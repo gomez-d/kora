@@ -1,14 +1,14 @@
-# Dependencias
+# Dependencies
 venv/
 .venv/
 env/
 
-# Archivos de python
+# Python files
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Variables de entorno y secretos
+# Environment variables and secrets
 .env
 .env.*
 !.env.example
@@ -19,19 +19,19 @@ db.sqlite3
 media/
 staticfiles/
 
-# Cobertura y pruebas
+# Coverage and testing
 .coverage
 htmlcov/
 .pytest_cache/
 
-# Herramietas de desarrollo
+# Development tools
 .vscode/
 .idea/
 
-# Sistema operativo
+# Operating system
 .DS_Store
 Thumbs.db
 
-# Archivos temporales
+# Temporary files
 *.tmp
 *.temp
