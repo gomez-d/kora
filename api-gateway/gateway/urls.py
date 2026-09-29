@@ -1,3 +1,6 @@
 from django.urls import path
+from gateway.views import HealthCheckView
 
-urlpatterns = [ ]
+urlpatterns = [
+    path('health/', HealthCheckView.as_view(), name='health-check')
+]
