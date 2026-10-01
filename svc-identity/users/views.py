@@ -19,11 +19,19 @@ class UserRegistrationView(APIView):
             user = serializer.save()
 
             return Response(
-                UserRegistrationSerializer(user).data,
+                {
+                    "success": True,
+                    "message": "User registered successfully.",
+                    "data": UserRegistrationSerializer(user).data,
+                },
                 status=status.HTTP_201_CREATED
             )
 
         return Response(
-            serializer.errors,
+            {
+                "success": False,
+                "message": "Validation error.",
+                "errors": serializer.errors,
+            },
             status=status.HTTP_400_BAD_REQUEST
         )
