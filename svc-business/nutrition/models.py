@@ -44,3 +44,35 @@ class NutritionalProfile(models.Model):
         max_length=20,
         choices=NUTRITION_GOAL_CHOICES
     )
+
+
+class Food(models.Model):
+    name = models.CharField(max_length=150)
+    calories = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
+    protein = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
+    carbohydrates = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
+    fat = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
+    fiber = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
+    sugar = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
+    sodium = models.DecimalField(
+        max_digits=8,
+        decimal_places=2
+    )
