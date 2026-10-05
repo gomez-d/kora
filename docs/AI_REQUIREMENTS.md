@@ -1,224 +1,224 @@
-# Necesidades del Microservicio de IA — Kora
+# AI Microservice Requirements — Kora
 
-## 1. Descripción
+## 1. Description
 
-El **Microservicio de IA** es el componente encargado de integrar las capacidades de Inteligencia Artificial de Kora.
+The **AI Microservice** is the component responsible for integrating Kora's Artificial Intelligence capabilities.
 
-Para la **V1**, el microservicio contará con dos capacidades principales:
+For **V1**, the microservice will have two main capabilities:
 
-1. **Visión / Machine Learning:** identificación de alimentos a partir de fotografías.
-2. **LLM:** generación de respuestas y recomendaciones utilizando el contexto nutricional del usuario.
+1. **Vision / Machine Learning:** food identification from photographs.
+2. **LLM:** generation of responses and recommendations using the user's nutritional context.
 
-### Arquitectura general
+### General Architecture
 
 ```text
                          KORA
                            │
                            ▼
                   ┌─────────────────┐
-                  │ Microservicio IA│
+                  │ AI Microservice│
                   └────────┬────────┘
                            │
                 ┌──────────┴──────────┐
                 ▼                     ▼
         ┌───────────────┐     ┌───────────────┐
-        │ Modelo Vision │     │      LLM      │
+        │ Vision Model │     │      LLM      │
         │ / Machine     │     │               │
-        │ Learning      │     │  API externa  │
+        │ Learning      │     │  External API  │
         └───────┬───────┘     └───────┬───────┘
                 │                     │
                 ▼                     ▼
-        Identificación          Generación de
-        de alimentos            respuestas
+        Food identification          Response
+        generation             generation
 ```
 
 ---
 
-# 2. Capacidades del Microservicio IA
+# 2. AI Microservice Capabilities
 
-## Capacidad 1 — Visión
+## Capability 1 — Vision
 
-La primera capacidad permite identificar alimentos presentes en una fotografía.
+The first capability allows the system to identify foods present in a photograph.
 
-### Entrada
+### Input
 
-Una imagen de comida.
+A food image.
 
-### Procesamiento
+### Processing
 
-El modelo de visión analiza la imagen e identifica los alimentos detectados.
+The vision model analyzes the image and identifies the detected foods.
 
-### Salida
+### Output
 
-Para cada alimento identificado:
+For each identified food:
 
-* Nombre del alimento.
-* Nivel de confianza de la predicción.
+* Food name.
+* Prediction confidence level.
 
-### Ejemplo
+### Example
 
 ```json
 {
     "success": true,
     "detections": [
         {
-            "food": "arroz",
+            "food": "rice",
             "confidence": 0.87
         },
         {
-            "food": "huevo",
+            "food": "egg",
             "confidence": 0.79
         }
     ]
 }
 ```
 
-> **Importante:** en la V1, el modelo de visión identifica alimentos y proporciona una confianza de detección. No se debe interpretar automáticamente la confianza como cantidad, peso o porción del alimento.
+> **Important:** in V1, the vision model identifies foods and provides a detection confidence score. The confidence score must not be automatically interpreted as the food's quantity, weight, or serving size.
 
 ---
 
-# 3. Capacidad 2 — LLM
+# 3. Capability 2 — LLM
 
-La segunda capacidad utiliza un modelo de lenguaje mediante una API externa.
+The second capability uses a language model through an external API.
 
-Su función será procesar el **prompt del usuario junto con un contexto nutricional controlado** para generar respuestas personalizadas.
+Its function will be to process the **user prompt together with controlled nutritional context** to generate personalized responses.
 
-## Información utilizada como contexto
+## Information Used as Context
 
-### Perfil del usuario
+### User Profile
 
-* Edad
-* Sexo
-* Peso
-* Altura
-* Actividad física
+* Age
+* Sex
+* Weight
+* Height
+* Physical activity
 
-### Objetivos nutricionales
+### Nutritional Goals
 
-* Calorías
-* Proteínas
-* Carbohidratos
-* Grasas
+* Calories
+* Protein
+* Carbohydrates
+* Fat
 
-### Consumo actual
+### Current Consumption
 
-* Alimentos consumidos
-* Cantidades disponibles
-* Valores nutricionales disponibles
+* Foods consumed
+* Available quantities
+* Available nutritional values
 
-Esta información será procesada por Kora antes de enviarse al LLM.
+This information will be processed by Kora before being sent to the LLM.
 
 ```text
-Usuario
+User
    │
    ▼
-Información del perfil
+Profile information
    +
-Objetivos nutricionales
+Nutritional goals
    +
-Consumo actual
+Current consumption
    +
-Información recuperada
+Retrieved information
    │
    ▼
-Contexto controlado
+Controlled context
    │
    ▼
 LLM
    │
    ▼
-Respuesta estructurada
+Structured response
 ```
 
 ---
 
-# 4. Funcionalidades de IA en Kora
+# 4. AI Features in Kora
 
-| Funcionalidad                              | Tipo de IA                          | Entrada                                 | Salida                                | Uso en Kora                              |
+| Feature                                    | AI Type                             | Input                                   | Output                                | Use in Kora                              |
 | ------------------------------------------ | ----------------------------------- | --------------------------------------- | ------------------------------------- | ---------------------------------------- |
-| Identificación de alimentos por fotografía | Modelo de visión / Machine Learning | Fotografía de una comida                | Alimentos identificados + confianza   | Ayudar al usuario a registrar su consumo |
-| Recomendaciones nutricionales              | LLM mediante API                    | Perfil + objetivos + consumo + contexto | Recomendaciones en texto estructurado | Generar recomendaciones personalizadas   |
+| Food identification from photograph       | Vision model / Machine Learning      | Photograph of a meal                   | Identified foods + confidence          | Help the user record their consumption  |
+| Nutritional recommendations              | LLM through API                    | Profile + goals + consumption + context | Recommendations in structured text   | Generate personalized recommendations   |
 
 ---
 
-# 5. Selección del modelo LLM
+# 5. LLM Model Selection
 
-Para la V1 se seleccionó **GPT-OSS 120B**, proporcionado mediante **Groq**.
+For V1, **GPT-OSS 120B**, provided through **Groq**, was selected.
 
-La selección considera las necesidades del agente de Kora, especialmente:
+The selection considers the needs of the Kora agent, especially:
 
-* Razonamiento.
-* Uso de herramientas.
-* Respuestas estructuradas.
-* Integración con RAG.
-* Integración con Rules.
-* Integración con Bayes.
-* Integración con Vision.
-* Manejo de contexto amplio.
+* Reasoning.
+* Tool use.
+* Structured responses.
+* RAG integration.
+* Rules integration.
+* Bayes integration.
+* Vision integration.
+* Large-context handling.
 
-## Comparación de modelos
+## Model Comparison
 
-| Característica       | GPT-OSS 120B | GPT-OSS 20B | Qwen 3.8 27B |
+| Feature              | GPT-OSS 120B | GPT-OSS 20B | Qwen 3.8 27B |
 | -------------------- | ------------ | ----------- | ------------ |
-| Razonamiento         | ✅ Alto       | ✅           | ✅ Alto       |
+| Reasoning            | ✅ High      | ✅           | ✅ High       |
 | Tool use             | ✅            | ✅           | ✅            |
-| Tool use paralelo    | ❌            | ❌           | ✅            |
+| Parallel tool use    | ❌           | ❌           | ✅            |
 | Structured Outputs   | ✅            | ✅           | ✅            |
 | JSON Schema estricto | ✅            | ✅           | ✅            |
-| Contexto             | 131K         | 131K        | 131K         |
-| Visión               | ❌            | ❌           | ✅            |
-| Velocidad en Groq    | ~500 t/s     | Alta        | ~450+ t/s    |
-| Adecuado para agente | ✅            | ✅           | ✅            |
-| Complejidad de Kora  | Muy adecuada | Adecuada    | Muy adecuada |
+| Context           | 131K         | 131K        | 131K         |
+| Vision               | ❌           | ❌           | ✅            |
+| Speed on Groq        | ~500 t/s     | High        | ~450+ t/s    |
+| Suitable for agent   | ✅           | ✅           | ✅            |
+| Kora complexity      | Very suitable | Suitable | Very suitable |
 
-### Modelo seleccionado
+### Selected Model
 
 ```text
-Proveedor:
+Provider:
 Groq
 
-Modelo:
+Model:
 openai/gpt-oss-120b
 
 API:
 Groq API compatible con OpenAI API
 
-Variable de entorno:
+Environment variable:
 GROQ_API_KEY
 ```
 
 ---
 
-# 6. Configuración del LLM
+# 6. LLM Configuration
 
-## Uso
+## Usage
 
-El modelo será utilizado para:
+The model will be used for:
 
-* Generación de respuestas del agente.
-* Razonamiento sobre el contexto proporcionado.
-* Generación de recomendaciones nutricionales.
-* Interpretación de información recuperada mediante RAG.
-* Coordinación de herramientas disponibles.
-* Integración con Rules, Bayes y Vision.
+* Agent response generation.
+* Reasoning over the provided context.
+* Nutritional recommendation generation.
+* Interpretation of information retrieved through RAG.
+* Coordination of available tools.
+* Integration with Rules, Bayes, and Vision.
 
-El LLM funcionará como parte del agente y no como sustituto de las herramientas especializadas.
+The LLM will operate as part of the agent and not as a substitute for specialized tools.
 
-## Entrada
+## Input
 
-La entrada estará compuesta por:
+The input will consist of:
 
 ```text
-Prompt del usuario
+User prompt
 +
-Contexto nutricional
+Nutritional context
 +
-Historial relevante
+Relevant history
 +
-Resultados de herramientas disponibles
+Results from available tools
 ```
 
-Por ejemplo:
+For example:
 
 ```json
 {
@@ -227,13 +227,12 @@ Por ejemplo:
 }
 ```
 
-El microservicio será responsable de obtener y preparar el contexto correspondiente antes de realizar la consulta al modelo.
+The microservice will be responsible for obtaining and preparing the corresponding context before querying the model.
 
-## Salida
+## Output
 
-El modelo generará una respuesta estructurada mediante JSON Schema.
+The model will generate a structured response using JSON Schema.
 
-Ejemplo simplificado:
 
 ```json
 {
@@ -244,108 +243,108 @@ Ejemplo simplificado:
 
 ---
 
-# 7. Limitaciones del LLM
+# 7. LLM Limitations
 
-El LLM no debe considerarse como la única fuente de verdad nutricional de Kora.
+The LLM should not be considered Kora's only source of nutritional truth.
 
-Las recomendaciones deberán apoyarse, cuando corresponda, en:
+Recommendations should be supported, when appropriate, by:
 
-* Información recuperada mediante RAG.
-* Reglas nutricionales definidas por el sistema.
-* Cálculos realizados mediante herramientas especializadas.
-* Información proporcionada por el usuario.
-* Resultados de los modelos de Machine Learning.
+* Retrieved information mediante RAG.
+* Nutritional rules defined by the system.
+* Calculations performed by specialized tools.
+* Information provided by the user.
+* Results from Machine Learning models.
 
-El modelo tampoco deberá inventar información que no esté disponible en el contexto.
+The model must not invent information that is not available in the context.
 
-Además, el uso del modelo mediante Groq está sujeto a los límites establecidos por el proveedor.
+Additionally, use of the model through Groq is subject to the limits established by the provider.
 
-La API Key **no debe incluirse directamente en el código fuente**.
+The API Key **must not be included directly in the source code**.
 
-Debe almacenarse mediante una variable de entorno:
+It must be stored using an environment variable:
 
 ```env
 GROQ_API_KEY=tu_api_key
 ```
 
-El archivo `.env` deberá mantenerse fuera del control de versiones.
+The `.env` file must be kept out of version control.
 
 ---
 
-# 8. Modelo de Visión / Machine Learning
+# 8. Vision / Machine Learning Model
 
-Kora utilizará un modelo de visión previamente desarrollado para la identificación de alimentos.
+Kora will use a previously developed vision model for food identification.
 
-Como parte de la evaluación del componente de visión se consideraron diferentes modelos:
+As part of the evaluation of the vision component, different models were considered:
 
-### Modelo 1 — Segmentación
+### Model 1 — Segmentation
 
 ```text
 arunapb/yolo11l-food-segmentation
 ```
 
-Su función es detectar regiones correspondientes a alimentos dentro de una imagen.
+Its function is to detect regions corresponding to foods within an image.
 
-### Modelo 2 — Clasificación
+### Model 2 — Classification
 
 ```text
 nateraw/food
 ```
 
-Su función es realizar clasificación relacionada con alimentos.
+Its function is to perform food-related classification.
 
-### Modelo 3 — Comparación visual
+### Model 3 — Visual Comparison
 
 ```text
 openai/clip-vit-base-patch32
 ```
 
-Puede utilizarse para comparar representaciones visuales de una imagen contra diferentes conceptos o ingredientes.
+It can be used to compare visual representations of an image against different concepts or ingredients.
 
 ---
 
-# 9. Flujo del componente de visión
+# 9. Vision Component Flow
 
-El flujo esperado es:
+The expected flow is:
 
 ```text
-Fotografía
+Photograph
     │
     ▼
 Modelo de visión
     │
     ▼
-Detección / clasificación
+Detection / classification
     │
     ▼
-Alimentos identificados
+Identified foods
     +
-Confianza
+Confidence
     │
     ▼
-Respuesta del Microservicio IA
+AI Microservice response
 ```
 
-### Ejemplo
+### Example
 
-Entrada:
+Input:
 
 ```text
-Fotografía de un plato con arroz y huevo
+Photograph de un plato con rice y egg
 ```
 
-Salida:
+Output:
 
 ```json
 {
     "success": true,
     "detections": [
         {
-            "food": "arroz",
+            "food": "rice",
             "confidence": 0.87
         },
         {
-            "food": "huevo",
+            "food": "egg",
             "confidence": 0.79
         }
     ]
@@ -354,23 +353,23 @@ Salida:
 
 ---
 
-# 10. API del componente de Visión
+# 10. Vision Component API
 
-## Entrada
+## Input
 
-La imagen será recibida mediante:
+The image will be received through:
 
 ```text
 multipart/form-data
 ```
 
-Campo:
+Field:
 
 ```text
 image
 ```
 
-Ejemplo conceptual:
+Conceptual example:
 
 ```text
 POST /vision/analyze
@@ -380,14 +379,14 @@ Content-Type: multipart/form-data
 image: fotografia.jpg
 ```
 
-## Salida
+## Output
 
 ```json
 {
     "success": true,
     "detections": [
         {
-            "food": "arroz",
+            "food": "rice",
             "confidence": 0.87
         }
     ]
@@ -396,11 +395,11 @@ image: fotografia.jpg
 
 ---
 
-# 11. API del componente LLM
+# 11. LLM Component API
 
-## Entrada
+## Input
 
-El endpoint recibirá información mínima para identificar la solicitud y generar el contexto correspondiente.
+The endpoint will receive the minimum information needed to identify the request and generate the corresponding context.
 
 Ejemplo:
 
@@ -411,9 +410,9 @@ Ejemplo:
 }
 ```
 
-El `user_id` permitirá al microservicio obtener la información necesaria del usuario mediante los componentes correspondientes.
+The `user_id` will allow the microservice to obtain the user's required information through the corresponding components.
 
-## Salida
+## Output
 
 ```json
 {
@@ -424,14 +423,14 @@ El `user_id` permitirá al microservicio obtener la información necesaria del u
 
 ---
 
-# 12. Relación con la arquitectura de Kora
+# 12. Relationship with Kora's Architecture
 
-El LLM no trabajará de forma aislada.
+The LLM will not operate in isolation.
 
-Dentro de `svc-agente`, el modelo podrá interactuar con las diferentes herramientas definidas para Kora.
+Within `svc-agente`, the model will be able to interact with the different tools defined for Kora.
 
 ```text
-                         svc-agente
+                         svc-ai
                              │
                              ▼
                       ┌─────────────┐
@@ -449,48 +448,48 @@ Dentro de `svc-agente`, el modelo podrá interactuar con las diferentes herramie
                            Vision
                              │
                              ▼
-                       Respuesta Kora
+                        Kora's Response
 ```
 
 ### RAG
 
-Proporcionará información relevante desde la base de conocimiento de Kora.
+It will provide relevant information from Kora's knowledge base.
 
 ### Rules
 
-Permitirá aplicar reglas y restricciones definidas por el sistema.
+It will allow the system to apply defined rules and restrictions.
 
 ### Bayes
 
-Permitirá trabajar con probabilidades cuando el caso de uso lo requiera.
+It will allow the system to work with probabilities when required by the use case.
 
 ### Vision
 
-Permitirá procesar imágenes de alimentos y devolver identificaciones con su nivel de confianza.
+It will allow food images to be processed and identifications to be returned with their confidence levels.
 
 ### LLM
 
-Será responsable de interpretar el contexto, razonar sobre la información disponible y generar la respuesta estructurada para el usuario.
+It will be responsible for interpreting the context, reasoning over the available information, and generating the structured response for the user.
 
 ---
 
-# 13. Flujo completo
+# 13. Complete Flow
 
-El flujo general de una solicitud puede representarse de la siguiente manera:
+The general flow of a request can be represented as follows:
 
 ```text
-                    USUARIO
+                    USER
                        │
                        ▼
-                 Solicitud Kora
+                 Kora request
                        │
                        ▼
                 ┌──────────────┐
-                │ svc-agente   │
+                │ svc-ai       │
                 └──────┬───────┘
                        │
                        ▼
-                  Planificación
+                  Planning
                        │
                        ▼
                       LLM
@@ -505,43 +504,43 @@ El flujo general de una solicitud puede representarse de la siguiente manera:
                     Vision
                        │
                        ▼
-                 Contexto final
+                 Final context
                        │
                        ▼
                       LLM
                        │
                        ▼
-              Respuesta estructurada
+              Structured response
                        │
                        ▼
                     KORA
                        │
                        ▼
-                    USUARIO
+                    USER
 ```
 
 ---
 
-# 14. Responsabilidades del Microservicio IA
+# 14. AI Microservice Responsibilities
 
-Para la V1, el microservicio será responsable de:
+For V1, the microservice will be responsible for:
 
-* Recibir solicitudes relacionadas con IA.
-* Procesar imágenes de alimentos.
-* Identificar alimentos mediante Machine Learning.
-* Devolver niveles de confianza.
-* Comunicarse con el proveedor del LLM.
-* Preparar y enviar el contexto necesario al LLM.
-* Procesar respuestas del modelo.
-* Mantener respuestas estructuradas.
-* Integrar las herramientas de IA definidas por Kora.
-* Manejar errores relacionados con las llamadas a modelos externos.
+* Receiving AI-related requests.
+* Processing food images.
+* Identifying foods using Machine Learning.
+* Returning confidence levels.
+* Communicating with the LLM provider.
+* Preparing and sending the necessary context to the LLM.
+* Processing model responses.
+* Maintaining structured responses.
+* Integrating the AI tools defined by Kora.
+* Handling errors related to calls to external models.
 
 ---
 
-# 15. Variables de entorno
+# 15. Environment Variables
 
-Las credenciales y configuraciones sensibles deberán mantenerse mediante variables de entorno.
+Sensitive credentials and configurations must be maintained using environment variables.
 
 Ejemplo:
 
@@ -549,49 +548,49 @@ Ejemplo:
 GROQ_API_KEY=tu_api_key
 ```
 
-No se deberá realizar:
+The following must not be done:
 
 ```python
 api_key = "gsk_xxxxxxxxxxxxxxxxx"
 ```
 
-La clave tampoco deberá incluirse en:
+The key must also not be included in:
 
-* Código fuente.
+* Source code.
 * Commits.
 * Pull Requests.
-* Documentación pública.
+* Public documentation.
 * `README.md`.
 
 ---
 
-# 16. Resumen de la V1
+# 16. V1 Summary
 
-| Componente    | Tecnología / Modelo                             | Función                                 |
+| Component     | Technology / Model                              | Function                                |
 | ------------- | ----------------------------------------------- | --------------------------------------- |
-| Visión        | Modelo de Machine Learning                      | Identificar alimentos                   |
-| Visión        | Modelo previamente desarrollado en Google Colab | Procesamiento de fotografías            |
-| LLM           | `openai/gpt-oss-120b`                           | Razonamiento y generación de respuestas |
-| Proveedor LLM | Groq                                            | Acceso mediante API                     |
-| RAG           | Base de conocimiento                            | Recuperar información relevante         |
-| Rules         | Motor de reglas                                 | Aplicar restricciones y reglas          |
-| Bayes         | Herramienta probabilística                      | Trabajar con probabilidades             |
-| Agente        | LangChain + LangGraph                           | Orquestar el flujo de IA                |
+| Vision        | Machine Learning model                         | Identify foods                          |
+| Vision        | Model previously developed in Google Colab    | Photograph processing                   |
+| LLM           | `openai/gpt-oss-120b`                          | Reasoning and response generation       |
+| LLM Provider  | Groq                                            | API access                              |
+| RAG           | Knowledge base                                  | Retrieve relevant information           |
+| Rules         | Rule engine                                     | Apply restrictions and rules            |
+| Bayes         | Probabilistic tool                              | Work with probabilities                 |
+| Agent         | LangChain + LangGraph                           | Orchestrate the AI flow                 |
 
 ---
 
-# 17. Decisión para la V1
+# 17. V1 Decision
 
-Para la primera versión de Kora se utilizará:
+The following will be used for the first version of Kora:
 
 ```text
-VISIÓN
+VISION
     │
-    └── Modelo de Machine Learning
+    └── Machine Learning Model
             │
-            └── Identificación de alimentos
+            └── Food Identification
                     +
-                    Confianza
+                    Confidence
 
 
 LLM
@@ -606,14 +605,14 @@ LLM
                     └── Vision
 ```
 
-El objetivo es mantener una separación clara entre las responsabilidades de cada componente:
+The goal is to maintain a clear separation between the responsibilities of each component:
 
-* **Vision/ML:** identifica alimentos.
-* **RAG:** proporciona conocimiento.
-* **Rules:** aplica reglas.
-* **Bayes:** maneja probabilidades.
-* **LLM:** interpreta, razona y genera la respuesta.
-* **svc-agente:** coordina el flujo completo.
-* **Kora:** presenta el resultado al usuario.
+* **Vision/ML:** identifies foods.
+* **RAG:** provides knowledge.
+* **Rules:** applies rules.
+* **Bayes:** handles probabilities.
+* **LLM:** interprets, reasons, and generates the response.
+* **svc-agente:** coordinates the complete flow.
+* **Kora:** presents the result to the user.
 
-Esta separación permite que cada componente pueda evaluarse y modificarse de manera independiente sin convertir al LLM en el responsable directo de todas las funciones del sistema.
+This separation allows each component to be evaluated and modified independently without making the LLM directly responsible for all system functions.
