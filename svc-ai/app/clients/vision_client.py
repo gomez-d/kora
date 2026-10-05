@@ -18,7 +18,7 @@ class VisionClient:
     def __init__(self):
 
         # ==========================================
-        # 1. CARGAR MODELO YOLO
+        # 1. LOAD YOLO MODEL
         # ==========================================
 
         model_path = hf_hub_download(
@@ -29,164 +29,256 @@ class VisionClient:
         self.yolo_model = YOLO(model_path)
 
         # ==========================================
-        # 2. CARGAR CLIP
+        # 2. LOAD CLIP MODEL
         # ==========================================
 
-        modelo_clip = "openai/clip-vit-base-patch32"
+        clip_model_name = "openai/clip-vit-base-patch32"
 
         self.clip_processor = CLIPProcessor.from_pretrained(
-            modelo_clip
+            clip_model_name
         )
 
         self.clip_model = CLIPModel.from_pretrained(
-            modelo_clip
+            clip_model_name
         )
 
         # ==========================================
-        # 3. CONFIGURAR DISPOSITIVO
+        # 3. CONFIGURE DEVICE
         # ==========================================
 
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = (
+            "cuda"
+            if torch.cuda.is_available()
+            else "cpu"
+        )
 
         self.clip_model.to(self.device)
 
         # ==========================================
-        # 4. INGREDIENTES PARA CLIP
+        # 4. INGREDIENTS FOR CLIP
         # ==========================================
-
-        self.ingredientes = [
-            "arroz",
-            "frijoles",
-            "carne asada",
-            "pollo",
-            "zanahoria",
-            "huevo",
-            "lechuga",
-            "tomate",
-            "aguacate",
-            "queso",
-            "papas fritas",
-            "kiwi"
+        self.ingredients = [
+            "rice",
+            "beans",
+            "grilled beef",
+            "chicken",
+            "pork",
+            "turkey",
+            "fish",
+            "salmon",
+            "tuna",
+            "shrimp",
+            "egg",
+            "cheese",
+            "milk",
+            "yogurt",
+            "bread",
+            "tortilla",
+            "pasta",
+            "noodles",
+            "oatmeal",
+            "cereal",
+            "potato",
+            "sweet potato",
+            "french fries",
+            "mashed potatoes",
+            "carrot",
+            "broccoli",
+            "cauliflower",
+            "spinach",
+            "lettuce",
+            "cabbage",
+            "cucumber",
+            "tomato",
+            "onion",
+            "garlic",
+            "bell pepper",
+            "jalapeno",
+            "corn",
+            "peas",
+            "green beans",
+            "zucchini",
+            "eggplant",
+            "mushroom",
+            "avocado",
+            "pumpkin",
+            "beetroot",
+            "celery",
+            "asparagus",
+            "radish",
+            "chickpeas",
+            "lentils",
+            "apple",
+            "banana",
+            "orange",
+            "lemon",
+            "lime",
+            "strawberry",
+            "blueberry",
+            "raspberry",
+            "blackberry",
+            "grape",
+            "watermelon",
+            "melon",
+            "pineapple",
+            "mango",
+            "papaya",
+            "kiwi",
+            "peach",
+            "pear",
+            "plum",
+            "cherry",
+            "coconut",
+            "pomegranate",
+            "walnut",
+            "almond",
+            "peanut",
+            "cashew",
+            "pistachio",
+            "chia seeds",
+            "flax seeds",
+            "sunflower seeds",
+            "peanut butter",
+            "olive oil",
+            "butter",
+            "honey",
+            "sugar",
+            "salt",
+            "tomato sauce",
+            "mayonnaise",
+            "mustard",
+            "ketchup",
+            "guacamole",
+            "hummus",
+            "salsa",
+            "chocolate",
+            "tofu",
+            "tempeh",
+            "granola"
         ]
 
-        self.textos_busqueda = [
-            f"una foto de {ingrediente}, comida"
-            for ingrediente in self.ingredientes
+        self.search_texts = [
+            f"a photo of {ingredient}, food"
+            for ingredient in self.ingredients
         ]
 
     def analyze(self, image):
 
         # ==========================================
-        # 1. ABRIR IMAGEN
+        # 1. OPEN IMAGE
         # ==========================================
 
         if isinstance(image, bytes):
 
-            original_img = Image.open(
+            original_image = Image.open(
                 BytesIO(image)
             ).convert("RGB")
 
         else:
 
-            original_img = Image.open(
+            original_image = Image.open(
                 image
             ).convert("RGB")
 
         print("====================================")
-        print("IMAGEN:", original_img.size)
-        print("DISPOSITIVO:", self.device)
+        print("IMAGE SIZE:", original_image.size)
+        print("DEVICE:", self.device)
 
         # ==========================================
-        # 2. DETECCIÓN CON YOLO
+        # 2. YOLO DETECTION
         # ==========================================
 
         results = self.yolo_model.predict(
-            source=original_img,
-            conf=0.01,
+            source=original_image,
+            conf=0.25,
             imgsz=640
         )
 
         result = results[0]
 
-        numero_detecciones = (
+        detection_count = (
             0
             if result.boxes is None
             else len(result.boxes)
         )
 
-        print("YOLO DETECTÓ:", numero_detecciones, "objetos")
+        print(
+            "YOLO DETECTED:",
+            detection_count,
+            "objects"
+        )
 
         # ==========================================
-        # 3. RESULTADOS DE YOLO
+        # 3. YOLO RESULTS
         # ==========================================
 
-        resultados_yolo = []
+        yolo_results = []
 
         if result.boxes is not None:
 
-            cajas = result.boxes.xyxy.cpu().numpy()
-            confianzas = result.boxes.conf.cpu().numpy()
-            clases = result.boxes.cls.cpu().numpy()
+            boxes = result.boxes.xyxy.cpu().numpy()
+            confidences = result.boxes.conf.cpu().numpy()
+            classes = result.boxes.cls.cpu().numpy()
 
-            for i in range(len(cajas)):
+            for i in range(len(boxes)):
 
-                clase_id = int(clases[i])
+                class_id = int(classes[i])
 
-                nombre_clase = self.yolo_model.names.get(
-                    clase_id,
-                    str(clase_id)
+                class_name = self.yolo_model.names.get(
+                    class_id,
+                    str(class_id)
                 )
 
-                resultados_yolo.append({
-                    "food": str(nombre_clase),
+                yolo_results.append({
+                    "food": str(class_name),
                     "confidence": round(
-                        float(confianzas[i]),
+                        float(confidences[i]),
                         4
                     ),
-                    "class_id": clase_id,
+                    "class_id": class_id,
                     "box": [
-                        round(float(valor), 2)
-                        for valor in cajas[i]
+                        round(float(value), 2)
+                        for value in boxes[i]
                     ]
                 })
 
-        print("RESULTADOS YOLO:")
-        print(resultados_yolo)
+        print("YOLO RESULTS:")
+        print(yolo_results)
 
         # ==========================================
-        # SI YOLO NO DETECTÓ NADA
+        # IF YOLO DID NOT DETECT ANYTHING
         # ==========================================
 
-        if len(resultados_yolo) == 0:
+        if len(yolo_results) == 0:
 
-            print("YOLO NO DETECTÓ OBJETOS")
+            print("YOLO DID NOT DETECT ANY OBJECTS")
             print("====================================")
 
             return {
                 "success": True,
-                "message": "YOLO no detectó alimentos",
+                "message": "YOLO did not detect any food",
                 "yolo": [],
                 "clip": [],
                 "detections": []
             }
 
         # ==========================================
-        # 4. OBTENER CAJAS
+        # 4. GET DETECTION BOXES
         # ==========================================
 
-        cajas = result.boxes.xyxy.cpu().numpy()
+        boxes = result.boxes.xyxy.cpu().numpy()
 
         # ==========================================
-        # 5. RECORTAR ALIMENTOS
+        # 5. CROP FOOD REGIONS
         # ==========================================
 
-        recortes = []
+        image_crops = []
 
-        for i, caja in enumerate(cajas):
+        for i, box in enumerate(boxes):
 
-            x_min, y_min, x_max, y_max = caja
+            x_min, y_min, x_max, y_max = box
 
-            recorte = original_img.crop(
+            image_crop = original_image.crop(
                 (
                     int(x_min),
                     int(y_min),
@@ -195,21 +287,24 @@ class VisionClient:
                 )
             )
 
-            recortes.append(recorte)
+            image_crops.append(image_crop)
 
-        print("RECORTES CREADOS:", len(recortes))
+        print(
+            "CROPS CREATED:",
+            len(image_crops)
+        )
 
         # ==========================================
-        # 6. CLASIFICACIÓN CON CLIP
+        # 6. CLASSIFICATION WITH CLIP
         # ==========================================
 
-        resultados_clip = []
+        clip_results = []
 
-        for i, recorte in enumerate(recortes):
+        for i, image_crop in enumerate(image_crops):
 
             inputs = self.clip_processor(
-                text=self.textos_busqueda,
-                images=recorte,
+                text=self.search_texts,
+                images=image_crop,
                 return_tensors="pt",
                 padding=True
             )
@@ -227,55 +322,111 @@ class VisionClient:
 
             logits_per_image = outputs.logits_per_image
 
-            probs = logits_per_image.softmax(
+            probabilities = logits_per_image.softmax(
                 dim=1
             )[0].cpu().numpy()
 
-            # Obtener las 5 mejores opciones
+            # Get the top 5 predictions
 
-            indices = probs.argsort()[-5:][::-1]
+            indices = probabilities.argsort()[-5:][::-1]
 
             top_5 = []
 
-            for indice in indices:
+            for index in indices:
 
                 top_5.append({
-                    "food": self.ingredientes[indice],
+                    "food": self.ingredients[index],
                     "confidence": round(
-                        float(probs[indice]),
+                        float(probabilities[index]),
                         4
                     )
                 })
 
-            resultados_clip.append({
-                "recorte": i + 1,
+            clip_results.append({
+                "crop": i + 1,
                 "prediction": top_5[0],
                 "top_5": top_5
             })
 
         print("====================================")
-        print("RESULTADOS CLIP:")
-        print(resultados_clip)
+        print("CLIP RESULTS:")
+        print(clip_results)
 
         # ==========================================
-        # 7. RESPUESTA FINAL PARA PRUEBAS
+        # 7. FINAL IMAGE RESULTS
+        # ==========================================
+
+        confidence_threshold = 0.10
+
+        valid_ingredients = set()
+
+        # Filter predictions by confidence
+        # and collect unique ingredients
+
+        for result in clip_results:
+
+            prediction = result["prediction"]
+
+            if prediction["confidence"] >= confidence_threshold:
+
+                valid_ingredients.add(
+                    prediction["food"]
+                )
+
+        # Format final result
+
+        if valid_ingredients:
+
+            ingredient_list = list(
+                valid_ingredients
+            )
+
+            if len(ingredient_list) > 1:
+
+                detected_ingredients = (
+                    ", ".join(ingredient_list[:-1])
+                    + " and "
+                    + ingredient_list[-1]
+                )
+
+            else:
+
+                detected_ingredients = ingredient_list[0]
+
+            print(
+                "Detected food in the original image:",
+                detected_ingredients
+            )
+
+        else:
+
+            detected_ingredients = ""
+
+            print(
+                "No food was detected with a confidence "
+                "greater than 10%."
+            )
+
+        # ==========================================
+        # 8. FINAL RESPONSE
         # ==========================================
 
         print("====================================")
-        print("ANÁLISIS COMPLETO")
+        print("COMPLETE ANALYSIS")
         print("====================================")
+
+        detections = []
+
+        for result in clip_results:
+            prediction = result["prediction"]
+
+            if prediction["confidence"] >= confidence_threshold:
+                detections.append({
+                    "food": prediction["food"],
+                    "confidence": prediction["confidence"]
+                })
 
         return {
             "success": True,
-
-            "image_size": {
-                "width": original_img.width,
-                "height": original_img.height
-            },
-
-            "yolo": resultados_yolo,
-
-            "clip": resultados_clip,
-
-            "detections": resultados_yolo
+            "detections": detections
         }
