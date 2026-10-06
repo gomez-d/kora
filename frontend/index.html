@@ -1,0 +1,854 @@
+
+<!DOCTYPE html>
+
+<html lang="es" class="no-js">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora</title>
+
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+
+    <link rel="stylesheet" href="css/vendor.css">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/k.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/k.svg">
+    <link rel="manifest" href="site.webmanifest">
+
+</head>
+
+
+<body id="top">
+
+    <div id="preloader">
+        <div id="loader" class="dots-fade">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+
+    <div id="page" class="s-pagewrap ss-home">
+
+        <div class="menu-underlay"></div>
+
+        <header class="s-header">
+
+            <div class="s-header__block">
+
+                <a class="s-header__menu-toggle" href="#0">
+                    <span>Menú</span>
+                </a>
+
+                <div class="s-header__cta">
+                    <a href="login.html" class="btn btn--primary s-header__cta-btn">
+                        Comenzar ahora
+                    </a>
+                </div>
+
+            </div>
+
+            <nav class="s-header__nav">
+
+                <a href="#0" class="s-header__nav-close-btn" title="Cerrar">
+                    <span>Cerrar</span>
+                </a>
+
+                <div class="s-header__nav-logo">
+                    <a href="index.html">
+                        <img src="images/logo.svg" alt="Página de inicio">
+                    </a>
+                </div>
+
+                <ul class="s-header__nav-links">
+
+                    <li class="current">
+                        <a href="index.html">Inicio</a>
+                    </li>
+
+                    <li>
+                        <a href="login.html">Iniciar Sesion</a>
+                    </li>
+
+
+
+                </ul>
+
+                <div class="s-header__nav-bottom">
+
+                    <h6>¿Necesitas ayuda?</h6>
+
+                    <div class="s-header__booking">
+                        <div class="s-header__booking-no">
+                            <a href="tel:+523531046654">(+52) 3531046654</a>
+                        </div>
+                    </div>
+
+                    <ul class="s-header__nav-social social-list">
+
+                        <li>
+                            <a href="#0">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    width="24" height="24" viewBox="0 0 24 24"
+                                    style="fill:rgba(0, 0, 0, 1)">
+                                    <path d="M20,3H4C3.447,3,3,3.448,3,4v16c0,0.552,0.447,1,1,1h8.615v-6.96h-2.338v-2.725h2.338v-2c0-2.325,1.42-3.592,3.5-3.592 c0.699-0.002,1.399,0.034,2.095,0.107v2.42h-1.435c-1.128,0-1.348,0.538-1.348,1.325v1.735h2.697l-0.35,2.725h-2.348V21H20 c0.553,0,1-0.448,1-1V4C21,3.448,20.553,3,20,3z"></path>
+                                </svg>
+
+                                <span class="u-screen-reader-text">Facebook</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#0">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    width="24" height="24" viewBox="0 0 24 24"
+                                    style="fill:rgba(0, 0, 0, 1)">
+                                    <path d="M19.633,7.997c0.013,0.175,0.013,0.349,0.013,0.523c0,5.325-4.053,11.461-11.46,11.461c-2.282,0-4.402-0.661-6.186-1.809 c0.324,0.037,0.636,0.05,0.973,0.05c1.883,0,3.616-0.636,5.001-1.721c-1.771-0.037-3.255-1.197-3.767-2.793 c0.249,0.037,0.499,0.062,0.761,0.062c0.361,0,0.724-0.05,1.061-0.137c-1.847-0.374-3.23-1.995-3.23-3.953v-0.05 c0.537,0.299,1.16,0.486,1.82,0.511C3.534,9.419,2.823,8.184,2.823,6.787c0-0.748,0.199-1.434,0.548-2.032 c1.983,2.443,4.964,4.04,8.306,4.215c-0.062-0.3-0.1-0.611-0.1-0.923c0-2.22,1.796-4.028,4.028-4.028 c1.16,0,2.207,0.486,2.943,1.272c0.91-0.175,1.782-0.512,2.556-0.973c-0.299,0.935-0.936,1.721-1.771,2.22 c0.811-0.088,1.597-0.312,2.319-0.624C21.104,6.712,20.419,7.423,19.633,7.997z"></path>
+                                </svg>
+
+                                <span class="u-screen-reader-text">Twitter</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#0">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    width="24" height="24" viewBox="0 0 24 24"
+                                    style="fill:rgba(0, 0, 0, 1)">
+                                    <path d="M11.999,7.377c-2.554,0-4.623,2.07-4.623,4.623c0,2.554,2.069,4.624,4.623,4.624c2.552,0,4.623-2.07,4.623-4.624 C16.622,9.447,14.551,7.377,11.999,7.377L11.999,7.377z M11.999,15.004c-1.659,0-3.004-1.345-3.004-3.003 c0-1.659,1.345-3.003,3.004-3.003s3.002,1.344,3.002,3.003C15.001,13.659,13.658,15.004,11.999,15.004L11.999,15.004z"></path>
+                                    <circle cx="16.806" cy="7.207" r="1.078"></circle>
+                                </svg>
+
+                                <span class="u-screen-reader-text">Instagram</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#0">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    width="24" height="24" viewBox="0 0 24 24"
+                                    style="fill: rgba(0, 0, 0, 1)">
+                                    <path d="M8.31 10.28a2.5 2.5 0 1 0 2.5 2.49 2.5 2.5 0 0 0-2.5-2.49zm0 3.8a1.31 1.31 0 1 1 0-2.61 1.31 1.31 0 1 1 0 2.61zm7.38-3.8a2.5 2.5 0 1 0 2.5 2.49 2.5 2.5 0 0 0-2.5-2.49zM17 12.77a1.31 1.31 0 1 1-1.31-1.3 1.31 1.31 0 0 1 1.31 1.3z"></path>
+                                </svg>
+
+                                <span class="u-screen-reader-text">Tripadvisor</span>
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </nav>
+
+        </header>
+
+        <section id="intro" class="s-intro">
+
+            <div class="s-intro__bg"></div>
+
+            <div class="row s-intro__content">
+
+                <div class="column xl-12">
+
+                    <div class="s-intro__pretitle">
+                        Bienvenido a
+                    </div>
+
+                    <h1 class="s-intro__title">
+                        KORA
+                    </h1>
+
+                    <p class="s-intro__desc lead">
+                        Explora tus hábitos, comprende tus necesidades nutricionales
+                        y construye una alimentación más saludable.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="s-intro__scroll-down">
+
+                <a href="#about" class="smoothscroll">
+
+                    <span class="scroll-text u-screen-reader-text">
+                        Desplazarse hacia abajo
+                    </span>
+
+                    <div class="scroll-icon">
+                        <svg clip-rule="evenodd"
+                            fill-rule="evenodd"
+                            stroke-linejoin="round"
+                            stroke-miterlimit="2"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+
+                            <path d="m5.214 14.522s4.505 4.502 6.259 6.255c.146.147.338.22.53.22s.384-.073.53-.22c1.754-1.752 6.249-6.244 6.249-6.244.144-.144.216-.334.217-.523 0-.193-.074-.386-.221-.534-.293-.293-.766-.294-1.057-.004l-4.968 4.968v-14.692c0-.414-.336-.75-.75-.75s-.75.336-.75.75v14.692l-4.979-4.978c-.289-.289-.761-.287-1.054.006-.148.148-.222.341-.221.534 0 .189.071.377.215.52z"
+                                fill-rule="nonzero"/>
+                        </svg>
+                    </div>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <section id="about" class="s-about">
+
+            <div class="row s-about__content">
+
+                <div class="column xl-12 s-about__content-grid grid-block">
+
+                    <div class="s-about__content-header section-header">
+
+                        <h2 class="text-display-title with-line">
+                            Nuestra propuesta
+                        </h2>
+
+                        <div class="s-about__content-header-inner">
+
+                            <p class="text-desc">
+                                Kora es una herramienta de apoyo para comprender mejor
+                                tus hábitos alimentarios y tus necesidades nutricionales.
+                                Su objetivo es ayudarte a tomar decisiones más informadas
+                                sobre tu alimentación.
+                            </p>
+
+                            <div class="s-about__content-media">
+
+                                <img class="s-about__media-big"
+                                    src="images/comida3.jpg"
+                                    alt="Alimentación saludable">
+
+                                <img class="s-about__media-small"
+                                    src="images/comida4.jpg"
+                                    alt="Alimentación saludable">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="s-about__content-main">
+
+                        <p class="attention-getter">
+                            Kora busca ayudarte a conocer tus hábitos alimentarios,
+                            identificar tus objetivos y comprender mejor los nutrientes
+                            que forman parte de tu alimentación diaria.
+                        </p>
+
+                        <p class="attention-getter">
+                            A través de inteligencia artificial y herramientas de análisis,
+                            Kora puede utilizar información sobre tus objetivos, consumo,
+                            preferencias y restricciones para ofrecerte recomendaciones
+                            adaptadas a tu contexto.
+                        </p>
+
+                        <p class="attention-getter">
+                            También busca facilitar el registro de alimentos y el seguimiento
+                            de tu alimentación, brindándote información que te ayude a construir
+                            hábitos más saludables de manera gradual.
+                        </p>
+
+                        <div class="s-about__content-btn">
+
+                            <a href="about.html"
+                                class="btn btn--stroke btn--medium u-fullwidth">
+                                Conoce más
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+<section class="s-menublock">
+
+    <div class="row s-menublock__top">
+
+        <div class="column xl-8 lg-12">
+
+            <div class="s-menublock__content-header section-header">
+
+                <h2 class="text-display-title with-line">
+                    Lo que Kora puede hacer por ti
+                </h2>
+
+                <p class="attention-getter">
+                    Conoce las herramientas que Kora ofrece para ayudarte a
+                    organizar tu alimentación, dar seguimiento a tus objetivos
+                    y comprender mejor tus hábitos nutricionales.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="column xl-12 menublock__slider-nav">
+
+            <a href="menu.html" class="menu-link">
+                Conoce Kora
+            </a>
+
+            <div class="menublock-buttons">
+
+                <div class="menublock-btn-prev">
+                    <svg clip-rule="evenodd"
+                        fill-rule="evenodd"
+                        stroke-linejoin="round"
+                        stroke-miterlimit="2"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+
+                        <path d="m9.474 5.209s-4.501 4.505-6.254 6.259c-.147.146-.22.338-.22.53s.073.384.22.53c1.752 1.754 6.252 6.257 6.252 6.257.145.145.336.217.527.217.191-.001.383-.074.53-.221.293-.293.294-.766.004-1.057l-4.976-4.976h14.692c.414 0 .75-.336.75-.75s-.336-.75-.75-.75h-14.692l4.978-4.979c.289-.289.287-.761-.006-1.054-.147-.147-.339-.221-.53-.221-.191-.001-.38.071-.525.215z"
+                            fill-rule="nonzero"/>
+                    </svg>
+                </div>
+
+                <div class="menublock-btn-next">
+                    <svg clip-rule="evenodd"
+                        fill-rule="evenodd"
+                        stroke-linejoin="round"
+                        stroke-miterlimit="2"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+
+                        <path d="m14.523 18.787s4.501-4.505 6.255-6.26c.146-.146.219-.338.219-.53s-.073-.383-.219-.53c-1.753-1.754-6.255-6.258-6.255-6.258-.144-.145-.334-.217-.524-.217-.193 0-.385.074-.532.221-.293.292-.295.766-.004 1.056l4.978 4.978h-14.692c-.414 0-.75.336-.75.75s.336.75.75.75h14.692l-4.979 4.979c-.289.289-.286.762.006 1.054.148.148.341.222.533.222.19 0 .378-.072.522-.215z"
+                            fill-rule="nonzero"/>
+                    </svg>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row s-menublock__slider-wrap">
+
+        <div class="column xl-12">
+
+            <div class="swiper-container s-menublock__slider">
+
+                <div class="swiper-wrapper">
+
+
+                    <div class="s-menublock__slide swiper-slide">
+
+                        <div class="menublock-item">
+
+                            <div class="menublock-item__thumb">
+                                <img src="images/dieta.jpg"
+                                    alt="Creación de dietas">
+                            </div>
+
+                            <div class="menublock-item__text">
+
+                                <h5>Creación de dietas</h5>
+
+                                <p>
+                                    Genera propuestas de alimentación
+                                    considerando tus objetivos, preferencias
+                                    y necesidades nutricionales.
+                                </p>
+
+                            </div>
+
+                            <div class="menublock-item__price-wrap">
+                                <div class="menublock-item__price">
+                                    <span></span>01
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="s-menublock__slide swiper-slide">
+
+                        <div class="menublock-item">
+
+                            <div class="menublock-item__thumb">
+                                <img src="images/menu/pasta.jpg"
+                                    srcset="images/menu/pasta.jpg 1x, images/menu/pasta@2x.jpg 2x"
+                                    alt="Seguimiento nutricional">
+                            </div>
+
+                            <div class="menublock-item__text">
+
+                                <h5>Seguimiento nutricional</h5>
+
+                                <p>
+                                    Registra tu alimentación y consulta tu
+                                    progreso para conocer cómo avanzas hacia
+                                    tus objetivos.
+                                </p>
+
+                            </div>
+
+                            <div class="menublock-item__price-wrap">
+                                <div class="menublock-item__price">
+                                    <span></span>02
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="s-menublock__slide swiper-slide">
+
+                        <div class="menublock-item">
+
+                            <div class="menublock-item__thumb">
+                                <img src="images/menu/toast.jpg"
+                                    srcset="images/menu/toast.jpg 1x, images/menu/toast@2x.jpg 2x"
+                                    alt="Registro de alimentos">
+                            </div>
+
+                            <div class="menublock-item__text">
+
+                                <h5>Registro de alimentos</h5>
+
+                                <p>
+                                    Registra lo que consumes y consulta la
+                                    información nutricional de los alimentos
+                                    que forman parte de tu alimentación.
+                                </p>
+
+                            </div>
+
+                            <div class="menublock-item__price-wrap">
+                                <div class="menublock-item__price">
+                                    <span></span>03
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="s-menublock__slide swiper-slide">
+
+                        <div class="menublock-item">
+
+                            <div class="menublock-item__thumb">
+                                <img src="images/menu/icecream.jpg"
+                                    alt="Identificación de alimentos con IA">
+                            </div>
+
+                            <div class="menublock-item__text">
+
+                                <h5>Identificación con IA</h5>
+
+                                <p>
+                                    Analiza fotografías de tus comidas para
+                                    identificar los alimentos presentes y
+                                    facilitar su registro.
+                                </p>
+
+                            </div>
+
+                            <div class="menublock-item__price-wrap">
+                                <div class="menublock-item__price">
+                                    <span></span>04
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="s-menublock__slide swiper-slide">
+
+                        <div class="menublock-item">
+
+                            <div class="menublock-item__thumb">
+                                <img src="images/menu/yogurt.jpg"
+                                    srcset="images/menu/yogurt.jpg 1x, images/menu/yogurt@2x.jpg 2x"
+                                    alt="Recomendaciones personalizadas">
+                            </div>
+
+                            <div class="menublock-item__text">
+
+                                <h5>Recomendaciones personalizadas</h5>
+
+                                <p>
+                                    Recibe recomendaciones relacionadas con tu
+                                    alimentación a partir de tus objetivos,
+                                    consumo y preferencias.
+                                </p>
+
+                            </div>
+
+                            <div class="menublock-item__price-wrap">
+                                <div class="menublock-item__price">
+                                    <span></span>05
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+        <section id="testimonials" class="s-testimonials">
+
+            <div class="row s-testimonials__content">
+
+                <div class="column xl-12">
+
+                    <h3 class="s-testimonials__title text-center">
+                        Lo que dicen nuestros usuarios
+                    </h3>
+
+                    <div class="swiper-container s-testimonials__slider">
+
+                        <div class="swiper-wrapper">
+
+
+                            <div class="s-testimonials__slide swiper-slide">
+
+                                <div class="s-testimonials__author">
+
+                                    <img src="images/avatars/user-02.jpg"
+                                        alt="Imagen del usuario"
+                                        class="s-testimonials__avatar">
+
+                                    <cite class="s-testimonials__cite">
+
+                                        Usuario de Kora
+
+                                        <span>Jalisco, México</span>
+
+                                    </cite>
+
+                                </div>
+
+                                <p>
+                                    Kora me ayudó a conocer mejor mis hábitos alimentarios
+                                    y a prestar más atención a lo que consumo diariamente.
+                                </p>
+
+                            </div>
+
+
+                            <div class="s-testimonials__slide swiper-slide">
+
+                                <div class="s-testimonials__author">
+
+                                    <img src="images/avatars/user-03.jpg"
+                                        alt="Imagen del usuario"
+                                        class="s-testimonials__avatar">
+
+                                    <cite class="s-testimonials__cite">
+
+                                        Usuario de Kora
+
+                                        <span>Michoacán, México</span>
+
+                                    </cite>
+
+                                </div>
+
+                                <p>
+                                    Me resulta útil tener en un mismo lugar información
+                                    sobre mis objetivos y mis hábitos de alimentación.
+                                </p>
+
+                            </div>
+
+
+                            <div class="s-testimonials__slide swiper-slide">
+
+                                <div class="s-testimonials__author">
+
+                                    <img src="images/avatars/user-01.jpg"
+                                        alt="Imagen del usuario"
+                                        class="s-testimonials__avatar">
+
+                                    <cite class="s-testimonials__cite">
+
+                                        Usuario de Kora
+
+                                        <span>Ciudad de México</span>
+
+                                    </cite>
+
+                                </div>
+
+                                <p>
+                                    La aplicación facilita el registro de mis alimentos
+                                    y me permite conocer mejor mi consumo diario.
+                                </p>
+
+                            </div>
+
+
+                            <div class="s-testimonials__slide swiper-slide">
+
+                                <div class="s-testimonials__author">
+
+                                    <img src="images/avatars/user-06.jpg"
+                                        alt="Imagen del usuario"
+                                        class="s-testimonials__avatar">
+
+                                    <cite class="s-testimonials__cite">
+
+                                        Usuario de Kora
+
+                                        <span>Guadalajara, México</span>
+
+                                    </cite>
+
+                                </div>
+
+                                <p>
+                                    Kora hace que revisar mis hábitos de alimentación
+                                    sea más sencillo y fácil de entender.
+                                </p>
+
+                            </div>
+
+
+                        </div>
+
+                        <div class="swiper-pagination"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <footer id="footer" class="s-footer">
+
+
+            <div class="row s-footer__top row-x-center">
+
+                <div class="column xl-4 lg-6 tab-8 mob-12">
+
+                    <a href="login.html"
+                        class="btn btn--primary btn--large u-fullwidth">
+                        Comenzar ahora
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <div class="row s-footer__main-content">
+
+
+                <div class="column xl-6 md-12 s-footer__block s-footer__about">
+
+                    <div class="s-footer__logo">
+
+                        <a class="logo" href="index.html">
+                            <img src="images/logo.svg" alt="Página de inicio">
+                        </a>
+
+                    </div>
+
+                    <p>
+                        Kora busca facilitar la comprensión de tus hábitos alimentarios
+                        y necesidades nutricionales mediante herramientas de inteligencia
+                        artificial, ayudándote a tomar decisiones más informadas sobre
+                        tu alimentación.
+                    </p>
+
+                </div>
+
+
+                <div class="column xl-6 md-12 s-footer__block s-footer__info">
+
+                    <div class="row">
+
+
+                        <div class="column xl-6 lg-12">
+
+                            <h5>Ubicación</h5>
+
+                            <p>
+                                Jiquilpan, Michoacán<br>
+                                México
+                            </p>
+
+                        </div>
+
+
+                        <div class="column xl-6 lg-12">
+
+                            <h5>Contacto</h5>
+
+                            <ul class="link-list">
+
+                                <li>
+                                    <a href="mailto:#0">
+                                        contacto@kora.com
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="tel:+2135551212">
+                                        (213) 555-1234
+                                    </a>
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+
+                        <div class="column">
+
+                            <h5>Horario de atención</h5>
+
+                            <ul class="opening-hours">
+
+                                <li>
+                                    <span class="opening-hours__days">
+                                        Lunes a viernes
+                                    </span>
+
+                                    <span class="opening-hours__time">
+                                        10:00 am - 9:00 pm
+                                    </span>
+                                </li>
+
+                                <li>
+                                    <span class="opening-hours__days">
+                                        Sábados y domingos
+                                    </span>
+
+                                    <span class="opening-hours__time">
+                                        9:00 am - 10:00 pm
+                                    </span>
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="row s-footer__bottom">
+
+
+                <div class="column xl-6 lg-12">
+
+                    <ul class="s-footer__social social-list">
+
+                        <li>
+                            <a href="#0">
+                                <span class="u-screen-reader-text">
+                                    Facebook
+                                </span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#0">
+                                <span class="u-screen-reader-text">
+                                    Twitter
+                                </span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#0">
+                                <span class="u-screen-reader-text">
+                                    Instagram
+                                </span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="#0">
+                                <span class="u-screen-reader-text">
+                                    Tripadvisor
+                                </span>
+                            </a>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+
+                <div class="column xl-6 lg-12">
+
+                    <p class="ss-copyright">
+
+                        <span>
+                            © Copyright Kora 2026
+                        </span>
+
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            
+
+
+        </footer>
+
+    </div>
+
+
+    <script src="js/plugins.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+
+</html>
