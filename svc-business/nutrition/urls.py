@@ -1,15 +1,20 @@
 from django.urls import path
-from .views import NutritionalProfileListCreateView, FoodCreateView
+from .views import HealthCheckView, NutritionalProfileListCreateView, FoodCreateView
 
 urlpatterns = [
     path(
-        "nutritional-profiles/",
-        NutritionalProfileListCreateView.as_view(),
-        name="nutritional-profile-list-create"
+        'health/',
+        HealthCheckView.as_view(),
+        name='health-check'
     ),
     path(
-        "foods/",
+        'nutritional-profiles/',
+        NutritionalProfileListCreateView.as_view(),
+        name='nutritional-profile-list-create'
+    ),
+    path(
+        'foods/',
         FoodCreateView.as_view(),
-        name="foods-create-view"
+        name='foods-create-view'
     )
 ]
