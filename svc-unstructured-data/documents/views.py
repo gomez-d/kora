@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from documents.database import (
@@ -8,7 +8,10 @@ from documents.database import (
     logs_collection,
     ml_results_collection
 )
-from documents.serializers import FlexibleDocumentSerializer
+from documents.serializers import (
+    FlexibleDocumentSerializer,
+    FlexibleDocumentUpdateSerializer
+)
 from bson import ObjectId
 from bson.errors import InvalidId
 
@@ -166,4 +169,100 @@ class DocumentDetailView(APIView):
                 'data': serialize_document(document)
             },
             status=status.HTTP_200_OK
+        )
+
+    def patch(self, request, document_type, document_id):
+        """
+        Partially update an existing MongoDB document.
+        """
+        # Validate that the requested document type is supported.
+        if document_type not in COLLECTIONS:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Invalid document type.'
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            object_id = ObjectId(document_id)
+        except InvalidId:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Invalid document ID.'
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        serializer = FlexibleDocumentUpdateSerializer(
+            data = request.data
+        )
+
+        if not serializer.is_valid():
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Validation error.',
+                    'errors': serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        document = serializer.validated_data['document']
+
+        # Validate user_id as UUID when it is updated in document types associated with Kora users.
+        if(
+            document_type in ['ai_recommendations', 'ml_results']
+            and 'user_id' in document
+        ):
+            uuid_field = serializers.UUIDField()
+
+            try:
+                document['user_id'] = uuid_field.run_validation(
+                    document['user_id']
+                )
+            except serializers.ValidationError:
+                return Response(
+                    {
+                        'success': False,
+                        'message': 'Validation error.',
+                        'errors': {
+                            'document': {
+                                'user_id': ['Must be a valid UUID.']
+                            }
+                        },
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        collection = COLLECTIONS[document_type]
+
+        # Update only the received fields without replacing the complete MongoDB document.
+        result = collection.update_one(
+            {'_id': object_id},
+            {'$set': document}
+        )
+
+        if result.matched_count == 0:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Document not found.',
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        updated_document = collection.find_one(
+            {'_id': object_id}
+        )
+
+        return Response(
+            {
+                'success': True,
+                'message': 'Document updated successfully.',
+                'data': serialize_document(updated_document)
+            },
+            status=status.HTTP_200_OK,
         )
