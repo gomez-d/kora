@@ -266,3 +266,53 @@ class DocumentDetailView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+    def delete(self, request, document_type, document_id):
+        """
+        Delete an existing MongoDB document by its ID.
+        """
+
+        # Validate that the requested document type is supported.
+        if document_type not in COLLECTIONS:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Invalid document type.',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            object_id = ObjectId(document_id)
+        except InvalidId:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Invalid document ID.'
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        collection = COLLECTIONS[document_type]
+
+        # Delete the document that matches the provided MongoDB ObjectId.
+        result = collection.delete_one(
+            {'_id': object_id}
+        )
+
+        if result.deleted_count == 0:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Document not found.',
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(
+            {
+                'success': True,
+                'message': 'Document deleted successfully.',
+            },
+            status=status.HTTP_200_OK,
+        )
