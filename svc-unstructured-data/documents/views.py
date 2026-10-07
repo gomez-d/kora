@@ -3,13 +3,14 @@ from datetime import datetime, timezone
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from documents.database import (
     ai_recommendations_collection,
     logs_collection,
     ml_results_collection
 )
 from documents.serializers import FlexibleDocumentSerializer
+from bson import ObjectId
+from bson.errors import InvalidId
 
 # Map each supported document type to its MongoDB collection.
 COLLECTIONS = {
@@ -17,6 +18,17 @@ COLLECTIONS = {
     'ml_results': ml_results_collection,
     'logs': logs_collection
 }
+
+def serialize_document(document):
+    """
+    Convert MongoDB-specific values into JSON-compatible values.
+
+    MongoDB objectId values are converted to strings before returning
+    the document through the API.
+    """
+    document['_id'] = str(document['_id'])
+
+    return document
 
 class DocumentCreateView(APIView):
     """
@@ -73,4 +85,85 @@ class DocumentCreateView(APIView):
                 },
             },
             status=status.HTTP_201_CREATED,
+        )
+
+class DocumentListView(APIView):
+    """
+    API endpoint used to retrieve documents from a MongoDB collection.
+    """
+
+    def get(self, request, document_type):
+        # Validate that the requested document type is supported.
+        if document_type not in COLLECTIONS:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Invalid document type.'
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        collection = COLLECTIONS[document_type]
+
+        # Retrieve all documents from the selected MongoDB collection.
+        documents = [
+            serialize_document(document)
+            for document in collection.find()
+        ]
+
+        return Response(
+            {
+                'success': True,
+                'message': 'Documents retrieved successfully.',
+                'data': documents,
+            },
+            status=status.HTTP_200_OK
+        )
+
+class DocumentDetailView(APIView):
+    """
+    API endpoint used to retrieve a specific MongoDB document by its ID.
+    """
+    def get(self, request, document_type, document_id):
+        # Validate that the requested document type is supported.
+        if document_type not in COLLECTIONS:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Invalid document type.'
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            object_id = ObjectId(document_id)
+        except InvalidId:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Invalid document ID.',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        collection = COLLECTIONS[document_type]
+
+        # Search for the document using its MongoDB ObjectId.
+        document = collection.find_one({'_id': object_id})
+
+        if document is None:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Document not found.',
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response(
+            {
+                'success': True,
+                'message': 'Document retrieved successfully.',
+                'data': serialize_document(document)
+            },
+            status=status.HTTP_200_OK
         )
