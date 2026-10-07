@@ -59,3 +59,22 @@ class FlexibleDocumentSerializer(serializers.Serializer):
                 )
 
         return attrs
+
+class FlexibleDocumentUpdateSerializer(serializers.Serializer):
+    """
+    Serializer used to validate partial update for flexible MongoDB documents.
+    """
+
+    # Flexible fields that will be updated in the existing document.
+    document = serializers.DictField()
+
+    def validate_document(self, value):
+        """
+        Prevent modification of fields managed internally by MongoDB or by the service.
+        """
+        if '_id' in value:
+            raise serializers.ValidationError(
+                'The _id field cannot be modified.'
+            )
+
+        return value
