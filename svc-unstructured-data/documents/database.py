@@ -5,7 +5,8 @@ from pymongo import MongoClient
 # Create the MongoDB client using the connection URL defined in the environment variables.
 client = MongoClient(
     os.getenv('MONGODB_URL'),
-    uuidRepresentation='standard'
+    uuidRepresentation='standard',
+    serverSelectionTimeoutMS=3000
 )
 
 # Get the database defined in the MongoDB connection URL.
