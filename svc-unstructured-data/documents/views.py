@@ -12,6 +12,7 @@ from documents.serializers import (
     FlexibleDocumentSerializer,
     FlexibleDocumentUpdateSerializer
 )
+from pymongo.errors import PyMongoError
 from bson import ObjectId
 from bson.errors import InvalidId
 
@@ -75,8 +76,17 @@ class DocumentCreateView(APIView):
         # Select the MongoDB collection associated with the document type.
         collection = COLLECTIONS[document_type]
 
-        # Store the flexible document in MongoDB.
-        result = collection.insert_one(document)
+        # Store the flexible document and handle MongoDB persistence errors.
+        try:
+            result = collection.insert_one(document)
+        except PyMongoError:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Database persistence error.'
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(
             {
@@ -107,11 +117,20 @@ class DocumentListView(APIView):
             )
         collection = COLLECTIONS[document_type]
 
-        # Retrieve all documents from the selected MongoDB collection.
-        documents = [
-            serialize_document(document)
-            for document in collection.find()
-        ]
+        # Retrieve all documents and handle MongoDB persistence errors.
+        try:
+            documents = [
+                serialize_document(document)
+                for document in collection.find()
+            ]
+        except PyMongoError:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Database persistence error.',
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(
             {
@@ -150,8 +169,17 @@ class DocumentDetailView(APIView):
 
         collection = COLLECTIONS[document_type]
 
-        # Search for the document using its MongoDB ObjectId.
-        document = collection.find_one({'_id': object_id})
+        # Retrieve the document and handle MongoDB persistence errors.
+        try:
+            document = collection.find_one({'_id': object_id})
+        except PyMongoError:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Database persistence error.',
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         if document is None:
             return Response(
@@ -240,10 +268,19 @@ class DocumentDetailView(APIView):
         collection = COLLECTIONS[document_type]
 
         # Update only the received fields without replacing the complete MongoDB document.
-        result = collection.update_one(
-            {'_id': object_id},
-            {'$set': document}
-        )
+        try:
+            result = collection.update_one(
+                {'_id': object_id},
+                {'$set': document}
+            )
+        except PyMongoError:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Database persistence error.',
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         if result.matched_count == 0:
             return Response(
@@ -253,10 +290,18 @@ class DocumentDetailView(APIView):
                 },
                 status=status.HTTP_404_NOT_FOUND,
             )
-
-        updated_document = collection.find_one(
-            {'_id': object_id}
-        )
+        try:
+            updated_document = collection.find_one(
+                {'_id': object_id}
+            )
+        except PyMongoError:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Database persistence error.',
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(
             {
@@ -296,9 +341,18 @@ class DocumentDetailView(APIView):
         collection = COLLECTIONS[document_type]
 
         # Delete the document that matches the provided MongoDB ObjectId.
-        result = collection.delete_one(
-            {'_id': object_id}
-        )
+        try:
+            result = collection.delete_one(
+                {'_id': object_id}
+            )
+        except PyMongoError:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Database persistence error.',
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         if result.deleted_count == 0:
             return Response(
