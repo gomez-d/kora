@@ -32,17 +32,48 @@ class FlexibleDocumentSerializer(serializers.Serializer):
         document_type = attrs['document_type']
         document = attrs['document']
 
-        if document_type in ['ai_recommendations', 'ml_results']:
-            if 'user_id' not in document:
-                raise serializers.ValidationError(
-                    {
-                        'document': {
-                            'user_id': ['This field is required.']
-                        }
-                    }
-                )
+        required_fields = {
+            'ai_recommendations': [
+                'user_id',
+                'model',
+                'input_context',
+                'recommendation',
+            ],
+            'ml_results': [
+                'user_id',
+                'model',
+                'input_context',
+                'result',
+            ],
+            'logs': [
+                'service',
+                'level',
+                'event',
+                'data',
+            ],
+        }
 
-            # Validate and convert the received value to a UUID object.
+        # Validate required fields for the selected document type.
+        missing_fields = [
+            field
+            for field in required_fields[document_type]
+            if field not in document
+        ]
+
+        if missing_fields:
+            errors = {
+                field: ['This field is required.']
+                for field in missing_fields
+            }
+
+            raise serializers.ValidationError(
+                {
+                    'document': errors
+                }
+            )
+
+        # Validate user_id as UUID for documents related to Kora users.
+        if document_type in ['ai_recommendations', 'ml_results']:
             uuid_field = serializers.UUIDField()
 
             try:
@@ -58,7 +89,60 @@ class FlexibleDocumentSerializer(serializers.Serializer):
                     }
                 )
 
+        # Validate minimum field types while preserving flexible content.
+        self.__validate_field_types(document_type, document)
+
         return attrs
+
+    def __validate_field_types(self, document_type, document):
+        """
+        Validate only the minimum expected data types for each document
+        type while allowing additional flexible fields.
+        """
+        errors = {}
+
+        if document_type in ['ai_recommendations', 'ml_results']:
+            if not isinstance(document['model'], str):
+                errors['model'] = ['Must be a string.']
+
+            if not isinstance(document['input_context'], dict):
+                errors['input_context'] = ['Must be an object.']
+
+        if document_type == 'ai_recommendations':
+            if not isinstance(document['recommendation'], (str, dict)):
+                errors['recommendation'] = [
+                    'Must be a string or an object.'
+                ]
+
+        if document_type == 'ml_results':
+            if not isinstance(document['result'], dict):
+                errors['result'] = ['Must be an object.']
+
+        if document_type == 'logs':
+            if not isinstance(document['service'], str):
+                errors['service'] = ['Must be a string.']
+
+            if not isinstance(document['level'], str):
+                errors['level'] = ['Must be a string.']
+
+            if not isinstance(document['event'], str):
+                errors['event'] = ['Must be a string.']
+
+            if not isinstance(document['data'], dict):
+                errors['data'] = ['Must be an object.']
+
+        if 'metadata' in document and not isinstance(
+            document['metadata'],
+            dict
+        ):
+            errors['metadata'] = ['Must be an object.']
+
+        if errors:
+            raise serializers.ValidationError(
+                {
+                    'document': errors
+                }
+            )
 
 class FlexibleDocumentUpdateSerializer(serializers.Serializer):
     """
