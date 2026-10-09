@@ -2,6 +2,18 @@ from rest_framework import serializers
 from users.models import User
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer used to register Kora users.
+
+    user_id exposes the UUID primary key used to identify the user
+    across Kora microservices.
+    """
+
+    user_id = serializers.UUIDField(
+        source='id',
+        read_only=True
+    )
+
     password = serializers.CharField(
         write_only = True,
         required = True
@@ -10,6 +22,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            'user_id',
             'username',
             'email',
             'password',
