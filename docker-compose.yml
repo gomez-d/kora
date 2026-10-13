@@ -1,0 +1,125 @@
+# Kora V1 — Docker Compose
+
+services:
+  # ---------------------------------------------------------------------------
+  # Databases
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kora
+      POSTGRES_PASSWORD: kora
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kora"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Microservices
+  # ---------------------------------------------------------------------------
+  svc-identity:
+    build: ./svc-identity
+    ports:
+      - "8001:8000"
+    environment:
+      ENVIRONMENT: development
+      PORT: "8000"
+      ALLOWED_HOSTS: "*"
+      DATABASE_URL: postgresql://kora:kora@postgres:5432/kora_identity
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  svc-business:
+    build: ./svc-business
+    ports:
+      - "8002:8000"
+    environment:
+      ENVIRONMENT: development
+      PORT: "8000"
+      ALLOWED_HOSTS: "*"
+      DATABASE_URL: postgresql://kora:kora@postgres:5432/kora_business
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  svc-unstructured-data:
+    build: ./svc-unstructured-data
+    ports:
+      - "8004:8000"
+    environment:
+      ENVIRONMENT: development
+      PORT: "8000"
+      MONGODB_URL: mongodb://mongo:27017/kora_unstructured
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+
+
+  svc-ai:
+    build: ./svc-ai
+    ports:
+      - "8003:8000"
+    env_file:
+      - ./svc-ai/.env
+    environment:
+      ENVIRONMENT: development
+      PORT: "8000"
+    restart: unless-stopped
+
+
+  api-gateway:
+    build: ./api-gateway
+    ports:
+      - "8000:8000"
+    environment:
+      ENVIRONMENT: development
+      PORT: "8000"
+      ALLOWED_HOSTS: "*"
+      IDENTITY_SERVICE_URL: http://svc-identity:8000
+      BUSINESS_SERVICE_URL: http://svc-business:8000
+      AI_SERVICE_URL: http://svc-ai:8000
+    depends_on:
+      - svc-identity
+      - svc-business
+      - svc-ai
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # Frontend
+  # ---------------------------------------------------------------------------
+  frontend:
+    build: ./frontend
+    ports:
+      - "5500:80"
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  mongo_data:

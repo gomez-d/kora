@@ -1,0 +1,6 @@
+
+CREATE DATABASE kora_identity;
+CREATE DATABASE kora_business;
+
+GRANT ALL PRIVILEGES ON DATABASE kora_identity TO kora;
+GRANT ALL PRIVILEGES ON DATABASE kora_business TO kora;
