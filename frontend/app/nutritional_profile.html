@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Mi perfil nutricional</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="../css/vendor.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/main-screen.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+</head>
+<body id="top" class="page-main">
+    <div id="page" class="s-pagewrap s-pagewrap--main">
+        <div class="menu-underlay"></div>
+        <header class="s-header s-header--main">
+            <div class="s-header__block s-header__block--main">
+            
+                <section class="s-megamenu">
+                    <div class="s-megamenu__inner">
+                        <nav class="s-megamenu__nav" role="navigation">
+                            <ul class="s-megamenu__list">
+                                <li class="s-megamenu__item">
+                                <a href="app/main_panel.html" class="s-megamenu__link" aria-label="Panel principal">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/H.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/food_catalog.html" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/N.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/food_catalog.html" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/HF.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/C.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/U.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </section>
+                <div class="s-header__right">
+                    <a href="account_settings.html" class="s-header__perfil" title="Perfil">
+                        <img src="../images/avatars/user-01.jpg" alt="Perfil" onerror="this.src='../images/k.svg'">
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <article class="s-content s-content--main">
+            <section class="s-alimento">
+                <div class="s-alimento__container">
+                    <h1 class="s-alimento__title">Mi perfil nutricional</h1>
+                    <p class="s-alimento__subtitle">Consulta y modifica tu información nutricional personal. Datos almacenados en el microservicio de negocio (HU-005).</p>
+
+                    <form id="form-perfil-nutricional" class="s-alimento__form" style="max-width:640px;margin:0 auto;">
+
+                        <div class="s-alimento__field">
+                            <label for="profile-age">Edad</label>
+                            <input type="number" id="profile-age" name="age" class="s-alimento__input" min="1" max="120" required>
+                        </div>
+
+                        <div class="s-alimento__field">
+                            <label for="profile-sex">Sexo</label>
+                            <select id="profile-sex" name="sex" class="s-alimento__input s-alimento__select" required>
+                                <option value="">Seleccionar…</option>
+                                <option value="MALE">Hombre</option>
+                                <option value="FEMALE">Mujer</option>
+                            </select>
+                        </div>
+
+                        <div class="s-alimento__field s-alimento__field--row">
+                            <div class="s-alimento__field-half">
+                                <label for="profile-weight">Peso actual (kg)</label>
+                                <input type="number" id="profile-weight" name="weight" class="s-alimento__input" min="0.1" step="0.1" required>
+                            </div>
+                            <div class="s-alimento__field-half">
+                                <label for="profile-height">Altura (cm)</label>
+                                <input type="number" id="profile-height" name="height" class="s-alimento__input" min="0.1" step="0.1" required>
+                            </div>
+                        </div>
+
+                        <div class="s-alimento__field">
+                            <label for="profile-activity">Nivel de actividad física</label>
+                            <select id="profile-activity" name="activity_level" class="s-alimento__input s-alimento__select" required>
+                                <option value="">Seleccionar…</option>
+                                <option value="NONE">Nula</option>
+                                <option value="LOW">Poco</option>
+                                <option value="MODERATE">Moderada</option>
+                                <option value="HIGH">Alta</option>
+                                <option value="VERY_HIGH">Muy alta</option>
+                            </select>
+                        </div>
+
+                        <div class="s-alimento__field">
+                            <label for="profile-goal">Objetivo nutricional</label>
+                            <select id="profile-goal" name="nutrition_goal" class="s-alimento__input s-alimento__select" required>
+                                <option value="">Seleccionar…</option>
+                                <option value="WEIGHT_LOSS">Pérdida de peso</option>
+                                <option value="WEIGHT_MAINTENANCE">Mantenimiento de peso</option>
+                                <option value="WEIGHT_GAIN">Aumento de peso</option>
+                                <option value="HEALTHY_EATING">Alimentación saludable</option>
+                            </select>
+                        </div>
+
+                        <div class="s-alimento__footer-actions">
+                            <button type="submit" class="s-alimento__btn s-alimento__btn--registrar">Guardar cambios</button>
+                            <button type="button" id="btn-edit-toggle" class="s-alimento__btn s-alimento__btn--secondary">Editar perfil</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </article>
+
+        <footer class="s-footer s-footer--main">
+            <div class="row s-footer__bottom">
+                <div class="column xl-4 lg-12">
+                    <p class="ss-copyright"><span>© Copyright KORA 2026</span></p>
+                </div>
+            </div>
+            <div class="kora-ai-button">
+                <button type="button" id="kora-ai-toggle" title="Habla con Kora AI">
+                    <img src="../images/cora.svg" alt="Kora">
+                </button>
+                <span class="kora-ai-label">Habla con Kora AI</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../js/plugins.js"></script>
+    <script src="../js/main.js"></script>
+
+    <script src="../js/kora-llm.js"></script>
+    <script>
+
+    </script>
+
+    <script>
+    (function () {
+        var form = document.getElementById("form-perfil-nutricional");
+        if (!form || !window.KoraApi) return;
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            var user = KoraApi.getUser() || {};
+            var payload = {
+                user_id: user.user_id || user.id,
+                age: parseInt(document.getElementById("profile-age").value, 10),
+                sex: document.getElementById("profile-sex").value,
+                weight: document.getElementById("profile-weight").value,
+                height: document.getElementById("profile-height").value,
+                activity_level: document.getElementById("profile-activity").value,
+                nutrition_goal: document.getElementById("profile-goal").value
+            };
+            try {
+                await KoraApi.createNutritionalProfile(payload);
+                alert("Perfil guardado correctamente.");
+            } catch (err) {
+                alert(err.message || "No se pudo guardar el perfil.");
+            }
+        });
+    })();
+    </script>
+
+</body>
+</html>

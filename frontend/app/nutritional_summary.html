@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Resumen nutricional</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="../css/vendor.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/main-screen.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+</head>
+<body id="top" class="page-main">
+    <div id="page" class="s-pagewrap s-pagewrap--main">
+        <div class="menu-underlay"></div>
+        <header class="s-header s-header--main">
+            <div class="s-header__block s-header__block--main">
+            
+                <section class="s-megamenu">
+                    <div class="s-megamenu__inner">
+                        <nav class="s-megamenu__nav" role="navigation">
+                            <ul class="s-megamenu__list">
+                                <li class="s-megamenu__item">
+                                <a href="app/main_panel.html" class="s-megamenu__link" aria-label="Panel principal">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/H.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/food_catalog" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/N.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/food_intake_history" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/HF.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/nutritional_summary" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/C.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/U.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </section>
+                <div class="s-header__right">
+                    <a href="account_settings.html" class="s-header__perfil" title="Perfil">
+                        <img src="../images/avatars/user-01.jpg" alt="Perfil" onerror="this.src='../images/k.svg'">
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <article class="s-content s-content--main">
+            <section class="s-alimento">
+                <div class="s-alimento__container">
+                    <h1 class="s-alimento__title">Resumen nutricional</h1>
+                    <p class="s-alimento__subtitle">Convierte tus registros en información comprensible. Datos reales de consumo (HU-011). Unidades y periodos claramente identificados.</p>
+
+                    <div class="s-summary__period">
+                        <button type="button" class="s-summary__period-btn is-active" data-period="today">Hoy</button>
+                        <button type="button" class="s-summary__period-btn" data-period="week">Esta semana</button>
+                        <button type="button" class="s-summary__period-btn" data-period="custom">Personalizado</button>
+                        <div id="custom-dates" class="s-summary__custom-dates" style="display:none;">
+                            <input type="date" id="summary-from" class="s-alimento__input">
+                            <input type="date" id="summary-to" class="s-alimento__input">
+                            <button type="button" id="btn-summary-apply" class="s-alimento__btn s-alimento__btn--primary">Aplicar</button>
+                        </div>
+                    </div>
+
+                    <div class="s-panel__summary" id="summary-cards">
+                        <div class="s-panel__card s-panel__card--calories">
+                            <h3>Calorías</h3>
+                            <div class="s-panel__value">
+                                <span id="sum-calories">—</span>
+                                <small>de <span id="sum-calories-goal">—</span> kcal</small>
+                            </div>
+                            <div class="s-panel__progress">
+                                <div class="s-panel__progress-bar" id="sum-calories-bar" style="width:0%"></div>
+                            </div>
+                            <span class="s-panel__progress-label" id="sum-calories-pct">0%</span>
+                        </div>
+                        <div class="s-panel__card">
+                            <h3>Proteína</h3>
+                            <div class="s-panel__value"><span id="sum-protein">—</span> <small>g</small></div>
+                        </div>
+                        <div class="s-panel__card">
+                            <h3>Carbohidratos</h3>
+                            <div class="s-panel__value"><span id="sum-carbs">—</span> <small>g</small></div>
+                        </div>
+                        <div class="s-panel__card">
+                            <h3>Grasas</h3>
+                            <div class="s-panel__value"><span id="sum-fat">—</span> <small>g</small></div>
+                        </div>
+                    </div>
+
+                    <div class="s-summary__section">
+                        <h2>Consumo de calorías por día</h2>
+                        <p class="s-alimento__hint">Valores en kcal. Periodo visible abajo.</p>
+                        <div class="s-summary__chart" id="chart-calories">
+
+                        </div>
+                    </div>
+
+                    <div class="s-summary__section">
+                        <h2>Evolución de macros</h2>
+                        <p class="s-alimento__hint">Proteína, carbohidratos y grasas (g) por día.</p>
+                        <div class="s-summary__chart s-summary__chart--macros" id="chart-macros">
+
+                        </div>
+                        <div class="s-summary__legend">
+                            <span class="s-summary__legend-item s-summary__legend--protein">Proteína</span>
+                            <span class="s-summary__legend-item s-summary__legend--carbs">Carbohidratos</span>
+                            <span class="s-summary__legend-item s-summary__legend--fat">Grasas</span>
+                        </div>
+                    </div>
+
+                    <div class="s-summary__section">
+                        <h2>Resumen semanal</h2>
+                        <div class="s-summary__week-grid" id="week-grid">
+
+                        </div>
+                        <p class="s-alimento__hint" id="week-note">Días con registros y días sin información se marcan claramente.</p>
+                    </div>
+
+                    <div class="s-summary__actions">
+                        <a href="food_intake_history.html" class="s-alimento__btn s-alimento__btn--secondary">Ver historial completo</a>
+                        <a href="food_intake.html" class="s-alimento__btn s-alimento__btn--registrar">Registrar consumo</a>
+                    </div>
+                </div>
+            </section>
+        </article>
+
+        <footer class="s-footer s-footer--main">
+            <div class="row s-footer__bottom">
+                <div class="column xl-4 lg-12">
+                    <p class="ss-copyright"><span>© Copyright KORA 2026</span></p>
+                </div>
+            </div>
+            <div class="kora-ai-button">
+                <button type="button" id="kora-ai-toggle" title="Habla con Kora AI">
+                    <img src="../images/cora.svg" alt="Kora">
+                </button>
+                <span class="kora-ai-label">Habla con Kora AI</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../js/plugins.js"></script>
+    <script src="../js/main.js"></script>
+
+    <script src="../js/kora-llm.js"></script>
+
+    <script>
+    (function () {
+        "use strict";
+
+        const DEMO_DAILY = [
+            { date: "2026-10-04", calories: 0, protein: 0, carbohydrates: 0, fat: 0, has_data: false },
+            { date: "2026-10-05", calories: 1850, protein: 95, carbohydrates: 210, fat: 55, has_data: true },
+            { date: "2026-10-06", calories: 2100, protein: 110, carbohydrates: 240, fat: 62, has_data: true },
+            { date: "2026-10-07", calories: 0, protein: 0, carbohydrates: 0, fat: 0, has_data: false },
+            { date: "2026-10-08", calories: 250, protein: 37.5, carbohydrates: 14, fat: 4.5, has_data: true },
+            { date: "2026-10-09", calories: 505, protein: 29.25, carbohydrates: 44.5, fat: 21.65, has_data: true },
+            { date: "2026-10-10", calories: 0, protein: 0, carbohydrates: 0, fat: 0, has_data: false }
+        ];
+
+        const GOAL_CALORIES = 2000;
+
+        function formatNum(v) {
+            if (v === null || v === undefined) return "—";
+            const n = Number(v);
+            return Number.isFinite(n) ? (n % 1 === 0 ? String(n) : n.toFixed(1)) : "—";
+        }
+
+        function shortDate(iso) {
+            const d = new Date(iso + "T12:00:00");
+            return d.toLocaleDateString("es-ES", { weekday: "short", day: "numeric" });
+        }
+
+        function updateSummaryCards(days) {
+            const totals = days.reduce(function (acc, d) {
+                if (d.has_data) {
+                    acc.calories += d.calories;
+                    acc.protein += d.protein;
+                    acc.carbohydrates += d.carbohydrates;
+                    acc.fat += d.fat;
+                }
+                return acc;
+            }, { calories: 0, protein: 0, carbohydrates: 0, fat: 0 });
+
+            const daysWithData = days.filter(function (d) { return d.has_data; }).length || 1;
+
+            document.getElementById("sum-calories").textContent = formatNum(totals.calories);
+            document.getElementById("sum-calories-goal").textContent = formatNum(GOAL_CALORIES * daysWithData);
+            const pct = Math.min(100, Math.round((totals.calories / (GOAL_CALORIES * daysWithData)) * 100)) || 0;
+            document.getElementById("sum-calories-bar").style.width = pct + "%";
+            document.getElementById("sum-calories-pct").textContent = pct + "%";
+            document.getElementById("sum-protein").textContent = formatNum(totals.protein);
+            document.getElementById("sum-carbs").textContent = formatNum(totals.carbohydrates);
+            document.getElementById("sum-fat").textContent = formatNum(totals.fat);
+        }
+
+        function renderCaloriesChart(days) {
+            const el = document.getElementById("chart-calories");
+            el.innerHTML = "";
+            const maxCal = Math.max.apply(null, days.map(function (d) { return d.calories; }).concat([GOAL_CALORIES, 1]));
+
+            days.forEach(function (d) {
+                const col = document.createElement("div");
+                col.className = "s-summary__bar-col" + (d.has_data ? "" : " is-empty");
+                const h = d.has_data ? Math.max(4, (d.calories / maxCal) * 100) : 4;
+                col.innerHTML =
+                    '<div class="s-summary__bar" style="height:' + h + '%" title="' + formatNum(d.calories) + ' kcal"></div>' +
+                    '<span class="s-summary__bar-label">' + shortDate(d.date) + '</span>' +
+                    '<span class="s-summary__bar-value">' + (d.has_data ? formatNum(d.calories) : "—") + '</span>';
+                el.appendChild(col);
+            });
+        }
+
+        function renderMacrosChart(days) {
+            const el = document.getElementById("chart-macros");
+            el.innerHTML = "";
+            const maxM = Math.max.apply(null, days.map(function (d) {
+                return Math.max(d.protein, d.carbohydrates, d.fat);
+            }).concat([1]));
+
+            days.forEach(function (d) {
+                const col = document.createElement("div");
+                col.className = "s-summary__bar-col s-summary__bar-col--multi" + (d.has_data ? "" : " is-empty");
+                function bar(val, cls) {
+                    const h = d.has_data ? Math.max(2, (val / maxM) * 100) : 2;
+                    return '<div class="s-summary__bar ' + cls + '" style="height:' + h + '%" title="' + formatNum(val) + ' g"></div>';
+                }
+                col.innerHTML =
+                    '<div class="s-summary__bar-group">' +
+                    bar(d.protein, "s-summary__bar--protein") +
+                    bar(d.carbohydrates, "s-summary__bar--carbs") +
+                    bar(d.fat, "s-summary__bar--fat") +
+                    '</div>' +
+                    '<span class="s-summary__bar-label">' + shortDate(d.date) + '</span>';
+                el.appendChild(col);
+            });
+        }
+
+        function renderWeekGrid(days) {
+            const el = document.getElementById("week-grid");
+            el.innerHTML = "";
+            days.forEach(function (d) {
+                const cell = document.createElement("div");
+                cell.className = "s-summary__week-day" + (d.has_data ? " has-data" : " no-data");
+                cell.innerHTML =
+                    "<strong>" + shortDate(d.date) + "</strong>" +
+                    "<span>" + (d.has_data ? formatNum(d.calories) + " kcal" : "Sin datos") + "</span>";
+                el.appendChild(cell);
+            });
+        }
+
+        function applyPeriod(period) {
+            let days = DEMO_DAILY.slice();
+            if (period === "today") {
+                const today = new Date().toISOString().slice(0, 10);
+                days = DEMO_DAILY.filter(function (d) { return d.date === today; });
+                if (!days.length) days = [DEMO_DAILY[DEMO_DAILY.length - 1]];
+            }
+
+            updateSummaryCards(days);
+            renderCaloriesChart(period === "today" ? DEMO_DAILY : days);
+            renderMacrosChart(period === "today" ? DEMO_DAILY : days);
+            renderWeekGrid(DEMO_DAILY);
+        }
+
+        document.querySelectorAll(".s-summary__period-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                document.querySelectorAll(".s-summary__period-btn").forEach(function (b) {
+                    b.classList.remove("is-active");
+                });
+                btn.classList.add("is-active");
+                const period = btn.getAttribute("data-period");
+                document.getElementById("custom-dates").style.display = period === "custom" ? "flex" : "none";
+                if (period !== "custom") applyPeriod(period);
+            });
+        });
+
+        document.getElementById("btn-summary-apply").addEventListener("click", function () {
+            applyPeriod("custom");
+        });
+
+        applyPeriod("week");
+    })();
+    </script>
+</body>
+</html>

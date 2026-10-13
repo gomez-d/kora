@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Catálogo de alimentos</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="../css/vendor.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/main-screen.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+</head>
+<body id="top" class="page-main">
+    <div id="page" class="s-pagewrap s-pagewrap--main">
+        <div class="menu-underlay"></div>
+<header class="s-header s-header--main">
+            <div class="s-header__block s-header__block--main">
+            
+                <section class="s-megamenu">
+                    <div class="s-megamenu__inner">
+                        <nav class="s-megamenu__nav" role="navigation">
+                            <ul class="s-megamenu__list">
+                                <li class="s-megamenu__item">
+                                <a href="app/main_panel.html" class="s-megamenu__link" aria-label="Panel principal">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/H.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/food_catalog.html" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/N.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/food_catalog.html" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/HF.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/C.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/U.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </section>
+                <div class="s-header__right">
+                    <a href="account_settings.html" class="s-header__perfil" title="Perfil">
+                        <img src="../images/avatars/user-01.jpg" alt="Perfil" onerror="this.src='../images/k.svg'">
+                    </a>
+                </div>
+            </div>
+        </header>
+        <article class="s-content s-content--main">
+            <section class="s-alimento">
+                <div class="s-alimento__container">
+                    <h1 class="s-alimento__title">Catálogo de alimentos</h1>
+                    <div class="s-catalog__toolbar">
+                        <div class="s-catalog__search">
+                            <input type="search" id="catalog-search" class="s-alimento__input" placeholder="Buscar por nombre…" autocomplete="off">
+                            <button type="button" id="btn-search" class="s-alimento__btn s-alimento__btn--primary">Buscar</button>
+                        </div>
+                        <div class="s-catalog__filters">
+                            <select id="catalog-sort" class="s-alimento__input s-alimento__select">
+                                <option value="name">Ordenar por nombre</option>
+                                <option value="calories">Ordenar por calorías</option>
+                                <option value="protein">Ordenar por proteína</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="catalog-grid" class="s-catalog__grid" aria-live="polite">
+
+                    </div>
+
+                    <div id="catalog-empty" class="s-catalog__empty">
+                        <p>Escribe un nombre y pulsa Buscar para ver alimentos del catálogo.</p>
+                        <p class="s-alimento__hint">Endpoint: GET /api/business/foods/ (HU-007). Solo se muestran nutrientes almacenados en el modelo.</p>
+                    </div>
+
+                    <div id="catalog-loading" class="s-catalog__empty" style="display:none;">
+                        <p>Cargando alimentos…</p>
+                    </div>
+                </div>
+            </section>
+        </article>
+        <div id="food-detail-modal" class="kora-modal" aria-hidden="true" role="dialog" aria-labelledby="food-detail-title">
+            <div class="kora-modal__backdrop" data-close-modal></div>
+            <div class="kora-modal__panel">
+                <button type="button" class="kora-modal__close" data-close-modal aria-label="Cerrar">×</button>
+
+                <div class="kora-modal__body">
+                    <div class="kora-modal__image-wrap" id="food-detail-image-wrap" style="display:none;">
+                        <img id="food-detail-image" src="" alt="">
+                    </div>
+
+                    <h2 id="food-detail-title" class="kora-modal__title">—</h2>
+                    <p class="kora-modal__portion" id="food-detail-portion">Porción de referencia: 100 g</p>
+
+                    <div class="kora-modal__nutrients">
+                        <div class="kora-modal__nutrient">
+                            <span>Calorías</span>
+                            <strong id="food-detail-calories">—</strong>
+                            <small>kcal</small>
+                        </div>
+                        <div class="kora-modal__nutrient">
+                            <span>Proteína</span>
+                            <strong id="food-detail-protein">—</strong>
+                            <small>g</small>
+                        </div>
+                        <div class="kora-modal__nutrient">
+                            <span>Carbohidratos</span>
+                            <strong id="food-detail-carbs">—</strong>
+                            <small>g</small>
+                        </div>
+                        <div class="kora-modal__nutrient">
+                            <span>Grasas</span>
+                            <strong id="food-detail-fat">—</strong>
+                            <small>g</small>
+                        </div>
+                        <div class="kora-modal__nutrient">
+                            <span>Fibra</span>
+                            <strong id="food-detail-fiber">—</strong>
+                            <small>g</small>
+                        </div>
+                        <div class="kora-modal__nutrient">
+                            <span>Azúcar</span>
+                            <strong id="food-detail-sugar">—</strong>
+                            <small>g</small>
+                        </div>
+                        <div class="kora-modal__nutrient">
+                            <span>Sodio</span>
+                            <strong id="food-detail-sodium">—</strong>
+                            <small>mg</small>
+                        </div>
+                    </div>
+
+                    <p class="s-alimento__hint">Valores del catálogo (modelo Food). No se muestran estimaciones.</p>
+
+                    <div class="kora-modal__actions">
+                        <a id="food-detail-register-btn" href="food_intake.html" class="s-alimento__btn s-alimento__btn--registrar">
+                            Registrar consumo
+                        </a>
+                        <button type="button" class="s-alimento__btn s-alimento__btn--secondary" data-close-modal>Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="s-footer s-footer--main">
+            <div class="row s-footer__bottom">
+                <div class="column xl-4 lg-12">
+                    <p class="ss-copyright"><span>© Copyright KORA 2026</span></p>
+                </div>
+            </div>
+            <div class="kora-ai-button">
+                <button type="button" id="kora-ai-toggle" title="Habla con Kora AI">
+                    <img src="../images/cora.svg" alt="Kora">
+                </button>
+                <span class="kora-ai-label">Habla con Kora AI</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../js/plugins.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/kora-llm.js"></script>
+
+    <script>
+    (function () {
+        "use strict";
+
+        const API_BASE = window.KORA_AI_BASE_URL || "http://localhost:8000";
+        const grid = document.getElementById("catalog-grid");
+        const emptyEl = document.getElementById("catalog-empty");
+        const loadingEl = document.getElementById("catalog-loading");
+        const searchInput = document.getElementById("catalog-search");
+        const btnSearch = document.getElementById("btn-search");
+        const sortSelect = document.getElementById("catalog-sort");
+
+        const modal = document.getElementById("food-detail-modal");
+        let currentFood = null;
+
+        const DEMO_FOODS = [
+            { id: 1, name: "Arroz blanco cocido", calories: 130, protein: 2.7, carbohydrates: 28.2, fat: 0.3, fiber: 0.4, sugar: 0.1, sodium: 1 },
+            { id: 2, name: "Huevo entero", calories: 155, protein: 12.6, carbohydrates: 1.1, fat: 10.6, fiber: 0, sugar: 1.1, sodium: 124 },
+            { id: 3, name: "Pechuga de pollo", calories: 165, protein: 31, carbohydrates: 0, fat: 3.6, fiber: 0, sugar: 0, sodium: 74 },
+            { id: 4, name: "Manzana", calories: 52, protein: 0.3, carbohydrates: 14, fat: 0.2, fiber: 2.4, sugar: 10, sodium: 1 },
+            { id: 5, name: "Avena en hojuelas", calories: 389, protein: 16.9, carbohydrates: 66.3, fat: 6.9, fiber: 10.6, sugar: 0.99, sodium: 2 },
+            { id: 6, name: "Salmón", calories: 208, protein: 20, carbohydrates: 0, fat: 13, fiber: 0, sugar: 0, sodium: 59 }
+        ];
+
+        function formatNum(v) {
+            if (v === null || v === undefined || v === "") return "—";
+            const n = Number(v);
+            return Number.isFinite(n) ? (n % 1 === 0 ? n : n.toFixed(1)) : "—";
+        }
+
+        function renderCards(foods) {
+            grid.innerHTML = "";
+            if (!foods || foods.length === 0) {
+                emptyEl.style.display = "block";
+                emptyEl.querySelector("p").textContent = "No se encontraron alimentos con ese criterio.";
+                return;
+            }
+            emptyEl.style.display = "none";
+
+            foods.forEach(function (food) {
+                const card = document.createElement("article");
+                card.className = "s-catalog__card";
+                card.innerHTML =
+                    '<h3 class="s-catalog__card-title">' + escapeHtml(food.name) + '</h3>' +
+                    '<div class="s-catalog__card-macros">' +
+                    '  <span><strong>' + formatNum(food.calories) + '</strong> kcal</span>' +
+                    '  <span>P: ' + formatNum(food.protein) + ' g</span>' +
+                    '  <span>C: ' + formatNum(food.carbohydrates) + ' g</span>' +
+                    '  <span>G: ' + formatNum(food.fat) + ' g</span>' +
+                    '</div>' +
+                    '<div class="s-catalog__card-actions">' +
+                    '  <button type="button" class="s-alimento__btn s-alimento__btn--secondary s-catalog__btn-detail">Ver detalles</button>' +
+                    '  <a href="food_intake.html?name=' + encodeURIComponent(food.name) + '" class="s-alimento__btn s-alimento__btn--primary">Registrar</a>' +
+                    '</div>';
+
+                card.querySelector(".s-catalog__btn-detail").addEventListener("click", function () {
+                    openDetail(food);
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        function escapeHtml(str) {
+            const d = document.createElement("div");
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        function openDetail(food) {
+            currentFood = food;
+            document.getElementById("food-detail-title").textContent = food.name || "—";
+            document.getElementById("food-detail-portion").textContent = "Porción de referencia: 100 g";
+            document.getElementById("food-detail-calories").textContent = formatNum(food.calories);
+            document.getElementById("food-detail-protein").textContent = formatNum(food.protein);
+            document.getElementById("food-detail-carbs").textContent = formatNum(food.carbohydrates);
+            document.getElementById("food-detail-fat").textContent = formatNum(food.fat);
+            document.getElementById("food-detail-fiber").textContent = formatNum(food.fiber);
+            document.getElementById("food-detail-sugar").textContent = formatNum(food.sugar);
+            document.getElementById("food-detail-sodium").textContent = formatNum(food.sodium);
+
+            const imgWrap = document.getElementById("food-detail-image-wrap");
+            const img = document.getElementById("food-detail-image");
+            if (food.image) {
+                img.src = food.image;
+                img.alt = food.name;
+                imgWrap.style.display = "block";
+            } else {
+                imgWrap.style.display = "none";
+                img.src = "";
+            }
+
+            const regBtn = document.getElementById("food-detail-register-btn");
+            regBtn.href = "food_intake.html?name=" + encodeURIComponent(food.name || "");
+
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeModal() {
+            modal.classList.remove("is-open");
+            modal.setAttribute("aria-hidden", "true");
+            document.body.style.overflow = "";
+            currentFood = null;
+        }
+
+        modal.querySelectorAll("[data-close-modal]").forEach(function (el) {
+            el.addEventListener("click", closeModal);
+        });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+        });
+
+        function filterAndSort() {
+            const q = (searchInput.value || "").trim().toLowerCase();
+            let list = DEMO_FOODS.slice();
+            if (q) {
+                list = list.filter(function (f) {
+                    return (f.name || "").toLowerCase().indexOf(q) !== -1;
+                });
+            }
+            const sort = sortSelect.value;
+            list.sort(function (a, b) {
+                if (sort === "name") return (a.name || "").localeCompare(b.name || "");
+                return (Number(b[sort]) || 0) - (Number(a[sort]) || 0);
+            });
+            renderCards(list);
+        }
+
+        btnSearch.addEventListener("click", filterAndSort);
+        searchInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") { e.preventDefault(); filterAndSort(); }
+        });
+        sortSelect.addEventListener("change", filterAndSort);
+
+        async function loadFromApi() {
+            if (loadingEl) loadingEl.style.display = "block";
+            if (emptyEl) emptyEl.style.display = "none";
+            try {
+                if (window.KoraApi) {
+                    var data = await KoraApi.listFoods();
+                    var list = Array.isArray(data) ? data : (data.results || data.data || []);
+                    if (list.length) {
+                        renderCards(list);
+                        if (loadingEl) loadingEl.style.display = "none";
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.warn("Catálogo API no disponible, usando demo:", e.message);
+            }
+            if (loadingEl) loadingEl.style.display = "none";
+            renderCards(DEMO_FOODS);
+            if (emptyEl) emptyEl.style.display = "none";
+        }
+        loadFromApi();
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+
+.s-pageheader {
+    padding-top: 2rem;
+    padding-bottom: 1.5rem;
+}
+
+.s-pageheader .page-title {
+    font-size: clamp(8rem, 10vw, 5rem);
+    line-height: 1.15;
+    padding-top: 0;
+}
+.s-footer--main {
+    background-color: #151312 !important;
+}
+.ss-copyright{
+    color: #fff !important;
+}
+
+.s-alimento__title{
+    color: #FA9572 !important;
+}
+.titulo-paso {
+    margin-top: 1.5rem;
+    color:#364238!important;
+}
+.s-alimento__field label {
+    color: #aa112e  !important;
+}

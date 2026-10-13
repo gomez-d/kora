@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Historial de consumo</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="../css/vendor.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/main-screen.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+</head>
+<body id="top" class="page-main">
+    <div id="page" class="s-pagewrap s-pagewrap--main">
+        <div class="menu-underlay"></div>
+<header class="s-header s-header--main">
+            <div class="s-header__block s-header__block--main">
+            
+                <section class="s-megamenu">
+                    <div class="s-megamenu__inner">
+                        <nav class="s-megamenu__nav" role="navigation">
+                            <ul class="s-megamenu__list">
+                                <li class="s-megamenu__item">
+                                <a href="app/main_panel.html" class="s-megamenu__link" aria-label="Panel principal">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/H.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/food_catalog.html" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/N.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/food_catalog.html" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/HF.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/C.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/U.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </section>
+                <div class="s-header__right">
+                    <a href="account_settings.html" class="s-header__perfil" title="Perfil">
+                        <img src="../images/avatars/user-01.jpg" alt="Perfil" onerror="this.src='../images/k.svg'">
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <article class="s-content s-content--main">
+            <section class="s-alimento">
+                <div class="s-alimento__container">
+                    <h1 class="s-alimento__title">Historial de consumo</h1>
+                    <p class="s-alimento__subtitle">Revisa qué has consumido. Consulta restringida al usuario autenticado (HU-010, HU-011).</p>
+
+                    <div class="s-history__filters">
+                        <div class="s-alimento__field">
+                            <label for="history-date-from">Desde</label>
+                            <input type="date" id="history-date-from" class="s-alimento__input">
+                        </div>
+                        <div class="s-alimento__field">
+                            <label for="history-date-to">Hasta</label>
+                            <input type="date" id="history-date-to" class="s-alimento__input">
+                        </div>
+                        <div class="s-alimento__field">
+                            <label for="history-food-filter">Alimento</label>
+                            <input type="search" id="history-food-filter" class="s-alimento__input" placeholder="Filtrar por nombre…">
+                        </div>
+                        <div class="s-alimento__field s-history__filter-actions">
+                            <label>&nbsp;</label>
+                            <button type="button" id="btn-history-filter" class="s-alimento__btn s-alimento__btn--primary">Aplicar</button>
+                        </div>
+                    </div>
+
+                    <div class="s-history__table-wrap">
+                        <table class="s-history__table" id="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha y hora</th>
+                                    <th>Alimento</th>
+                                    <th>Cantidad</th>
+                                    <th>Calorías</th>
+                                    <th>Proteína</th>
+                                    <th>Carbos</th>
+                                    <th>Grasas</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="s-history__cards" id="history-cards">
+
+                    </div>
+
+                    <div id="history-empty" class="s-catalog__empty">
+                        <p>No hay registros de consumo en el periodo seleccionado.</p>
+                        <p class="s-alimento__hint">Cuando existan endpoints de consumo (HU-010), aquí aparecerán tus registros reales.</p>
+                        <a href="food_intake.html" class="s-alimento__btn s-alimento__btn--primary" style="margin-top:1rem;">Registrar un consumo</a>
+                    </div>
+                </div>
+            </section>
+        </article>
+
+        <div id="history-detail-modal" class="kora-modal" aria-hidden="true" role="dialog" aria-labelledby="history-detail-title">
+            <div class="kora-modal__backdrop" data-close-history-modal></div>
+            <div class="kora-modal__panel">
+                <button type="button" class="kora-modal__close" data-close-history-modal aria-label="Cerrar">×</button>
+                <div class="kora-modal__body">
+                    <h2 id="history-detail-title" class="kora-modal__title">—</h2>
+                    <p id="history-detail-datetime" class="kora-modal__portion">—</p>
+                    <p id="history-detail-quantity" class="kora-modal__portion">—</p>
+                    <div class="kora-modal__nutrients">
+                        <div class="kora-modal__nutrient"><span>Calorías</span><strong id="hd-calories">—</strong><small>kcal</small></div>
+                        <div class="kora-modal__nutrient"><span>Proteína</span><strong id="hd-protein">—</strong><small>g</small></div>
+                        <div class="kora-modal__nutrient"><span>Carbohidratos</span><strong id="hd-carbs">—</strong><small>g</small></div>
+                        <div class="kora-modal__nutrient"><span>Grasas</span><strong id="hd-fat">—</strong><small>g</small></div>
+                        <div class="kora-modal__nutrient"><span>Fibra</span><strong id="hd-fiber">—</strong><small>g</small></div>
+                        <div class="kora-modal__nutrient"><span>Azúcar</span><strong id="hd-sugar">—</strong><small>g</small></div>
+                        <div class="kora-modal__nutrient"><span>Sodio</span><strong id="hd-sodium">—</strong><small>mg</small></div>
+                    </div>
+                    <div class="kora-modal__actions">
+                        <button type="button" class="s-alimento__btn s-alimento__btn--secondary" data-close-history-modal>Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="s-footer s-footer--main">
+            <div class="row s-footer__bottom">
+                <div class="column xl-4 lg-12">
+                    <p class="ss-copyright"><span>© Copyright KORA 2026</span></p>
+                </div>
+            </div>
+            <div class="kora-ai-button">
+                <button type="button" id="kora-ai-toggle" title="Habla con Kora AI">
+                    <img src="../images/cora.svg" alt="Kora">
+                </button>
+                <span class="kora-ai-label">Habla con Kora AI</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../js/plugins.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/kora-llm.js"></script>
+
+    <script>
+    (function () {
+        "use strict";
+
+        const DEMO_HISTORY = [
+            { id: 1, food_name: "Arroz blanco cocido", quantity: 150, unit: "g", date: "2026-10-09", time: "13:30", calories: 195, protein: 4.05, carbohydrates: 42.3, fat: 0.45, fiber: 0.6, sugar: 0.15, sodium: 1.5 },
+            { id: 2, food_name: "Huevo entero", quantity: 2, unit: "unit", date: "2026-10-09", time: "08:15", calories: 310, protein: 25.2, carbohydrates: 2.2, fat: 21.2, fiber: 0, sugar: 2.2, sodium: 248 },
+            { id: 3, food_name: "Manzana", quantity: 1, unit: "unit", date: "2026-10-08", time: "16:00", calories: 52, protein: 0.3, carbohydrates: 14, fat: 0.2, fiber: 2.4, sugar: 10, sodium: 1 },
+            { id: 4, food_name: "Pechuga de pollo", quantity: 120, unit: "g", date: "2026-10-08", time: "14:00", calories: 198, protein: 37.2, carbohydrates: 0, fat: 4.32, fiber: 0, sugar: 0, sodium: 88.8 }
+        ];
+
+        const tbody = document.getElementById("history-tbody");
+        const cards = document.getElementById("history-cards");
+        const emptyEl = document.getElementById("history-empty");
+        const tableWrap = document.querySelector(".s-history__table-wrap");
+        const modal = document.getElementById("history-detail-modal");
+
+        function formatNum(v) {
+            if (v === null || v === undefined) return "—";
+            const n = Number(v);
+            return Number.isFinite(n) ? (n % 1 === 0 ? n : n.toFixed(1)) : "—";
+        }
+
+        function openDetail(item) {
+            document.getElementById("history-detail-title").textContent = item.food_name;
+            document.getElementById("history-detail-datetime").textContent = item.date + " · " + item.time;
+            document.getElementById("history-detail-quantity").textContent = "Cantidad: " + item.quantity + " " + item.unit;
+            document.getElementById("hd-calories").textContent = formatNum(item.calories);
+            document.getElementById("hd-protein").textContent = formatNum(item.protein);
+            document.getElementById("hd-carbs").textContent = formatNum(item.carbohydrates);
+            document.getElementById("hd-fat").textContent = formatNum(item.fat);
+            document.getElementById("hd-fiber").textContent = formatNum(item.fiber);
+            document.getElementById("hd-sugar").textContent = formatNum(item.sugar);
+            document.getElementById("hd-sodium").textContent = formatNum(item.sodium);
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+        }
+
+        function closeModal() {
+            modal.classList.remove("is-open");
+            modal.setAttribute("aria-hidden", "true");
+            document.body.style.overflow = "";
+        }
+        modal.querySelectorAll("[data-close-history-modal]").forEach(function (el) {
+            el.addEventListener("click", closeModal);
+        });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+        });
+
+        function render(list) {
+            tbody.innerHTML = "";
+            cards.innerHTML = "";
+
+            if (!list.length) {
+                emptyEl.style.display = "block";
+                tableWrap.style.display = "none";
+                cards.style.display = "none";
+                return;
+            }
+            emptyEl.style.display = "none";
+            tableWrap.style.display = "";
+            cards.style.display = "";
+
+            list = list.slice().sort(function (a, b) {
+                return (b.date + b.time).localeCompare(a.date + a.time);
+            });
+
+            list.forEach(function (item) {
+
+                const tr = document.createElement("tr");
+                tr.innerHTML =
+                    "<td>" + item.date + " " + item.time + "</td>" +
+                    "<td>" + escapeHtml(item.food_name) + "</td>" +
+                    "<td>" + item.quantity + " " + item.unit + "</td>" +
+                    "<td>" + formatNum(item.calories) + "</td>" +
+                    "<td>" + formatNum(item.protein) + "</td>" +
+                    "<td>" + formatNum(item.carbohydrates) + "</td>" +
+                    "<td>" + formatNum(item.fat) + "</td>" +
+                    "<td><button type=\"button\" class=\"s-history__link-detail\">Ver</button></td>";
+                tr.querySelector(".s-history__link-detail").addEventListener("click", function () {
+                    openDetail(item);
+                });
+                tbody.appendChild(tr);
+
+                const card = document.createElement("article");
+                card.className = "s-history__card";
+                card.innerHTML =
+                    "<div class=\"s-history__card-header\">" +
+                    "  <strong>" + escapeHtml(item.food_name) + "</strong>" +
+                    "  <span>" + item.date + " · " + item.time + "</span>" +
+                    "</div>" +
+                    "<div class=\"s-history__card-body\">" +
+                    "  <span>" + item.quantity + " " + item.unit + "</span>" +
+                    "  <span>" + formatNum(item.calories) + " kcal</span>" +
+                    "  <span>P " + formatNum(item.protein) + " g · C " + formatNum(item.carbohydrates) + " g · G " + formatNum(item.fat) + " g</span>" +
+                    "</div>" +
+                    "<button type=\"button\" class=\"s-alimento__btn s-alimento__btn--secondary s-history__card-btn\">Ver detalle</button>";
+                card.querySelector(".s-history__card-btn").addEventListener("click", function () {
+                    openDetail(item);
+                });
+                cards.appendChild(card);
+            });
+        }
+
+        function escapeHtml(str) {
+            const d = document.createElement("div");
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        function applyFilter() {
+            const from = document.getElementById("history-date-from").value;
+            const to = document.getElementById("history-date-to").value;
+            const foodQ = (document.getElementById("history-food-filter").value || "").trim().toLowerCase();
+
+            let list = DEMO_HISTORY.slice();
+            if (from) list = list.filter(function (i) { return i.date >= from; });
+            if (to) list = list.filter(function (i) { return i.date <= to; });
+            if (foodQ) list = list.filter(function (i) {
+                return (i.food_name || "").toLowerCase().indexOf(foodQ) !== -1;
+            });
+            render(list);
+        }
+
+        document.getElementById("btn-history-filter").addEventListener("click", applyFilter);
+
+        (function () {
+            const to = new Date();
+            const from = new Date();
+            from.setDate(from.getDate() - 7);
+            document.getElementById("history-date-to").value = to.toISOString().slice(0, 10);
+            document.getElementById("history-date-from").value = from.toISOString().slice(0, 10);
+        })();
+
+        render(DEMO_HISTORY);
+    })();
+    </script>
+</body>
+</html>
