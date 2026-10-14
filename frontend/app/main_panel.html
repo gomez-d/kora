@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Panel principal</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="../css/vendor.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/main-screen.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+</head>
+<body id="top" class="page-main">
+    <div id="page" class="s-pagewrap s-pagewrap--main">
+        <div class="menu-underlay"></div>
+        <header class="s-header s-header--main">
+            <div class="s-header__block s-header__block--main">
+            
+                <section class="s-megamenu">
+                    <div class="s-megamenu__inner">
+                        <nav class="s-megamenu__nav" role="navigation">
+                            <ul class="s-megamenu__list">
+                                <li class="s-megamenu__item">
+                                <a href="app/main_panel.html" class="s-megamenu__link" aria-label="Panel principal">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/H.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="food_intake.html" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/N.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="nutritional_summary.html" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/HF.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/C.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/U.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </section>
+                <div class="s-header__right">
+                    <a href="account_settings.html" class="s-header__perfil" title="Perfil">
+                        <img src="../images/avatars/user-01.jpg" alt="Perfil" onerror="this.src='../images/k.svg'">
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <article class="s-content s-content--main">
+            <section class="s-panel">
+                <div class="s-panel__container">
+                    <header class="s-panel__header">
+                        <h1 class="s-panel__title">¡Hola! Tu resumen de hoy</h1>
+                        <p class="s-panel__subtitle">Nutrirse es un acto de amor propio.</p>
+                    </header>
+
+                    <div class="s-panel__summary">
+                        <div class="s-panel__card s-panel__card--calories">
+                            <h3 >Calorías consumidas</h3>
+                            <div class="s-panel__value">
+                                <span id="calories-consumed">—</span>
+                                <small>de <span id="calories-goal">—</span> kcal</small>
+                            </div>
+                            <div class="s-panel__progress">
+                                <div class="s-panel__progress-bar" id="calories-progress-bar" style="width:0%"></div>
+                            </div>
+                            <span class="s-panel__progress-label" id="calories-progress-label">0%</span>
+                        </div>
+
+                        <div class="s-panel__card">
+                            <h3>Proteína</h3>
+                            <div class="s-panel__value">
+                                <span id="protein-consumed">—</span>
+                                <small>g</small>
+                            </div>
+                        </div>
+                        <div class="s-panel__card">
+                            <h3>Carbohidratos</h3>
+                            <div class="s-panel__value">
+                                <span id="carbs-consumed">—</span>
+                                <small>g</small>
+                            </div>
+                        </div>
+                        <div class="s-panel__card">
+                            <h3>Grasas</h3>
+                            <div class="s-panel__value">
+                                <span id="fat-consumed">—</span>
+                                <small>g</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="s-panel__actions">
+                        <a href="food_intake.html" class="s-panel__btn s-panel__btn--primary">
+                            Registrar alimento
+                        </a>
+                        <a href="food_catalog.html" class="s-panel__btn s-panel__btn--secondary">
+                            Ver catálogo
+                        </a>
+                    </div>
+
+                    <div class="s-panel__section">
+                        <h2>Últimos consumos</h2>
+                        <div id="recent-consumptions" class="s-panel__list">
+                            <div class="s-panel__empty" id="empty-state">
+                                <p>Aún no has registrado ningún consumo hoy.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </article>
+
+        <footer class="s-footer s-footer--main">
+            <div class="row s-footer__bottom">
+                <div class="column xl-4 lg-12">
+                    <p class="ss-copyright"><span>© Copyright KORA 2026</span></p>
+                </div>
+                <div class="s-header__logo s-header__logo--main">
+                    <a class="logo" href="main_panel.html"><img src="../images/logo.svg" alt="Kora"></a>
+                </div>
+            </div>
+            <div class="kora-ai-button">
+                <button type="button" id="kora-ai-toggle" title="Habla con Kora AI">
+                    <img src="../images/cora.svg" alt="Kora">
+                </button>
+                <span class="kora-ai-label">Habla con Kora AI</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../js/plugins.js"></script>
+    <script src="../js/main.js"></script>
+
+    <script src="../js/kora-llm.js"></script>
+    <script>
+
+    </script>
+</body>
+</html>

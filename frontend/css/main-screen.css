@@ -1,218 +1,136 @@
-/* ===================================================================
- * MAIN SCREEN (page-main) — estilos exclusivos de esta pantalla
- * Layout, tamaños, colores y disposición distintos al resto del sitio.
- * ================================================================ */
 
-
-/* -------------------------------------------------------------------
- * Variables locales de esta pantalla
- * ------------------------------------------------------------------- */
 .page-main {
-    --main-orange:           #c93f1d;
-    --main-green:    #365902;
-    --main-vine: #710119;
-    --main-bg:              #faf9f7;
-    --main-card-radius:     4px;
-    --main-gap:             1.6rem;
+    --main-orange:       #c93f1d;
+    --main-green:        #365902;
+    --main-vine:         #710119;
+    --main-bg:           #faf9f7;
+    --main-card-radius:  4px;
+    --main-gap:          1.6rem;
+    --font:              "Newsreader", Serif;
+    --font-2:            "Cormorant Garamond", Serif;
+    --font-3:            "Inter", Sans-serif;
+    --font-4:            "Cormorant SC", Serif;
 }
 
-
-/* -------------------------------------------------------------------
- * PAGE WRAP — fondo blanco limpio
- * ------------------------------------------------------------------- */
 .s-pagewrap--main {
     background: var(--main-bg);
     min-height: 100vh;
 }
 
-
-/* ===================================================================
- * HEADER — main screen
- * Layout:  [ Logo Kora ] .............. [ Perfil redondo | Hamburguesa ]
- * =================================================================== */
-.s-header--main {
+.page-main .s-header--main {
     position: sticky;
     top: 0;
     z-index: 500;
-    background: #d1cac5;
+    background: #2D4200;
     padding: 0;
-}
-
-.s-header__block--main {
+    min-height: 96px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0.75rem 1.5rem;
-    min-height: 64px;
 }
 
-/* Logo izquierda */
-.s-header__logo--main {
-    flex-shrink: 0;
-}
-
-.s-header__logo--main .logo img {
-    display: block;
-    height: 42px;
-    width: auto;
-    max-width: 140px;
-    object-fit: contain;
-}
-
-/* Grupo derecha: perfil + menú */
-.s-header__right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-left: auto;
-}
-
-/* Imagen de perfil redonda */
-.s-header__perfil {
-    display: block;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid #ddd;
-    flex-shrink: 0;
-    transition: border-color 0.2s ease, transform 0.2s ease;
-}
-
-.s-header__perfil:hover {
-    border-color: var(--main-vine);
-    transform: scale(1.05);
-}
-
-.s-header__perfil img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-/* Hamburguesa negra cuadrada */
-.s-header--main .s-header__menu-toggle {
+.page-main .s-header__block--main {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    position: relative;
-    flex-shrink: 0;
-    transform: translateY(-35px);
-}
-
-.s-header--main .s-header__menu-toggle span,
-.s-header__menu-icon {
-    display: block;
-    width: 22px;
-    height: 2px;
-    background: var(--main-vine);
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 1.25rem 1rem;
+    min-height: 96px;
     position: relative;
 }
-
-.s-header__menu-icon::before,
-.s-header__menu-icon::after {
-    content: "";
+.page-main .s-header__perfil {
     position: absolute;
-    left: 0;
-    width: 22px;
-    height: 2px;
-    background: #fff;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    top: calc(45% + 20px);  
+}
+.s-header__logo--main img{
+    width: 60px;
+    height:  60px;
+    object-fit: cover;
+}
+.page-main .s-header__perfil img {
+    width: 80px;
+    height:  80px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
-.s-header__menu-icon::before { top: -7px; }
-.s-header__menu-icon::after  { top:  7px; }
-
-/* Ocultar span de texto del template original en esta pantalla */
-.s-header--main .s-header__menu-toggle > span:not(.s-header__menu-icon) {
-    display: none;
-}
-
-
-/* ===================================================================
- * MEGA MENÚ — barra tipo píldora con iconos
- * =================================================================== */
-.s-megamenu {
-    padding: 2rem 1.5rem 1.5rem;
+.page-main .s-header--main .s-megamenu {
+    position: static;
+    padding: 0;
+    margin: 0;
+    width: auto;
     display: flex;
     justify-content: center;
 }
 
-.s-megamenu__inner {
-    width: 100%;
-    max-width: 560px;
+.page-main .s-header--main .s-megamenu__inner,
+.page-main .s-header--main .s-megamenu__nav {
+    width: auto;
+    max-width: none;
 }
 
-.s-megamenu__nav {
-    width: 100%;
-}
 
-.s-megamenu__list {
+.page-main .s-header--main .s-megamenu__list {
     display: flex;
     align-items: center;
-    justify-content: space-around;
-    list-style: none;
+    justify-content: center;
+    gap: 2.8rem;
     margin: 0;
-    padding: 0.85rem 1.5rem;
-    background: #fff;
-    border: 2.5px solid var(--main-pill-border);
-    border-radius: 999px;          /* píldora */
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    gap: 0.5rem;
+    padding: 1.2rem 3.8rem;
+    list-style: none;
+    background: #60783A;
+    border-radius: 999px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-.s-megamenu__item {
+.page-main .s-header--main .s-megamenu__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin: 0;
     padding: 0;
 }
 
-.s-megamenu__btn {
+.page-main .s-header--main .s-megamenu__link {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 52px;
     height: 52px;
-    border: none;
-    background: transparent;
     border-radius: 50%;
-    cursor: pointer;
     transition: background 0.2s ease, transform 0.15s ease;
-    padding: 0;
 }
 
-.s-megamenu__btn:hover {
-    background: rgba(0,0,0,0.05);
+.page-main .s-header--main .s-megamenu__link:hover {
+    background: rgba(0, 0, 0, 0.06);
     transform: scale(1.08);
 }
 
-.s-megamenu__btn.is-active {
-    background: rgba(0,0,0,0.08);
-    box-shadow: inset 0 0 0 2px var(--main-orange);
-}
-
-.s-megamenu__icon {
+.page-main .s-header--main .s-megamenu__icon {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    height: 100%;
     line-height: 0;
 }
 
-.s-megamenu__icon svg {
+.page-main .s-header--main .s-megamenu__icon img {
     display: block;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    margin: 0;
 }
 
-
-/* ===================================================================
- * ÁREA DE OPCIONES / CARDS
- * =================================================================== */
 .s-main-options {
     padding: 0 1.5rem 3rem;
 }
@@ -225,14 +143,12 @@
     gap: var(--main-gap);
 }
 
-/* Card genérica con borde verde */
 .s-card {
     background: hsla(28, 25%, 86%, 1);
     border-radius: var(--main-card-radius);
     box-sizing: border-box;
 }
 
-/* Cabecera con el título */
 .s-main-options__header {
     padding: 2.5rem 2rem;
     display: flex;
@@ -253,7 +169,6 @@
     line-height: 1.3;
 }
 
-/* Grid de cards de opciones */
 .s-main-options__grid {
     display: flex;
     flex-direction: column;
@@ -280,13 +195,8 @@
     height: 100%;
 }
 
-
-/* ===================================================================
- * FOOTER — main screen
- * Layout:  [ Social ]  [ © Copyright ]  [ Logo derecha ]
- * =================================================================== */
 .s-footer--main {
-    background: hsla(28, 25%, 76%, 1);
+    background: #151312;
     border-top: 1px solid #e8e8e8;
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
@@ -306,7 +216,7 @@
 }
 
 .s-footer--main .s-footer__bottom::before {
-    display: none; /* quitar línea decorativa del template si molesta */
+    display: none;
 }
 
 .s-footer__social-col {
@@ -325,7 +235,6 @@
     align-items: center;
 }
 
-/* Logo del footer a la derecha */
 .s-footer__logo--main {
     margin: 0;
 }
@@ -349,154 +258,6 @@
     fill: var(--main-vine);
 }
 
-
-/* ===================================================================
- * RESPONSIVE
- * =================================================================== */
-@media screen and (max-width: 768px) {
-    .s-header__block--main {
-        padding: 0.6rem 1rem;
-    }
-
-    .s-header__logo--main .logo img {
-        height: 36px;
-    }
-
-    .s-header__perfil {
-        width: 40px;
-        height: 40px;
-    }
-
-    .s-header--main .s-header__menu-toggle {
-        width: 40px;
-        height: 40px;
-    }
-
-    .s-megamenu {
-        padding: 1.5rem 1rem 1rem;
-    }
-
-    .s-megamenu__list {
-        padding: 0.65rem 1rem;
-    }
-
-    .s-megamenu__btn {
-        width: 44px;
-        height: 44px;
-    }
-
-    .s-megamenu__icon svg {
-        width: 24px;
-        height: 24px;
-    }
-
-    .s-main-options {
-        padding: 0 1rem 2rem;
-    }
-
-    .s-main-options__header {
-        padding: 1.75rem 1.25rem;
-        min-height: 90px;
-    }
-
-    .s-card--option {
-        min-height: 110px;
-    }
-
-    .s-footer--main .s-footer__bottom {
-        flex-direction: column;
-        text-align: center;
-        gap: 1.25rem;
-    }
-
-    .s-footer__social-col,
-    .s-footer__logo-col {
-        justify-content: center;
-        width: 100%;
-    }
-
-    .s-footer__copy-col {
-        order: 2;
-    }
-
-    .s-footer__logo-col {
-        order: 3;
-    }
-}
-
-@media screen and (max-width: 480px) {
-    .s-megamenu__list {
-        gap: 0.25rem;
-        padding: 0.5rem 0.75rem;
-    }
-
-    .s-megamenu__btn {
-        width: 40px;
-        height: 40px;
-    }
-}
-/* =====================================================
-   MEGA MENÚ CENTRADO EN EL HEADER
-   ===================================================== */
-
-.s-header--main .s-header__block {
-    position: relative;
-}
-
-.s-header--main .s-megamenu {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
-}
-
-.s-header--main .s-megamenu__inner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.s-header--main .s-megamenu__list {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 32px;                    /* más separación entre iconos */
-    margin: 0;
-    padding: 0.6rem 2.25rem;      /* más padding horizontal → píldora más larga */
-    list-style: none;
-    background: #fff;
-    border: 2.5px solid var(--main-pill-border, #c93f1d); /* por si la variable no está definida */
-    border-radius: 999px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.s-header--main .s-megamenu__item {
-    margin: 0;
-    padding: 0;
-}
-
-.s-header--main .s-megamenu__btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 52px;
-    height: 52px;
-    padding: 0;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-}
-
-.s-header--main .s-megamenu__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* ===================================================================
- * BOTÓN KORA AI (flotante)
- * =================================================================== */
 .kora-ai-button {
     position: fixed;
     bottom: 28px;
@@ -519,9 +280,6 @@
     cursor: pointer;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.kora-ai-button button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -533,6 +291,7 @@
     display: block;
     transform: translateY(18px);
 }
+
 .kora-ai-label {
     font-size: 0.78rem;
     font-weight: 600;
@@ -545,21 +304,6 @@
     pointer-events: none;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-    .kora-ai-button {
-        bottom: 20px;
-        right: 16px;
-    }
-    .kora-ai-button button {
-        width: 58px;
-        height: 58px;
-    }
-}
-
-/* ===================================================================
- * REGISTRO DE ALIMENTO
- * =================================================================== */
 .s-alimento {
     padding: 2.5rem 1.5rem 4rem;
 }
@@ -572,15 +316,14 @@
 .s-alimento__title {
     margin: 0 0 2rem;
     font-family: var(--font-3, "Inter", sans-serif);
-    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-size: clamp(4rem, 4vw, 2rem);
     font-weight: 700;
     letter-spacing: 0.03em;
     text-transform: uppercase;
-    color: var(--main-green);
+    color: var(--main-vine);
     text-align: center;
 }
 
-/* Grid de dos columnas */
 .s-alimento__grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -588,9 +331,8 @@
     align-items: start;
 }
 
-/* Cards */
 .s-alimento__card {
-    background: hsla(28, 25%, 86%, 1);
+    background: #f4f4f4;
     border-radius: var(--main-card-radius);
     padding: 1.75rem;
     box-sizing: border-box;
@@ -607,7 +349,6 @@
     gap: 1.25rem;
 }
 
-/* ---------- Formulario ---------- */
 .s-alimento__form {
     display: flex;
     flex-direction: column;
@@ -622,23 +363,17 @@
     margin-bottom: 0.25rem;
 }
 
-.s-alimento__fecha-row label {
+.s-alimento__fecha-row label,
+.s-alimento__field label {
     font-size: 2rem;
     font-weight: 600;
     color: var(--main-green);
-    
 }
 
 .s-alimento__field {
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
-}
-
-.s-alimento__field label {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--main-green);
 }
 
 .s-alimento__input,
@@ -680,7 +415,6 @@
     cursor: not-allowed;
 }
 
-/* ---------- Preview imagen ---------- */
 .s-alimento__preview {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -708,7 +442,6 @@
     display: block;
 }
 
-/* ---------- Botones ---------- */
 .s-alimento__btn {
     display: inline-flex;
     align-items: center;
@@ -758,7 +491,6 @@
     box-shadow: 0 4px 14px rgba(54, 89, 2, 0.25);
 }
 
-/* Acciones */
 .s-alimento__actions-form {
     display: flex;
     justify-content: flex-end;
@@ -777,8 +509,709 @@
     justify-content: flex-start;
 }
 
-/* ---------- Responsive ---------- */
+.s-alimento__field--row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.s-alimento__field-half {
+    flex: 1 1 140px;
+}
+
+.s-alimento__subtitle {
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.s-alimento__hint {
+    display: block;
+    font-size: 0.85rem;
+    color: #888;
+    margin-top: 0.35rem;
+}
+
+.s-alimento__preview-nutrients {
+    background: #f5f3f0;
+    border-radius: 6px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.s-alimento__nutrients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin: 0.75rem 0;
+}
+
+.s-alimento__nutrients-grid .nutrient {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+}
+
+.s-alimento__nutrients-grid .nutrient strong {
+    font-size: 1.1rem;
+    color: var(--main-green, #365902);
+}
+
+.s-panel__container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.s-panel__header {
+    margin-bottom: 2rem;
+}
+
+.s-panel__title {
+    font-size: 3.5rem;
+    margin: 1rem 0 0.35rem;
+    font-family: var(--font);
+    color: var(--main-vine);
+}
+
+.s-panel__subtitle {
+    color: #5a3e2b;
+    margin: 0;
+}
+
+.s-panel__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.s-panel__card {
+    background: #f4f4f4;
+    border: 5px solid var(--main-green);
+    border-radius: 5px;
+    padding: 2rem;
+}
+
+.s-panel__card h3 {
+    font-size: 3rem;
+    margin: 0 0.5rem 0.5rem;
+    color: #0d0705;
+    font-weight: 500;
+    font-family: var(--font-2);
+}
+
+.s-panel__value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #feb500;
+}
+
+.s-panel__value small {
+    font-size: 2rem;
+    font-weight: 400;
+    color: #888;
+    display: block;
+}
+
+.s-panel__progress {
+    height: 8px;
+    background: #eee;
+    border-radius: 4px;
+    margin-top: 0.75rem;
+    overflow: hidden;
+}
+
+.s-panel__progress-bar {
+    height: 100%;
+    background: var(--main-orange, #c93f1d);
+    transition: width 0.3s ease;
+}
+
+.s-panel__progress-label {
+    font-size: 1.5rem;
+    color: #888;
+}
+
+.s-panel__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.s-panel__btn {
+    display: inline-block;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.s-panel__btn--primary {
+    background: #feb500;
+    color: #fff;
+}
+
+.s-panel__btn--secondary {
+    background: #eee;
+    color: #333;
+}
+
+.s-panel__empty {
+    text-align: center;
+    padding: 2rem;
+    background: #faf9f7;
+    border-radius: 8px;
+}
+
+.s-panel__section h2 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #0d0705;
+}
+
+.s-catalog__search {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.s-catalog__search .s-alimento__input {
+    flex: 1 1 200px;
+}
+
+.s-catalog__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.s-catalog__empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+.s-catalog__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: flex-end;
+}
+
+.s-catalog__filters {
+    flex: 0 0 auto;
+}
+
+.s-catalog__card {
+    background: #fff;
+    border: 1px solid #e5e0db;
+    border-radius: 10px;
+    padding: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.s-catalog__card:hover {
+    border-color: var(--main-orange, #c93f1d);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.s-catalog__card-title {
+    font-size: 1.05rem;
+    margin: 0;
+    color: #222;
+}
+
+.s-catalog__card-macros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.85rem;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.s-catalog__card-macros strong {
+    color: var(--main-green, #365902);
+}
+
+.s-catalog__card-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: auto;
+    padding-top: 0.5rem;
+}
+
+.s-catalog__card-actions .s-alimento__btn {
+    font-size: 0.85rem;
+    padding: 0.45rem 0.85rem;
+}
+
+.s-setup__progress {
+    margin-bottom: 1.5rem;
+}
+
+.s-setup__progress-bar {
+    height: 6px;
+    background: #eee;
+    border-radius: 3px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.s-setup__progress-bar > div {
+    height: 100%;
+    background: #aa112e;
+    transition: width 0.3s ease;
+}
+
+.kora-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.kora-modal.is-open {
+    visibility: visible;
+    opacity: 1;
+}
+
+.kora-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.kora-modal__panel {
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    max-width: 480px;
+    width: calc(100% - 2rem);
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.kora-modal__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #f0eeeb;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #333;
+    z-index: 2;
+}
+
+.kora-modal__close:hover {
+    background: #e0ddd8;
+}
+
+.kora-modal__body {
+    padding: 1.75rem 1.5rem 1.5rem;
+}
+
+.kora-modal__image-wrap {
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f5f3f0;
+    text-align: center;
+}
+
+.kora-modal__image-wrap img {
+    max-width: 100%;
+    max-height: 180px;
+    object-fit: contain;
+}
+
+.kora-modal__title {
+    font-size: 1.35rem;
+    margin: 0 0 0.35rem;
+    padding-right: 2rem;
+}
+
+.kora-modal__portion {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0 0 1rem;
+}
+
+.kora-modal__nutrients {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.kora-modal__nutrient {
+    background: #faf9f7;
+    border-radius: 6px;
+    padding: 0.65rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.kora-modal__nutrient span {
+    font-size: 1rem;
+    color: #feb500;
+}
+
+.kora-modal__nutrient strong {
+    font-size: 1.15rem;
+    color: var(--main-green, #365902);
+}
+
+.kora-modal__nutrient small {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+.kora-modal__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+}
+
+.s-history__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: flex-end;
+}
+
+.s-history__filters .s-alimento__field {
+    flex: 1 1 140px;
+    margin: 0;
+}
+
+.s-history__filter-actions {
+    flex: 0 0 auto;
+}
+
+.s-history__table-wrap {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+}
+
+.s-history__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.s-history__table th,
+.s-history__table td {
+    padding: 0.65rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.s-history__table th {
+    background: #f5f3f0;
+    font-weight: 600;
+    color: #444;
+}
+
+.s-history__table tbody tr:hover {
+    background: #faf9f7;
+}
+
+.s-history__link-detail {
+    background: none;
+    border: none;
+    color: var(--main-orange, #c93f1d);
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.s-history__cards {
+    display: none;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.s-history__card {
+    background: #fff;
+    border: 1px solid #e5e0db;
+    border-radius: 10px;
+    padding: 1rem 1.15rem;
+}
+
+.s-history__card-header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 0.5rem;
+}
+
+.s-history__card-header span {
+    font-size: 1rem;
+    color: #feb500;
+}
+
+.s-history__card-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0.75rem;
+}
+
+.s-history__card-btn {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+}
+.s-summary__period {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.s-summary__period-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.s-summary__period-btn.is-active {
+    background: var(--main-orange, #c93f1d);
+    border-color: var(--main-orange, #c93f1d);
+    color: #fff;
+}
+
+.s-summary__custom-dates {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.s-summary__section {
+    margin: 2rem 0 1.5rem;
+}
+
+.s-summary__section h2 {
+    font-size: 1.2rem;
+    margin: 0 0 0.35rem;
+}
+
+.s-summary__chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    min-height: 160px;
+    padding: 1rem 0.25rem;
+    border-bottom: 1px solid #eee;
+    overflow-x: auto;
+}
+
+.s-summary__bar-col {
+    flex: 1 1 40px;
+    min-width: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 140px;
+}
+
+.s-summary__bar {
+    width: 70%;
+    max-width: 36px;
+    background: var(--main-orange, #c93f1d);
+    border-radius: 4px 4px 0 0;
+    transition: height 0.3s ease;
+}
+
+.s-summary__bar-col.is-empty .s-summary__bar {
+    background: #ddd;
+}
+
+.s-summary__bar-label {
+    font-size: 0.7rem;
+    color: #888;
+    margin-top: 0.35rem;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.s-summary__bar-value {
+    font-size: 0.7rem;
+    color: #555;
+    margin-top: 0.15rem;
+}
+
+.s-summary__bar-col--multi {
+    height: 140px;
+}
+
+.s-summary__bar-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    width: 100%;
+    justify-content: center;
+    height: 100%;
+}
+
+.s-summary__bar-group .s-summary__bar {
+    width: 28%;
+    max-width: 14px;
+}
+
+.s-summary__bar--protein { background: #1976D2; }
+.s-summary__bar--carbs   { background: #4CAF50; }
+.s-summary__bar--fat     { background: #c93f1d; }
+
+.s-summary__legend {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.s-summary__legend-item::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 0.35rem;
+    vertical-align: middle;
+}
+
+.s-summary__legend--protein::before { background: #1976D2; }
+.s-summary__legend--carbs::before   { background: #4CAF50; }
+.s-summary__legend--fat::before     { background: #c93f1d; }
+
+.s-summary__week-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.65rem;
+    margin-top: 0.75rem;
+}
+
+.s-summary__week-day {
+    background: #fff;
+    border: 1px solid #e5e0db;
+    border-radius: 8px;
+    padding: 0.75rem;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.s-summary__week-day strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.s-summary__week-day.has-data {
+    border-color: var(--main-green, #365902);
+    background: #f6faf2;
+}
+
+.s-summary__week-day.no-data {
+    border-style: dashed;
+    color: #999;
+}
+
+.s-summary__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
 @media screen and (max-width: 768px) {
+    .page-main .s-header__block--main {
+        padding: 1rem 0.75rem;
+        min-height: 80px;
+    }
+
+    .page-main .s-header--main .s-megamenu__list {
+        gap: 1.5rem;
+        padding: 0.9rem 2rem;
+    }
+
+    .page-main .s-header--main .s-megamenu__link {
+        width: 44px;
+        height: 44px;
+    }
+
+    .page-main .s-header--main .s-megamenu__icon img {
+        width: 26px;
+        height: 26px;
+    }
+
+    .s-main-options {
+        padding: 0 1rem 2rem;
+    }
+
+    .s-main-options__header {
+        padding: 1.75rem 1.25rem;
+        min-height: 90px;
+    }
+
+    .s-card--option {
+        min-height: 110px;
+    }
+
+    .s-footer--main .s-footer__bottom {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.25rem;
+    }
+
+    .s-footer__social-col,
+    .s-footer__logo-col {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .s-footer__copy-col {
+        order: 2;
+    }
+
+    .s-footer__logo-col {
+        order: 3;
+    }
+
     .s-alimento {
         padding: 1.75rem 1rem 3rem;
     }
@@ -802,5 +1235,40 @@
 
     .s-alimento__footer-actions {
         justify-content: center;
+    }
+
+    .s-history__table-wrap {
+        display: none !important;
+    }
+
+    .s-history__cards {
+        display: flex !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .page-main .s-header--main .s-megamenu__list {
+        gap: 1rem;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .page-main .s-header--main .s-megamenu__link {
+        width: 40px;
+        height: 40px;
+    }
+
+    .page-main .s-header--main .s-megamenu__icon img {
+        width: 24px;
+        height: 24px;
+    }
+
+    .kora-ai-button {
+        bottom: 20px;
+        right: 16px;
+    }
+
+    .kora-ai-button button {
+        width: 58px;
+        height: 58px;
     }
 }

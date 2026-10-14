@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Ajustes de cuenta</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="../css/vendor.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/main-screen.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+</head>
+<body id="top" class="page-main">
+    <div id="page" class="s-pagewrap s-pagewrap--main">
+        <div class="menu-underlay"></div>
+        <header class="s-header s-header--main">
+            <div class="s-header__block s-header__block--main">
+            
+                <section class="s-megamenu">
+                    <div class="s-megamenu__inner">
+                        <nav class="s-megamenu__nav" role="navigation">
+                            <ul class="s-megamenu__list">
+                                <li class="s-megamenu__item">
+                                <a href="app/main_panel.html" class="s-megamenu__link" aria-label="Panel principal">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/H.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/food_catalog.html" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/N.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/food_catalog.html" class="s-megamenu__link" aria-label="Catálogo">
+                                    <span class="s-megamenu__icon">
+                                        <img src="../images/icons/HF.png" alt="Inicio" width="28" height="28">
+                                    </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/C.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="s-megamenu__item">
+                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
+                                        <span class="s-megamenu__icon">
+                                            <img src="../images/icons/U.png" alt="Perfil" width="28" height="28">
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </section>
+                <div class="s-header__right">
+                    <a href="account_settings.html" class="s-header__perfil" title="Perfil">
+                        <img src="../images/avatars/user-01.jpg" alt="Perfil" onerror="this.src='../images/k.svg'">
+                    </a>
+                </div>
+            </div>
+        </header>
+        <article class="s-content s-content--main">
+            <section class="s-alimento">
+                <div class="s-alimento__container" style="max-width:640px;margin:0 auto;">
+                    <h1 class="s-alimento__title">Ajustes de cuenta y preferencias</h1>
+                    <p class="s-alimento__subtitle">Opciones personales de la cuenta. Solo se muestran campos soportados por el backend actual.</p>
+
+                    <div class="s-alimento__card" style="padding:1.5rem;margin-bottom:1.5rem;">
+                        <h3>Datos de la cuenta</h3>
+                        <p><strong>Nombre:</strong> <span id="account-name">—</span></p>
+                        <p><strong>Correo:</strong> <span id="account-email">—</span></p>
+                        <p class="s-alimento__hint">Campos del modelo User (Identity): first_name, last_name, email, username.</p>
+                    </div>
+
+                    <div class="s-alimento__card" style="padding:1.5rem;margin-bottom:1.5rem;">
+                        <h3>Perfil nutricional</h3>
+                        <p>Para modificar edad, sexo, peso, altura, actividad y objetivo, ve a <a href="nutritional_profile.html">Mi perfil nutricional</a>.</p>
+                    </div>
+
+                    <div class="s-alimento__footer-actions">
+                        <a href="../login.html" class="s-alimento__btn s-alimento__btn--registrar">Cerrar sesión</a>
+                        <a href="main_panel.html" class="s-alimento__btn s-alimento__btn--secondary">Volver al panel</a>
+                    </div>
+                </div>
+            </section>
+        </article>
+
+        <footer class="s-footer s-footer--main">
+            <div class="row s-footer__bottom">
+                <div class="column xl-4 lg-12">
+                    <p class="ss-copyright"><span>© Copyright KORA 2026</span></p>
+                </div>
+            </div>
+            <div class="kora-ai-button">
+                <button type="button" id="kora-ai-toggle" title="Habla con Kora AI">
+                    <img src="../images/cora.svg" alt="Kora">
+                </button>
+                <span class="kora-ai-label">Habla con Kora AI</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../js/plugins.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/kora-llm.js"></script>
+</body>
+</html>

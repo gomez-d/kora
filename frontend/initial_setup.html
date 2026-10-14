@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Configuración inicial del perfil</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="css/vendor.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/setup.css">
+    <link rel="stylesheet" href="css/main-screen.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/k.svg">
+</head>
+<body id="top" class="page-main">
+    <div id="page" class="s-pagewrap s-pagewrap--main">
+            <section
+                class="s-pageheader pageheader"
+                style="background-image: url('images/red.jpg');"
+            >
+                <div class="row">
+                    <div class="column xl-12 s-pageheader__content">
+                        <h1 class="page-title">KORA</h1>
+                    </div>
+                </div>
+            </section>
+
+
+        <article class="s-content s-content--main">
+            <section class="s-alimento">
+                <div class="s-alimento__container" style="max-width:640px;margin:0 auto;">
+                    <h1 class="s-alimento__title">Configuración Perfil Nutricional</h1>
+
+                    <div class="s-setup__progress">
+                        <span id="step-indicator">Paso 1 de 3</span>
+                        <div class="s-setup__progress-bar"><div id="progress-fill" style="width:33%"></div></div>
+                    </div>
+
+                    <form id="form-setup" class="s-alimento__form">
+                    
+                        <div class="s-setup__step" id="step-1">
+                            <h3 class="titulo-paso">Datos personales</h3>
+                            <div class="s-alimento__field">
+                                <label for="setup-age">Edad</label>
+                                <input type="number" id="setup-age" name="age" class="s-alimento__input" min="1" max="120" required>
+                            </div>
+                            <div class="s-alimento__field">
+                                <label for="setup-sex">Sexo</label>
+                                <select id="setup-sex" name="sex" class="s-alimento__input s-alimento__select" required>
+                                    <option value="">Seleccionar…</option>
+                                    <option value="MALE">Hombre</option>
+                                    <option value="FEMALE">Mujer</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    
+                        <div class="s-setup__step" id="step-2" style="display:none;">
+                            <h3 class="titulo-paso">Características físicas</h3>
+                            <div class="s-alimento__field">
+                                <label for="setup-weight">Peso (kg)</label>
+                                <input type="number" id="setup-weight" name="weight" class="s-alimento__input" min="0.1" step="0.1" required>
+                            </div>
+                            <div class="s-alimento__field">
+                                <label for="setup-height">Altura (cm)</label>
+                                <input type="number" id="setup-height" name="height" class="s-alimento__input" min="0.1" step="0.1" required>
+                            </div>
+                        </div>
+
+                    
+                        <div class="s-setup__step" id="step-3" style="display:none;">
+                            <h3 class="titulo-paso">Preferencias nutricionales</h3>
+                            <div class="s-alimento__field">
+                                <label for="setup-activity">Nivel de actividad física</label>
+                                <select id="setup-activity" name="activity_level" class="s-alimento__input s-alimento__select" required>
+                                    <option value="">Seleccionar…</option>
+                                    <option value="NONE">Nula</option>
+                                    <option value="LOW">Poco</option>
+                                    <option value="MODERATE">Moderada</option>
+                                    <option value="HIGH">Alta</option>
+                                    <option value="VERY_HIGH">Muy alta</option>
+                                </select>
+                            </div>
+                            <div class="s-alimento__field">
+                                <label for="setup-goal">Objetivo principal</label>
+                                <select id="setup-goal" name="nutrition_goal" class="s-alimento__input s-alimento__select" required>
+                                    <option value="">Seleccionar…</option>
+                                    <option value="WEIGHT_LOSS">Pérdida de peso</option>
+                                    <option value="WEIGHT_MAINTENANCE">Mantenimiento de peso</option>
+                                    <option value="WEIGHT_GAIN">Aumento de peso</option>
+                                    <option value="HEALTHY_EATING">Alimentación saludable</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="s-alimento__footer-actions">
+                            <button type="button" id="btn-prev" class="s-alimento__btn s-alimento__btn--secondary" style="display:none;">Regresar</button>
+                            <button type="button" id="btn-next" class="s-alimento__btn s-alimento__btn--primary">Continuar</button>
+                            <button type="submit" id="btn-finish" class="s-alimento__btn s-alimento__btn--registrar" style="display:none;">Finalizar y guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </article>
+
+        <footer class="s-footer--main">
+            <div class="row s-footer__bottom">
+                <div class="column xl-4 lg-12">
+                    <p class="ss-copyright"><span>© Copyright KORA 2026</span></p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/plugins.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        (function () {
+            let current = 1;
+            const total = 3;
+            const steps = [1,2,3].map(n => document.getElementById('step-' + n));
+            const indicator = document.getElementById('step-indicator');
+            const fill = document.getElementById('progress-fill');
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnFinish = document.getElementById('btn-finish');
+
+            function showStep(n) {
+                steps.forEach((s,i) => s.style.display = (i+1 === n) ? 'block' : 'none');
+                indicator.textContent = 'Paso ' + n + ' de ' + total;
+                fill.style.width = (n / total * 100) + '%';
+                btnPrev.style.display = n > 1 ? 'inline-block' : 'none';
+                btnNext.style.display = n < total ? 'inline-block' : 'none';
+                btnFinish.style.display = n === total ? 'inline-block' : 'none';
+            }
+
+            btnNext.addEventListener('click', function () {
+                if (current < total) { current++; showStep(current); }
+            });
+            btnPrev.addEventListener('click', function () {
+                if (current > 1) { current--; showStep(current); }
+            });
+
+            document.getElementById('form-setup').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                var user = (window.KoraApi && KoraApi.getUser()) || {};
+                var userId = user.user_id || user.id || null;
+                var payload = {
+                    user_id: userId,
+                    age: parseInt(document.getElementById('setup-age').value, 10),
+                    sex: document.getElementById('setup-sex').value,
+                    weight: document.getElementById('setup-weight').value,
+                    height: document.getElementById('setup-height').value,
+                    activity_level: document.getElementById('setup-activity').value,
+                    nutrition_goal: document.getElementById('setup-goal').value
+                };
+                try {
+                    if (window.KoraApi && userId) {
+                        await KoraApi.createNutritionalProfile(payload);
+                    }
+                    window.location.href = 'app/main_panel.html';
+                } catch (err) {
+                    alert(err.message || 'No se pudo guardar el perfil.');
+                }
+            });
+
+            showStep(1);
+        })();
+    </script>
+
+    <script src="js/kora-config.js"></script>
+    <script src="js/kora-api.js"></script>
+    <script src="js/kora-auth.js"></script>
+
+</body>
+</html>

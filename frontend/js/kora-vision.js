@@ -1,24 +1,13 @@
-/**
- * kora-vision.js
- * Conecta el frontend con el endpoint de visión del microservicio AI:
- *   POST /vision/analyze  (multipart/form-data, campo "image")
- *
- * Respuesta esperada:
- *   { success: true, detections: [ { food: string, confidence: number }, ... ] }
- *   o { success: false, detections: [], error: string }
- */
 
 (function () {
   "use strict";
 
-  // ─────────────────────────────────────────────
-  // Configuración – cambia la URL según tu entorno
-  // ─────────────────────────────────────────────
-  const AI_BASE_URL = window.KORA_AI_BASE_URL || "http://localhost:8000";
 
-  // ─────────────────────────────────────────────
-  // Elementos del DOM
-  // ─────────────────────────────────────────────
+  const AI_BASE_URL =
+    (window.KoraConfig && window.KoraConfig.AI_BASE) ||
+    window.KORA_AI_BASE_URL ||
+    "http://localhost:8000";
+
   const fileInput = document.getElementById("alimento-file");
   const previewBox = document.getElementById("alimento-preview");
   const previewImg = document.getElementById("alimento-preview-img");
@@ -26,14 +15,12 @@
     ? previewBox.querySelector(".s-alimento__preview-placeholder")
     : null;
   const btnObtener = document.getElementById("btn-obtener-ingredientes");
-  const textareaIngredientes = document.getElementById("alimento-ingredientes");
-  const btnModificar = document.getElementById("btn-modificar-ingredientes");
+  const textareaIngredientes = document.getElementById("alimento-detecciones");
+  const btnModificar = document.getElementById("btn-usar-deteccion");
+  const inputNombre = document.getElementById("alimento-nombre");
 
   let selectedFile = null;
 
-  // ─────────────────────────────────────────────
-  // Preview de la imagen seleccionada
-  // ─────────────────────────────────────────────
   if (fileInput) {
     fileInput.addEventListener("change", function (e) {
       const file = e.target.files && e.target.files[0];
@@ -61,9 +48,6 @@
     });
   }
 
-  // ─────────────────────────────────────────────
-  // Botón "Obtener ingredientes"
-  // ─────────────────────────────────────────────
   if (btnObtener) {
     btnObtener.addEventListener("click", async function () {
       if (!selectedFile) {
@@ -77,10 +61,10 @@
         const formData = new FormData();
         formData.append("image", selectedFile);
 
-        const response = await fetch(`${AI_BASE_URL}/vision/analyze`, {
+        const response = await fetch("/api/ai/vision/analyze", {
           method: "POST",
           body: formData,
-          // No poner Content-Type: el navegador lo establece con el boundary
+      
         });
 
         if (!response.ok) {
@@ -107,7 +91,6 @@
           return;
         }
 
-        // Ordenar por confianza descendente y formatear
         const sorted = detections
           .slice()
           .sort((a, b) => (b.confidence || 0) - (a.confidence || 0));
@@ -131,28 +114,38 @@
       }
     });
   }
-
-  // ─────────────────────────────────────────────
-  // Botón "Modificar" – habilita edición manual
-  // ─────────────────────────────────────────────
-  if (btnModificar && textareaIngredientes) {
+  if (btnModificar && textareaIngredientes && inputNombre) {
     btnModificar.addEventListener("click", function () {
-      textareaIngredientes.disabled = false;
-      textareaIngredientes.focus();
+        const seleccion = window.getSelection().toString().trim();
+
+        if (!seleccion) {
+            alert("Selecciona con el cursor el alimento que deseas utilizar.");
+            return;
+        }
+
+        const alimento = seleccion
+            .replace(/^•\s*/, "")
+            .replace(/\s*\(\d+(?:\.\d+)?%\)\s*$/, "")
+            .trim();
+
+        if (!alimento) {
+            alert("Selecciona un alimento válido.");
+            return;
+        }
+
+        inputNombre.value = alimento;
+        inputNombre.dispatchEvent(new Event("input", { bubbles: true }));
     });
-  }
+}
 
-  // ─────────────────────────────────────────────
-  // Helpers
-  // ─────────────────────────────────────────────
   function setLoading(isLoading) {
-    if (!btnObtener) return;
-    btnObtener.disabled = isLoading;
-    btnObtener.textContent = isLoading
-      ? "Analizando…"
-      : "Obtener ingredientes";
-  }
+      if (!btnObtener) return;
 
+      btnObtener.disabled = isLoading;
+      btnObtener.textContent = isLoading
+          ? "Analizando..."
+          : "Analizar imagen";
+  }
   function capitalize(str) {
     if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1);

@@ -1,27 +1,13 @@
-/**
- * kora-llm.js
- * Conecta el frontend con el endpoint LLM del microservicio AI:
- *   POST /ai/process
- *   Body JSON: { "type": "llm", "prompt": "..." }
- *
- * Respuesta esperada:
- *   { success: true, type: "llm", response: string }
- *   o { success: false, type: "llm", error: string }
- *
- * UI: panel de chat flotante controlado por #kora-ai-toggle
- */
+
 
 (function () {
   "use strict";
 
-  // ─────────────────────────────────────────────
-  // Configuración – cambia la URL según tu entorno
-  // ─────────────────────────────────────────────
-  const AI_BASE_URL = window.KORA_AI_BASE_URL || "http://localhost:8000";
+  const AI_BASE_URL =
+    (window.KoraConfig && window.KoraConfig.AI_BASE) ||
+    window.KORA_AI_BASE_URL ||
+    "http://localhost:8000";
 
-  // ─────────────────────────────────────────────
-  // Crear el panel de chat si no existe
-  // ─────────────────────────────────────────────
   function ensureChatPanel() {
     if (document.getElementById("kora-chat-panel")) return;
 
@@ -55,7 +41,6 @@
     `;
     document.body.appendChild(panel);
 
-    // Estilos mínimos inyectados (puedes moverlos a CSS)
     if (!document.getElementById("kora-chat-styles")) {
       const style = document.createElement("style");
       style.id = "kora-chat-styles";
@@ -190,9 +175,6 @@
     }
   }
 
-  // ─────────────────────────────────────────────
-  // Inicialización
-  // ─────────────────────────────────────────────
   ensureChatPanel();
 
   const toggleBtn = document.getElementById("kora-ai-toggle");
@@ -232,9 +214,6 @@
     closeBtn.addEventListener("click", closePanel);
   }
 
-  // ─────────────────────────────────────────────
-  // Envío de mensajes al LLM
-  // ─────────────────────────────────────────────
   if (form) {
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
@@ -248,7 +227,7 @@
       const loadingEl = appendMessage("Pensando…", "loading");
 
       try {
-        const response = await fetch(`${AI_BASE_URL}/ai/process`, {
+        const response = await fetch("/ai/process", { 
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -268,7 +247,6 @@
 
         const data = await response.json();
 
-        // Quitar el mensaje de "Pensando…"
         if (loadingEl && loadingEl.parentNode) {
           loadingEl.parentNode.removeChild(loadingEl);
         }
@@ -291,9 +269,6 @@
     });
   }
 
-  // ─────────────────────────────────────────────
-  // Helpers de UI
-  // ─────────────────────────────────────────────
   function appendMessage(text, type) {
     if (!messagesBox) return null;
     const div = document.createElement("div");

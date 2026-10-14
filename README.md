@@ -1,9 +1,7 @@
-<a id="readme-top"></a>
+ <a id="readme-top"></a>
 
 <!-- ===================================================== -->
-
 <!--                         HEADER                        -->
-
 <!-- ===================================================== -->
 
 <div align="center">
@@ -13,291 +11,290 @@
   <h1>🥗 Kora</h1>
 
   <p>
-    <strong>Plataforma de gestión y seguimiento nutricional</strong>
+    <strong>Nutrition Management and Tracking Platform</strong>
   </p>
 
   <p>
-    proyecto orientado a la gestión y consulta de información relacionada con alimentos y nutrición.<br>
-    El sistema busca facilitar a los usuarios el acceso a información nutricional y proporcionar funcionalidades para la gestión del catálogo de alimentos.
+    A project focused on managing and accessing food and nutrition-related information.<br>
+    The system aims to provide users with easy access to nutritional information and tools for managing the food catalog.
   </p>
 
   <p>
-    🚧 <strong>Proyecto en desarrollo</strong> 🚧
+    🚧 <strong>Project in Development</strong> 🚧
   </p>
 
 </div>
 
 <br>
+
 <!-- ===================================================== -->
-
 <!--                         BADGES                        -->
-
 <!-- ===================================================== -->
 
 <div align="center">
 
-![Status](https://img.shields.io/badge/Estado-En%20desarrollo-orange?style=for-the-badge)
-![Academic](https://img.shields.io/badge/Proyecto-Académico-blue?style=for-the-badge)
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge\&logo=github)
+![Status](https://img.shields.io/badge/Status-In%20Development-orange?style=for-the-badge)
+![Academic](https://img.shields.io/badge/Project-Academic-blue?style=for-the-badge)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github)
 
 </div>
 
 <br>
 
-
 ---
 
-## 📑 Contenido
+## 📑 Table of Contents
 
 <details>
-  <summary>Ver contenido</summary>
+  <summary>View contents</summary>
 
-1. [🥗 Sobre Kora](#-sobre-kora)
-2. [🎯 Objetivo](#-objetivo)
-3. [✨ Funcionalidades](#-funcionalidades)
-4. [🏗️ Arquitectura](#️-arquitectura)
-5. [🛠️ Tecnologías](#️-tecnologías)
-6. [📁 Estructura del proyecto](#-estructura-del-proyecto)
-7. [🚀 Instalación](#-instalación)
-8. [👥 Equipo](#-equipo)
-9. [📊 Estado del proyecto](#-estado-del-proyecto)
+1. [🥗 About Kora](#-about-kora)
+2. [🎯 Objective](#-objective)
+3. [✨ Features](#-features)
+4. [🏗️ Architecture](#️-architecture)
+5. [🛠️ Technologies](#️-technologies)
+6. [📁 Project Structure](#-project-structure)
+7. [🚀 Installation](#-installation)
+8. [👥 Team](#-team)
+9. [📊 Project Status](#-project-status)
 10. [🗺️ Roadmap](#️-roadmap)
-11. [📚 Documentación](#-documentación)
+11. [📚 Documentation](#-documentation)
+12. [🤝 Workflow](#-workflow)
+13. [📌 Notes](#-notes)
+14. [🐳 Containerization](#-containerization-hu-023)
 
 </details>
 
 ---
 
+## 🥗 About Kora
 
-## 🥗 Sobre Kora
+**Kora** is a platform designed to manage and track information related to food and nutrition.
 
-**Kora** es una plataforma orientada a la gestión y seguimiento de información relacionada con la alimentación y la nutrición.
+The project integrates different software components to provide users with tools for exploring food information, recording meals, and tracking their eating habits.
 
-El proyecto integra diferentes componentes de software para construir una solución que permita al usuario consultar información de alimentos, registrar sus comidas y llevar un seguimiento de su alimentación.
+Additionally, the platform is designed to integrate **artificial intelligence services** to provide intelligent analysis tools.
 
-Además, se contempla la integración de **servicios de inteligencia artificial** para incorporar herramientas de análisis dentro de la plataforma.
-
-> 💡 **Kora** combina desarrollo web, bases de datos, APIs, microservicios e inteligencia artificial en un mismo proyecto.
-
----
+> 💡 **Kora** combines web development, databases, APIs, microservices, and artificial intelligence in a single project.
 
 ---
 
-## 🎯 Objetivo
+## 🎯 Objective
 
-Desarrollar una plataforma que centralice diferentes herramientas relacionadas con la alimentación y permita al usuario llevar un registro organizado de sus hábitos alimenticios.
+To develop a platform that centralizes tools related to food and nutrition, allowing users to maintain an organized record of their eating habits.
 
-El proyecto busca integrar:
+The project aims to integrate:
 
-* 🥗 Información nutricional de alimentos.
-* 🍽️ Registro de comidas.
-* 📋 Gestión de dietas.
-* 🎯 Objetivos nutricionales.
-* 📊 Seguimiento de alimentación.
-* 🤖 Análisis mediante inteligencia artificial.
-* 🌐 Acceso mediante una aplicación web.
-
----
-
-## ✨ Funcionalidades
-
-> Algunas funcionalidades se encuentran todavía en etapa de diseño o desarrollo.
-
-### 🥗 Información de alimentos
-
-* Consulta de alimentos.
-* Información nutricional.
-* Organización y gestión del catálogo.
-
-### 🍽️ Registro de comidas
-
-* Registro de alimentos consumidos.
-* Organización de comidas.
-* Consulta del historial.
-
-### 📋 Dietas
-
-* Creación y gestión de dietas.
-* Organización de alimentos dentro de planes.
-* Seguimiento de objetivos.
-
-### 🤖 Inteligencia artificial
-
-* Análisis de imágenes de alimentos.
-* Identificación de alimentos mediante modelos de IA.
-* Integración de servicios inteligentes dentro de la plataforma.
-
-### 📊 Seguimiento
-
-* Visualización de información nutricional.
-* Historial de comidas.
-* Seguimiento de objetivos.
+- 🥗 Nutritional information about food.
+- 🍽️ Meal logging.
+- 📋 Diet management.
+- 🎯 Nutritional goals.
+- 📊 Dietary tracking.
+- 🤖 Artificial intelligence-based analysis.
+- 🌐 Access through a web application.
 
 ---
 
+## ✨ Features
 
-## 🏗️ Arquitectura
+> Some features are still in the design or development stages.
 
-Kora está organizado mediante diferentes componentes que permiten separar las responsabilidades del sistema.
+### 🥗 Food Information
 
+- Browse food items.
+- Access nutritional information.
+- Organize and manage the food catalog.
+
+### 🍽️ Meal Logging
+
+- Record consumed food items.
+- Organize meals.
+- View meal history.
+
+### 📋 Diets
+
+- Create and manage diets.
+- Organize food items within plans.
+- Track goals.
+
+### 🤖 Artificial Intelligence
+
+- Analyze food images.
+- Identify food items using AI models.
+- Integrate intelligent services into the platform.
+
+### 📊 Tracking
+
+- Visualize nutritional information.
+- Review meal history.
+- Track nutritional goals.
 
 ---
 
-## 🛠️ Tecnologías
+## 🏗️ Architecture
+
+Kora is organized into different components to separate system responsibilities and support modular development.
+
+---
+
+## 🛠️ Technologies
 
 ### Backend
 
-![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge\&logo=django\&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge\&logo=python\&logoColor=white)
+![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
-### Bases de datos
+### Databases
 
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge\&logo=postgresql\&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge\&logo=mongodb\&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 
-### Desarrollo
+### Development
 
-![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge\&logo=git\&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge\&logo=github\&logoColor=white)
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
 
-### Inteligencia artificial
+### Artificial Intelligence
 
-![Python](https://img.shields.io/badge/AI-Python-3776AB?style=for-the-badge\&logo=python\&logoColor=white)
+![Python](https://img.shields.io/badge/AI-Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 
-> Las tecnologías pueden actualizarse conforme se definan e implementen los diferentes componentes del sistema.
+> Technologies may be updated as the different system components are defined and implemented.
 
 ---
 
-
-## 📁 Estructura del proyecto
+## 📁 Project Structure
 
 ```text
 Kora/
 │
 ├── backend/
-│   └── Lógica y API principal
+│   └── Main logic and API
 │
 ├── frontend/
-│   └── Aplicación web
+│   └── Web application
 │
 ├── services/
-│   └── Servicios y microservicios
+│   └── Services and microservices
 │
 ├── database/
-│   └── Recursos generales de base de datos
+│   └── General database resources
 │
 ├── postgres/
-│   └── Configuración de PostgreSQL
+│   └── PostgreSQL configuration
 │
 ├── mongodb/
-│   └── Configuración de MongoDB
+│   └── MongoDB configuration
 │
 ├── docs/
 │   ├── images/
-│   └── Documentación del proyecto
+│   └── Project documentation
 │
 └── README.md
 ```
 
 ---
 
-## 🚀 Instalación
+## 🚀 Installation
 
-### 📋 Requisitos
+### 📋 Requirements
 
-Antes de comenzar, asegúrate de contar con:
+Before getting started, make sure you have the following installed:
 
-* 🐍 Python
-* 🐘 PostgreSQL
-* 🍃 MongoDB
-* 🐙 Git
-* 💻 Un editor de código
+- 🐍 Python
+- 🐘 PostgreSQL
+- 🍃 MongoDB
+- 🐙 Git
+- 💻 A code editor
 
-### 📥 Clonar el repositorio
+### 📥 Clone the Repository
 
 ```bash
-git clone https://github.com/TU-USUARIO/Kora.git
+git clone https://github.com/YOUR-USERNAME/Kora.git
 ```
 
-### 📂 Entrar al proyecto
+### 📂 Navigate to the Project
 
 ```bash
 cd Kora
 ```
 
-### ⚙️ Configuración
+### ⚙️ Configuration
 
-La configuración específica de cada componente se encuentra documentada dentro de sus respectivos directorios.
+The specific configuration instructions for each component are documented in their respective directories.
 
-> ⚠️ **Nota:** Los pasos de instalación se actualizarán conforme se complete la configuración de los diferentes módulos del proyecto.
+> ⚠️ **Note:** Installation instructions will be updated as the configuration of the different project modules is completed.
 
 ---
 
-## 👥 Equipo
+## 👥 Team
 
-Kora es desarrollado de manera colaborativa como proyecto académico.
+Kora is collaboratively developed as an academic project.
 
 <div align="center">
 
-|        👤 Integrante       |                                 💻 GitHub                               |  🧩 Área  |
-| :------------------------: | :----------------------------------------------:                         | :--------: |
-|  **Alondra López**         |      [@Alondralopez](https://github.com/Alondralopez)                    | Desarrollo |
-|  **Daniel Gomez**          |      [@gomez-d](https://github.com/gomez-d)                              | Desarrollo |
-|  **Maritza Santibáñez**    |      [@Santibanez-22420423](https://github.com/Santibanez-22420423)      | Desarrollo |
+| 👤 Team Member | 💻 GitHub | 🧩 Area |
+| :---: | :---: | :---: |
+| **Alondra López** | [@Alondralopez](https://github.com/Alondralopez) | Development |
+| **Daniel Gomez** | [@gomez-d](https://github.com/gomez-d) | Development |
+| **Maritza Santibáñez** | [@Santibanez-22420423](https://github.com/Santibanez-22420423) | Development |
 
 </div>
 
 ---
 
-## 📊 Estado del proyecto
+## 📊 Project Status
 
-🚧 **En desarrollo**
+🚧 **In Development**
 
-Actualmente Kora se encuentra en una etapa inicial de desarrollo.
+Kora is currently in the initial stages of development.
 
-### ✅ Actualmente
+### ✅ Current Progress
 
-* [x] Definición inicial del proyecto.
-* [x] Definición de la arquitectura general.
-* [x] Organización del repositorio.
-* [ ] Diseño de interfaces.
-* [ ] Implementación del backend.
-* [ ] Implementación de bases de datos.
-* [ ] Desarrollo de servicios.
-* [ ] Integración de inteligencia artificial.
-* [ ] Desarrollo de aplicación web.
-* [ ] Desarrollo de aplicación móvil.
-* [ ] Pruebas de integración.
-* [ ] Despliegue.
+- [x] Initial project definition.
+- [x] General architecture definition.
+- [x] Repository organization.
+- [ ] Interface design.
+- [ ] Backend implementation.
+- [ ] Database implementation.
+- [ ] Service development.
+- [ ] Artificial intelligence integration.
+- [ ] Web application development.
+- [ ] Mobile application development.
+- [ ] Integration testing.
+- [ ] Deployment.
 
 ---
+
 ## 🗺️ Roadmap
 
+The roadmap will be updated as the project progresses and new features are implemented.
 
-## 📚 Documentación
+---
 
-La documentación técnica y académica del proyecto se encuentra dentro de:
+## 📚 Documentation
+
+The project's technical and academic documentation is stored in the following directory:
 
 ```text
 docs/
 ```
 
-Aquí se almacenarán materiales relacionados con:
+This directory will contain materials related to:
 
-* 📐 Arquitectura.
-* 🎨 Diseño.
-* 🗄️ Bases de datos.
-* 🔗 APIs.
-* 🤖 Inteligencia artificial.
-* 📋 Requerimientos.
-* 🧪 Pruebas.
-* 📖 Documentación técnica.
+- 📐 Architecture.
+- 🎨 Design.
+- 🗄️ Databases.
+- 🔗 APIs.
+- 🤖 Artificial intelligence.
+- 📋 Requirements.
+- 🧪 Testing.
+- 📖 Technical documentation.
 
 ---
 
-## 🤝 Flujo de trabajo
+## 🤝 Workflow
 
-Para mantener organizado el desarrollo se utilizarán ramas independientes para las diferentes funcionalidades y correcciones.
+To keep development organized, separate branches will be used for individual features and bug fixes.
 
 ```text
 main
@@ -312,13 +309,13 @@ main
  └── docs/
 ```
 
-Los cambios serán integrados a la rama principal después de su revisión correspondiente.
+Changes will be merged into the main branch after the corresponding review.
 
 ---
 
-## 📌 Notas
+## 📌 Notes
 
-Kora es un proyecto académico en desarrollo. Las funcionalidades, tecnologías y arquitectura pueden cambiar conforme avance la implementación y se realicen pruebas sobre el sistema.
+Kora is an academic project currently under development. Its features, technologies, and architecture may change as implementation progresses and the system undergoes testing.
 
 ---
 
@@ -326,16 +323,105 @@ Kora es un proyecto académico en desarrollo. Las funcionalidades, tecnologías 
 
 ### 🥗 Kora
 
-**Tecnología para una alimentación más organizada.**
+**Technology for a more organized approach to nutrition.**
 
-🚧 *Proyecto en desarrollo* 🚧
-
-<br>
-
-⭐ Si este proyecto te resulta interesante, ¡dale una estrella al repositorio!
+🚧 **Project in Development** 🚧
 
 <br>
 
-<a href="#readme-top">⬆️ Volver al inicio</a>
+⭐ If you find this project interesting, please give the repository a star!
+
+<br>
+
+<a href="#readme-top">⬆️ Back to Top</a>
 
 </div>
+
+---
+
+## 🐳 Containerization (HU-023)
+
+Kora V1 can be run in a reproducible environment using Docker Compose.
+
+### Requirements
+
+- Docker Engine
+- Docker Compose v2
+
+### Configuration
+
+```bash
+cp .env.example .env
+
+# Optional: Edit .env and configure GROQ_API_KEY or other AI API keys.
+```
+
+### Starting the Environment
+
+From the repository root directory, run:
+
+```bash
+docker compose up --build -d
+```
+
+On the first run, Docker builds the images and creates the PostgreSQL databases (`kora_identity` and `kora_business`) and the MongoDB database.
+
+### Services and Ports
+
+| Service | URL / Host Port |
+|---|---|
+| API Gateway | [http://localhost:8000](http://localhost:8000) |
+| Identity | [http://localhost:8001](http://localhost:8001) |
+| Business | [http://localhost:8002](http://localhost:8002) |
+| AI | [http://localhost:8003](http://localhost:8003) |
+| Unstructured Data | [http://localhost:8004](http://localhost:8004) |
+| PostgreSQL | `localhost:5432` (user/password: `kora` / `kora`) |
+| MongoDB | `localhost:27017` |
+
+Within the Docker Compose network, microservices can communicate using their service names, such as `svc-identity`, `postgres`, and `mongo`.
+
+### Quick Verification
+
+```bash
+# Gateway (adjust the health endpoint if your API uses a different route).
+curl -s http://localhost:8000/ || true
+
+# Identity health check (depending on the current implementation).
+curl -s http://localhost:8001/api/users/health/ || curl -s http://localhost:8001/
+
+# Business health check.
+curl -s http://localhost:8002/api/nutrition/health/ || curl -s http://localhost:8002/
+
+# AI (FastAPI documentation).
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8003/docs
+```
+
+### Stopping the Environment
+
+```bash
+docker compose down
+```
+
+To also remove the data volumes, run:
+
+```bash
+docker compose down -v
+```
+
+> ⚠️ **Warning:** Removing volumes deletes the persisted data stored in those volumes.
+
+### Dockerfiles
+
+Each microservice includes its own `Dockerfile`:
+
+- `api-gateway/Dockerfile`
+- `svc-identity/Dockerfile`
+- `svc-business/Dockerfile`
+- `svc-ai/Dockerfile`
+- `svc-unstructured-data/Dockerfile`
+
+PostgreSQL is initialized using `docker/postgres/init.sql`, which creates the `kora_identity` and `kora_business` databases.
+
+### Frontend
+
+The static frontend in `frontend/` is not included in the V1 `docker-compose.yml`. It can be served using any local static web server or integrated with Nginx in a future version.

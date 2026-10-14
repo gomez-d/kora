@@ -1,15 +1,9 @@
-/* ===================================================================
- * Maillard 1.0.0 - Main JS
- *
- * ------------------------------------------------------------------- */
 
 (function(html) {
 
     'use strict';
 
 
-   /* preloader
-    * -------------------------------------------------- */
     const ssPreloader = function() {
 
         const siteBody = document.querySelector('body');
@@ -31,11 +25,9 @@
             });
         });
 
-    }; // end ssPreloader
+    }; 
 
 
-   /* offcanvas nav menu
-    * ------------------------------------------------------ */
     const ssOffCanvas = function() {
 
         const menuToggle  = document.querySelector('.s-header__menu-toggle');
@@ -66,11 +58,9 @@
             }
         });
 
-    }; // end ssOffcanvas   
+    }; 
 
 
-   /* glightbox
-    * ------------------------------------------------------ */ 
     const ssGLightbox = function() {
 
         const lightbox = GLightbox({
@@ -86,11 +76,9 @@
             }
         });        
 
-    } // end ssGLightbox
+    } 
 
 
-   /* swiper
-    * ------------------------------------------------------ */ 
     const ssSwiper = function() {
         
         const specialtiesSlider = function() {
@@ -104,7 +92,7 @@
 
                 slidesPerView: 1,
                 pagination: {
-                    // el: '.swiper-pagination',
+                
                     clickable: true,
                     navigation: {
                         nextEl: '.menublock-btn-next',
@@ -112,22 +100,22 @@
                     }
                 },
                 breakpoints: {
-                    // when window width is > 400px
+                
                     401: {
                         slidesPerView: 1,
                         spaceBetween: 20
                     },
-                    // when window width is > 680px
+                
                     681: {
                         slidesPerView: 2,
                         spaceBetween: 44
                     },
-                    // when window width is > 1100px
+
                     1101: {
                         slidesPerView: 3,
                         spaceBetween: 50
                     },
-                    // when window width is > 1400px
+
                     1401: {
                         slidesPerView: 3,
                         spaceBetween: 60
@@ -137,23 +125,23 @@
 
             prevButton.addEventListener('click', function() {
                 if (slider.activeIndex === 0) {                    
-                  // At the beginning of the slider
-                  slider.slideTo(slider.slides.length - 1); // Go to the last slide
+
+                    slider.slideTo(slider.slides.length - 1); 
                 } else {
-                  slider.slidePrev();
+                    slider.slidePrev();
                 }
             });
-              
+                
             nextButton.addEventListener('click', function() {
                 if (slider.activeIndex === slider.slides.length - 1) {
-                  // At the end of the slider
-                  slider.slideTo(0); // Go to the first slide
+                
+                    slider.slideTo(0);
                 } else {
-                  slider.slideNext();
+                    slider.slideNext();
                 }
             });
 
-        }; // end specialtiesSlider
+        }; 
 
         
         const testimonialSlider = function() {
@@ -169,17 +157,17 @@
                     clickable: true,
                 },
                 breakpoints: {
-                    // when window width is > 400px
+                
                     401: {
                         slidesPerView: 1,
                         spaceBetween: 20
                     },
-                    // when window width is > 900px
+                
                     901: {
                         slidesPerView: 2,
                         spaceBetween: 50
                     },
-                    // when window width is > 1200px
+                
                     1201: {
                         slidesPerView: 2,
                         spaceBetween: 80
@@ -187,20 +175,16 @@
                 }
             });
 
-        }; // end testimonialSlider
+        };
 
         specialtiesSlider();
         testimonialSlider();
 
-    }; // end ssSwiper
+    }; 
 
-
-   /* alert boxes
-    * ------------------------------------------------------ */
     const ssAlertBoxes = function() {
 
         const boxes = document.querySelectorAll('.alert-box');
-  
         boxes.forEach(function(box){
 
             box.addEventListener('click', function(e) {
@@ -215,11 +199,8 @@
             });
         })
 
-    }; // end ssAlertBoxes
+    };
 
-
-   /* smoothscroll
-    * ------------------------------------------------------ */
     const ssMoveTo = function() {
 
         const easeFunctions = {
@@ -258,11 +239,8 @@
             moveTo.registerTrigger(trigger);
         });
 
-    }; // end ssMoveTo
+    }; 
 
-
-   /* Initialize
-    * ------------------------------------------------------ */
     (function ssInit() {
 
         ssPreloader();

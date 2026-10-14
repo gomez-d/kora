@@ -1,0 +1,185 @@
+@charset "UTF-8";
+
+
+
+.formulario-auth {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.formulario-auth fieldset {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.formulario-auth .campo-formulario {
+    display: grid;
+    grid-template-columns: minmax(150px, 34%) minmax(0, 1fr);
+    align-items: center;
+    column-gap: 16px;
+    width: 100%;
+    margin: 0 0 20px;
+}
+
+.formulario-auth .campo-formulario > label {
+    margin: 0;
+    color: #151312;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.formulario-auth .campo-formulario > input:not([type="checkbox"]),
+.formulario-auth .campo-formulario > select,
+.formulario-auth .campo-formulario > textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: 44px;
+    margin: 0;
+    padding: 8px 0;
+    border: 0;
+    border-bottom: 1px solid #81766e;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: #151312;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.formulario-auth .campo-formulario > input:not([type="checkbox"]):focus,
+.formulario-auth .campo-formulario > select:focus,
+.formulario-auth .campo-formulario > textarea:focus {
+    border-bottom-color: #c93f1d;
+    box-shadow: 0 1px 0 #c93f1d;
+    outline: none;
+}
+
+.formulario-auth .campo-formulario > input::placeholder,
+.formulario-auth .campo-formulario > textarea::placeholder {
+    color: #a79a8f;
+    opacity: 1;
+}
+
+.formulario-auth .opcion-formulario {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 18px;
+}
+
+.formulario-auth .opcion-formulario label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.formulario-auth .opcion-formulario input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #365902;
+}
+
+.formulario-auth .boton-formulario {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+@media (max-width: 560px) {
+    .formulario-auth .campo-formulario {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 6px;
+        margin-bottom: 18px;
+    }
+
+    .formulario-auth .campo-formulario > label {
+        font-size: 14px;
+    }
+
+    .formulario-auth .campo-formulario > input:not([type="checkbox"]),
+    .formulario-auth .campo-formulario > select,
+    .formulario-auth .campo-formulario > textarea {
+        font-size: 15px;
+    }
+}
+
+.s-footer {
+    padding-top: 10px;
+    padding-bottom: 5px;
+}
+
+.s-footer__bottom {
+    padding-top: 5px;
+    margin-top: 5px;
+}
+
+.s-footer .ss-copyright {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.s-pageheader {
+    padding-top: 2rem;
+    padding-bottom: 1.5rem;
+}
+
+.s-pageheader .page-title {
+    font-size: clamp(8rem, 10vw, 5rem);
+    line-height: 1.15;
+    padding-top: 0;
+}
+
+.s-pagecontent {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+.s-pagecontent .pageintro {
+    margin-bottom: 1.5rem;
+}
+
+
+.s-pageheader {
+    margin-bottom: 20px;
+}
+
+.content-block--grey.cta-block {
+    padding-top: 25px;
+    padding-bottom: 30px;
+}
+
+.content-block--grey.cta-block h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.content-block--grey.cta-block {
+    margin-bottom: 25px;
+}
+
+.s-footer {
+    margin-top: 0;
+    padding-top: 10px;
+    padding-bottom: 25px;
+}
+
+
+
+.formulario-auth + .text-center.u-add-top {
+    margin-top: 25px;
+}
+
+.formulario-auth + .text-center.u-add-top p {
+    margin-bottom: 8px;
+}

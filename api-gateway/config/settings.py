@@ -23,7 +23,7 @@ load_dotenv(BASE_DIR / '.env')
 # Internal URLs used by the API Gateway to communicate with the microservices
 IDENTITY_SERVICE_URL = os.getenv('IDENTITY_SERVICE_URL')
 BUSINESS_SERVICE_URL = os.getenv('BUSINESS_SERVICE_URL')
-
+AI_SERVICE_URL = os.getenv("AI_SERVICE_URL")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
@@ -136,3 +136,5 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
