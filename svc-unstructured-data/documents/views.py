@@ -10,7 +10,8 @@ from documents.database import (
 )
 from documents.serializers import (
     FlexibleDocumentSerializer,
-    FlexibleDocumentUpdateSerializer
+    FlexibleDocumentUpdateSerializer,
+    IdentityEventSerializer
 )
 from pymongo.errors import PyMongoError
 from bson import ObjectId
@@ -369,4 +370,64 @@ class DocumentDetailView(APIView):
                 'message': 'Document deleted successfully.',
             },
             status=status.HTTP_200_OK,
+        )
+
+class IdentityEventView(APIView):
+    """
+    API endpoint used to receive identity events and store them
+    in the logs MongoDB collection.
+    """
+
+    def post(self, request):
+
+        # Validate the event received from the identity service.
+        serializer = IdentityEventSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Validation error.',
+                    'errors': serializer.errors,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        validated_data = serializer.validated_data
+
+        # Build the MongoDB log document using the established
+        # identity-to-unstructured-data communication contract.
+        document = {
+            'service': 'svc-identity',
+            'level': validated_data['level'],
+            'event': validated_data['event'],
+            'data': {
+                'user_id': validated_data['user_id'],
+                **validated_data['data'],
+            },
+            'metadata': validated_data['metadata'],
+            'timestamp': datetime.now(timezone.utc),
+        }
+
+        # Store the identity event in MongoDB.
+        try:
+            result = logs_collection.insert_one(document)
+        except PyMongoError:
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Database persistence error.',
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return Response(
+            {
+                'success': True,
+                'message': 'Identity event stored successfully.',
+                'data': {
+                    'id': str(result.inserted_id),
+                },
+            },
+            status=status.HTTP_201_CREATED,
         )
