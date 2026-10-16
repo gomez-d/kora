@@ -1,0 +1,262 @@
+### HU-006 - Create a food category
+POST http://127.0.0.1:8002/api/food-categories/
+Content-Type: application/json
+
+{
+  "name": "Frutas",
+  "description": "Frutas frescas"
+}
+
+
+### HU-006 - Create food
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "Manzana",
+    "description": "Manzana fresca",
+    "serving_size": 100,
+    "serving_unit": "G",
+    "nutrients": [
+        {
+            "nutrient_type": "CALORIES",
+            "amount": 52,
+            "unit": "KCAL"
+        },
+        {
+            "nutrient_type": "CARBOHYDRATES",
+            "amount": 14,
+            "unit": "G"
+        },
+        {
+            "nutrient_type": "FIBER",
+            "amount": 2.4,
+            "unit": "G"
+        }
+    ]
+}
+
+
+### HU-006 - Invalid food name
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "",
+    "description": "Manzana fresca",
+    "serving_size": 100,
+    "serving_unit": "G",
+    "nutrients": [
+        {
+            "nutrient_type": "CALORIES",
+            "amount": 52,
+            "unit": "KCAL"
+        }
+    ]
+}
+
+### HU-006 - Invalid food description
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "Manzana",
+    "description": "",
+    "serving_size": 100,
+    "serving_unit": "G",
+    "nutrients": [
+        {
+            "nutrient_type": "CALORIES",
+            "amount": 52,
+            "unit": "KCAL"
+        }
+    ]
+}
+
+
+### HU-006 - Invalid serving size
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "Manzana",
+    "description": "Manzana fresca",
+    "serving_size": 0,
+    "serving_unit": "G",
+    "nutrients": [
+        {
+            "nutrient_type": "CALORIES",
+            "amount": 52,
+            "unit": "KCAL"
+        }
+    ]
+}
+
+### HU-006 Invalid food categoy
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "00000000-0000-0000-0000-000000000000",
+    "name": "Manzana",
+    "description": "Manzana fresca",
+    "serving_size": 100,
+    "serving_unit": "G",
+    "nutrients": [
+        {
+            "nutrient_type": "CALORIES",
+            "amount": 52,
+            "unit": "KCAL"
+        }
+    ]
+}
+
+
+### HU-006 - Invalid nutrient amount
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "Manzana",
+    "description": "Manzana fresca",
+    "serving_size": 100,
+    "serving_unit": "G",
+    "nutrients": [
+        {
+            "nutrient_type": "CALORIES",
+            "amount": -5,
+            "unit": "KCAL"
+        }
+    ]
+}
+
+### HU-006 - Invalid nutrient type
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "Manzana",
+    "description": "Manzana fresca",
+    "serving_size": 100,
+    "serving_unit": "G",
+    "nutrients": [
+        {
+            "nutrient_type": "VITAMINS",
+            "amount": 5,
+            "unit": "G"
+        }
+    ]
+}
+
+
+### HU-006 - Invalid serving unit
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "Manzana",
+    "description": "Manzana fresca",
+    "serving_size": 100,
+    "serving_unit": "OZ",
+    "nutrients": [
+        {
+            "nutrient_type": "CALORIES",
+            "amount": 52,
+            "unit": "KCAL"
+        }
+    ]
+}
+
+
+### HU-006 - Invalid nutrient unit
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "Manzana",
+    "description": "Manzana fresca",
+    "serving_size": 100,
+    "serving_unit": "G",
+    "nutrients": [
+        {
+            "nutrient_type": "CALORIES",
+            "amount": 52,
+            "unit": "LBS"
+        }
+    ]
+}
+
+
+### HU-006 - Missing nutrients
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "Pera",
+    "description": "Pera fresca",
+    "serving_size": 100,
+    "serving_unit": "G"
+}
+
+
+### HU-006 - Missing nutrients
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "Pera",
+    "description": "Pera fresca",
+    "serving_size": 100,
+    "serving_unit": "G",
+    "nutrients": []
+}
+
+
+### HU-006 - Empty food category name
+POST http://127.0.0.1:8002/api/food-categories/
+Content-Type: application/json
+
+{
+    "name": "",
+    "description": "Frutas frescas"
+}
+
+
+### HU-006 - Empty food category description
+POST http://127.0.0.1:8002/api/food-categories/
+Content-Type: application/json
+
+{
+    "name": "Frutas",
+    "description": ""
+}
+
+
+### HU-006 Negative serving size
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
+    "name": "Plátano",
+    "description": "Plátano fresco",
+    "serving_size": -10,
+    "serving_unit": "G",
+    "nutrients": [
+        {
+            "nutrient_type": "CALORIES",
+            "amount": 89,
+            "unit": "KCAL"
+        }
+    ]
+}

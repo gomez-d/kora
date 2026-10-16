@@ -1,20 +1,30 @@
 from django.urls import path
-from .views import HealthCheckView, NutritionalProfileListCreateView, FoodCreateView
+from .views import (
+    HealthCheckView,
+    NutritionalProfileListCreateView,
+    FoodCreateView,
+    FoodCategoryCreateView
+)
 
 urlpatterns = [
     path(
-        'health/',
+        "health/",
         HealthCheckView.as_view(),
-        name='health-check'
+        name="health-check"
     ),
     path(
-        'nutritional-profiles/',
+        "nutritional-profiles/",
         NutritionalProfileListCreateView.as_view(),
-        name='nutritional-profile-list-create'
+        name="nutritional-profile-list-create"
     ),
     path(
-        'foods/',
+        "food-categories/",
+        FoodCategoryCreateView.as_view(),
+        name="food-category-create"
+    ),
+    path(
+        "foods/",
         FoodCreateView.as_view(),
-        name='foods-create-view'
+        name="foods-create"
     )
 ]
