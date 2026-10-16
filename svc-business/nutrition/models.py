@@ -78,7 +78,10 @@ class FoodCategory(models.Model):
         default=uuid.uuid4,
         editable=False
     )
-    name = models.CharField(max_length=100)
+    name = models.CharField(
+        max_length=100,
+        unique=True
+    )
     description = models.CharField(max_length=255)
 
 
@@ -93,7 +96,10 @@ class Food(models.Model):
         on_delete=models.PROTECT,
         related_name="foods"
     )
-    name = models.CharField(max_length=100)
+    name = models.CharField(
+        max_length=100,
+        unique=True
+    )
     description = models.CharField(max_length=255)
     serving_size = models.DecimalField(
         max_digits=8,
@@ -130,3 +136,11 @@ class FoodNutrient(models.Model):
         max_length=10,
         choices=NUTRIENT_UNIT_CHOICES
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["food", "nutrient_type"],
+                name="unique_nutrient_type_per_food"
+            )
+        ]

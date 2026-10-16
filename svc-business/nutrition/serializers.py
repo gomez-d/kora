@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from .models import (
     NutritionalProfile,
@@ -47,7 +48,14 @@ class NutritionalProfileSerializer(serializers.ModelSerializer):
 
 class FoodCategorySerializer(serializers.ModelSerializer):
     name = serializers.CharField(
-        allow_blank=True
+        allow_blank=True,
+        validators=[
+            UniqueValidator(
+                queryset=FoodCategory.objects.all(),
+                lookup="iexact",
+                message="Ya existe una categoría con este nombre"
+            )
+        ]
     )
 
     description = serializers.CharField(
@@ -71,13 +79,15 @@ class FoodCategorySerializer(serializers.ModelSerializer):
                 "El nombre de la categoría no puede estar vacío."
             )
 
+        return value.strip().upper()
+
     def validate_description(self, value):
         if not value.strip():
             raise serializers.ValidationError(
                 "La descripción de una categoría no puede estar vacía."
             )
 
-        return value.strip()
+        return value.strip().upper()
 
 
 class FoodNutrientSerializer(serializers.ModelSerializer):
@@ -110,7 +120,14 @@ class FoodSerializer(serializers.ModelSerializer):
     )
 
     name = serializers.CharField(
-        allow_blank=True
+        allow_blank=True,
+        validators=[
+            UniqueValidator(
+                queryset=Food.objects.all(),
+                lookup="iexact",
+                message="Ya existe un alimento con este nombre."
+            )
+        ]
     )
 
     description = serializers.CharField(
@@ -141,13 +158,26 @@ class FoodSerializer(serializers.ModelSerializer):
             "updated_at"
         ]
 
+    def validate_nutrients(self, value):
+        nutrient_types = [
+            nutrient["nutrient_type"]
+            for nutrient in value
+        ]
+
+        if len(nutrient_types) != len(set(nutrient_types)):
+            raise serializers.ValidationError(
+                "No se permite repetir el tipo de nutrinete en un alimento"
+            )
+
+        return value
+
     def validate_name(self, value):
         if not value.strip():
             raise serializers.ValidationError(
                 "El nombre del alimento no puede estar vacío."
             )
 
-        return value.strip()
+        return value.strip().upper()
 
     def validate_description(self, value):
         if not value.strip():
@@ -155,7 +185,7 @@ class FoodSerializer(serializers.ModelSerializer):
                 "La descripción no puede estar vacía."
             )
 
-        return value.strip()
+        return value.strip().upper()
 
     def validate_serving_size(self, value):
         if value <= 0:
