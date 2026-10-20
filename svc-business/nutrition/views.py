@@ -2,12 +2,14 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import NutritionalProfile
+from .models import NutritionalProfile, Food
 from .serializers import (
     NutritionalProfileSerializer,
     FoodCategorySerializer,
-    FoodSerializer
+    FoodSerializer,
+    FoodReadSerializer
 )
+from .pagination import FoodPagination
 
 
 class HealthCheckView(APIView):
@@ -43,7 +45,43 @@ class FoodCategoryCreateView(APIView):
         )
 
 
-class FoodCreateView(APIView):
+class FoodView(APIView):
+    def get(self, request):
+        foods = Food.objects.select_related(
+            "category"
+        ).prefetch_related(
+            "nutrients"
+        )
+
+        search = request.query_params.get("search")
+        category_id = request.query_params.get("category_id")
+
+        if search:
+            foods = foods.filter(name__icontains=search)
+
+        if category_id:
+            foods = foods.filter(category_id=category_id)
+
+        ordering = request.query_params.get("ordering", "name")
+
+        allowed_orderings = {
+            "name",
+            "-name",
+            "created_at",
+            "-created_at"
+        }
+
+        if ordering not in allowed_orderings:
+            ordering = "name"
+
+        foods = foods.order_by(ordering)
+
+        paginator = FoodPagination()
+        page = paginator.paginate_queryset(foods, request, view=self)
+
+        serializer = FoodReadSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
     def post(self, request):
         serializer = FoodSerializer(
             data=request.data
@@ -61,3 +99,18 @@ class FoodCreateView(APIView):
             serializer.errors,
             status=400
         )
+
+
+class FoodDetailView(APIView):
+    def get(self, request, food_id):
+        try:
+            food = Food.objects.select_related(
+                "category").prefetch_related("nutrients").get(id=food_id)
+        except Food.DoesNotExist:
+            return Response(
+                {"detail": "Food not found."},
+                status=404
+            )
+
+        serializer = FoodReadSerializer(food)
+        return Response(serializer.data)

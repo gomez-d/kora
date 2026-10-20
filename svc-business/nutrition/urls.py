@@ -2,8 +2,9 @@ from django.urls import path
 from .views import (
     HealthCheckView,
     NutritionalProfileListCreateView,
-    FoodCreateView,
-    FoodCategoryCreateView
+    FoodView,
+    FoodCategoryCreateView,
+    FoodDetailView
 )
 
 urlpatterns = [
@@ -24,7 +25,12 @@ urlpatterns = [
     ),
     path(
         "foods/",
-        FoodCreateView.as_view(),
-        name="foods-create"
+        FoodView.as_view(),
+        name="foods"
+    ),
+    path(
+        "foods/<uuid:food_id>/",
+        FoodDetailView.as_view(),
+        name="food-detail"
     )
 ]
