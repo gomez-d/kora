@@ -162,3 +162,24 @@ class FlexibleDocumentUpdateSerializer(serializers.Serializer):
             )
 
         return value
+
+class IdentityEventSerializer(serializers.Serializer):
+    """
+    Serializer used to validate identity events received from
+    the identity microservice.
+    """
+
+    user_id = serializers.UUIDField()
+    event = serializers.CharField()
+    level = serializers.CharField()
+    data = serializers.DictField(required=False)
+    metadata = serializers.DictField(required=False)
+
+    def validate(self, attrs):
+        """
+        Validate the minimum structure required for identity events.
+        """
+        attrs.setdefault('data', {})
+        attrs.setdefault('metadata', {})
+
+        return attrs
