@@ -53,7 +53,7 @@ class FoodCategorySerializer(serializers.ModelSerializer):
             UniqueValidator(
                 queryset=FoodCategory.objects.all(),
                 lookup="iexact",
-                message="Ya existe una categoría con este nombre"
+                message="A category with this name already exists."
             )
         ]
     )
@@ -76,7 +76,7 @@ class FoodCategorySerializer(serializers.ModelSerializer):
     def validate_name(self, value):
         if not value.strip():
             raise serializers.ValidationError(
-                "El nombre de la categoría no puede estar vacío."
+                "The category name cannot be empty."
             )
 
         return value.strip().upper()
@@ -84,7 +84,7 @@ class FoodCategorySerializer(serializers.ModelSerializer):
     def validate_description(self, value):
         if not value.strip():
             raise serializers.ValidationError(
-                "La descripción de una categoría no puede estar vacía."
+                "The description of a category cannot be empty."
             )
 
         return value.strip().upper()
@@ -125,7 +125,7 @@ class FoodSerializer(serializers.ModelSerializer):
             UniqueValidator(
                 queryset=Food.objects.all(),
                 lookup="iexact",
-                message="Ya existe un alimento con este nombre."
+                message="There is already a food product with this name."
             )
         ]
     )
@@ -166,7 +166,7 @@ class FoodSerializer(serializers.ModelSerializer):
 
         if len(nutrient_types) != len(set(nutrient_types)):
             raise serializers.ValidationError(
-                "No se permite repetir el tipo de nutrinete en un alimento"
+                "Repeating the type of nutrient in a food item is not permitted."
             )
 
         return value
@@ -182,7 +182,7 @@ class FoodSerializer(serializers.ModelSerializer):
     def validate_description(self, value):
         if not value.strip():
             raise serializers.ValidationError(
-                "La descripción no puede estar vacía."
+                "The description cannot be empty."
             )
 
         return value.strip().upper()
@@ -190,7 +190,7 @@ class FoodSerializer(serializers.ModelSerializer):
     def validate_serving_size(self, value):
         if value <= 0:
             raise serializers.ValidationError(
-                "El tamaño de la porción debe ser mayor que cero."
+                "The portion size must be greater than zero."
             )
 
         return value
@@ -210,3 +210,25 @@ class FoodSerializer(serializers.ModelSerializer):
             )
 
         return food
+
+
+class FoodReadSerializer(serializers.ModelSerializer):
+    category = FoodCategorySerializer(read_only=True)
+    nutrients = FoodNutrientSerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = Food
+        fields = [
+            "id",
+            "category",
+            "name",
+            "description",
+            "serving_size",
+            "serving_unit",
+            "nutrients",
+            "created_at",
+            "updated_at"
+        ]
