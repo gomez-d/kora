@@ -11,62 +11,47 @@
     <link rel="stylesheet" href="../css/vendor.css">
     <link rel="stylesheet" href="../css/styles.css">
     <link rel="stylesheet" href="../css/main-screen.css">
+    <link rel="stylesheet" href="../css/header-kora.css">
     <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
 </head>
-<body id="top" class="page-main">
-    <div id="page" class="s-pagewrap s-pagewrap--main">
-        <div class="menu-underlay"></div>
-        <header class="s-header s-header--main">
-            <div class="s-header__block s-header__block--main">
-            
-                <section class="s-megamenu">
-                    <div class="s-megamenu__inner">
-                        <nav class="s-megamenu__nav" role="navigation">
-                            <ul class="s-megamenu__list">
-                                <li class="s-megamenu__item">
-                                <a href="app/main_panel.html" class="s-megamenu__link" aria-label="Panel principal">
-                                    <span class="s-megamenu__icon">
-                                        <img src="../images/icons/H.png" alt="Inicio" width="28" height="28">
-                                    </span>
-                                </a>
-                                </li>
-                                <li class="s-megamenu__item">
-                                    <a href="food_intake.html" class="s-megamenu__link" aria-label="Catálogo">
-                                    <span class="s-megamenu__icon">
-                                        <img src="../images/icons/N.png" alt="Inicio" width="28" height="28">
-                                    </span>
-                                    </a>
-                                </li>
-                                <li class="s-megamenu__item">
-                                    <a href="nutritional_summary.html" class="s-megamenu__link" aria-label="Catálogo">
-                                    <span class="s-megamenu__icon">
-                                        <img src="../images/icons/HF.png" alt="Inicio" width="28" height="28">
-                                    </span>
-                                    </a>
-                                </li>
-                                <li class="s-megamenu__item">
-                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
-                                        <span class="s-megamenu__icon">
-                                            <img src="../images/icons/C.png" alt="Perfil" width="28" height="28">
-                                        </span>
-                                    </a>
-                                </li>
-                                <li class="s-megamenu__item">
-                                    <a href="app/account_settings.html" class="s-megamenu__link" aria-label="Perfil">
-                                        <span class="s-megamenu__icon">
-                                            <img src="../images/icons/U.png" alt="Perfil" width="28" height="28">
-                                        </span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                </section>
-                <div class="s-header__right">
-                    <a href="account_settings.html" class="s-header__perfil" title="Perfil">
-                        <img src="../images/avatars/user-01.jpg" alt="Perfil" onerror="this.src='../images/k.svg'">
+<body>
+        <header class="kora-header">
+            <div class="kora-header__inner">
+
+                
+                <div class="kora-header__logo">
+                    <a href="#">
+                        <img src="../images/logo.svg" alt="Logo Kora">
+                        
                     </a>
                 </div>
+
+                
+                <nav class="kora-header__nav kora-header__nav--left">
+                    <a href="main_panel.html">INICIO</a>
+                    <a href="food_catalog.html">CATALOGO</a>
+                    <a href="food_intake.html">CONSUMO</a>
+                </nav>
+
+                
+                <div class="kora-header__brand">
+                    <a href="#">
+                        <span class="kora-header__brand-text">KORA</span>
+                    </a>
+                </div>
+
+                
+                <nav class="kora-header__nav kora-header__nav--right">
+                    <a href="food_intake_history.html">HISTORIAL</a>
+                    <a href="account_settings.html">AJUSTES</a>
+                </nav>
+
+                
+                <div class="kora-header__profile">
+                    <img src="../images/avatars/user-01.jpg" alt="Perfil">
+                    
+                </div>
+
             </div>
         </header>
 
