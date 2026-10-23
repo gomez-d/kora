@@ -1,11 +1,14 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from django.utils import timezone
 
 from .models import (
     NutritionalProfile,
     Food,
     FoodCategory,
-    FoodNutrient
+    FoodNutrient,
+    ConsumptionRecord,
+    ConsumptionItem
 )
 
 
@@ -232,3 +235,85 @@ class FoodReadSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at"
         ]
+
+
+class ConsumptionItemSerializer(serializers.ModelSerializer):
+    food_id = serializers.PrimaryKeyRelatedField(
+        source="food",
+        queryset=Food.objects.all()
+    )
+
+    class Meta:
+        model = ConsumptionItem
+        fields = [
+            "id",
+            "food_id",
+            "quantity",
+            "calories",
+            "protein",
+            "carbohydrates",
+            "fat",
+            "fiber",
+            "sugar",
+            "sodium"
+        ]
+        read_only_field = [
+            "id"
+        ]
+
+    def validate_quantity(self, value):
+        if value <= 0:
+            raise serializers.ValidationError(
+                "Quantity must be greater than zero."
+            )
+
+        return value
+
+
+class ConsumptionRecordSerializer(serializers.ModelSerializer):
+    consumption_items = ConsumptionItemSerializer(
+        many=True,
+        allow_empty=False
+    )
+    notes = serializers.CharField(
+        allow_blank=True
+    )
+
+    class Meta:
+        model = ConsumptionRecord
+        fields = [
+            "id",
+            "user_id",
+            "consumed_at",
+            "notes",
+            "consumption_items",
+            "created_at",
+        ]
+        read_only_fields = [
+            "id",
+            "created_at"
+        ]
+
+    def validate_consumed_at(self, value):
+        if value > timezone.now():
+            raise serializers.ValidationError(
+                "Consumption date and time cannot be in the future"
+            )
+
+        return value
+
+    def validate_notes(self, value):
+        return value.strip().upper()
+
+    def create(self, validated_data):
+        items_data = validated_data.pop("consumption_items")
+
+        record = ConsumptionRecord.objects.create(**validated_data)
+
+        for item_data in items_data:
+            ConsumptionItem.objects.create(
+                consumption=record,
+                **item_data
+            )
+
+        return record
