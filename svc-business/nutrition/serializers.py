@@ -199,10 +199,10 @@ class FoodSerializer(serializers.ModelSerializer):
         # Extract nutrients because they belong to FoodNutrient, not Food.
         nutrients_data = validated_data.pop("nutrients")
 
-        # Create the food before creating its related nutrinets
+        # Create the food before creating its related nutrinets.
         food = Food.objects.create(**validated_data)
 
-        # Associate each nutrient with the newly created food
+        # Associate each nutrient with the newly created food.
         for nutrient_data in nutrients_data:
             FoodNutrient.objects.create(
                 food=food,
@@ -210,6 +210,27 @@ class FoodSerializer(serializers.ModelSerializer):
             )
 
         return food
+
+    def update(self, instance, validated_data):
+        nutrients_data = validated_data.pop("nutrients", None)
+
+        # Update the food fields.
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+
+        # Replace the existing nutrients when provided.
+        if nutrients_data is not None:
+            instance.nutrients.all().delete()
+
+            for nutrient_data in nutrients_data:
+                FoodNutrient.objects.create(
+                    food=instance,
+                    **nutrient_data
+                )
+
+        return instance
 
 
 class FoodReadSerializer(serializers.ModelSerializer):

@@ -2,6 +2,8 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from django.db import IntegrityError
+
 from .models import NutritionalProfile, Food
 from .serializers import (
     NutritionalProfileSerializer,
@@ -114,3 +116,98 @@ class FoodDetailView(APIView):
 
         serializer = FoodReadSerializer(food)
         return Response(serializer.data)
+
+    def put(self, request, food_id):
+        try:
+            food = Food.objects.get(id=food_id)
+        except Food.DoesNotExist:
+            return Response(
+                {"detail": "Food not found."},
+                status=404
+            )
+
+        serializer = FoodSerializer(
+            food,
+            data=request.data
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            updated_food = Food.objects.select_related(
+                "category"
+            ).prefetch_related(
+                "nutrients"
+            ).get(id=food_id)
+
+            response_serializer = FoodReadSerializer(updated_food)
+
+            return Response(
+                response_serializer.data,
+                status=200
+            )
+
+        return Response(
+            serializer.errors,
+            status=400
+        )
+
+    def patch(self, request, food_id):
+        try:
+            food = Food.objects.get(id=food_id)
+        except Food.DoesNotExist:
+            return Response(
+                {"detail": "Food not found."},
+                status=404
+            )
+
+        serializer = FoodSerializer(
+            food,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            updated_food = Food.objects.select_related(
+                "category"
+            ).prefetch_related(
+                "nutrients"
+            ).get(id=food_id)
+
+            response_serializer = FoodReadSerializer(updated_food)
+
+            return Response(
+                response_serializer.data,
+                status=200
+            )
+
+        return Response(
+            serializer.errors,
+            status=400
+        )
+
+    def delete(self, request, food_id):
+        try:
+            food = Food.objects.get(id=food_id)
+        except Food.DoesNotExist:
+            return Response(
+                {"detail": "Food not found."},
+                status=404
+            )
+
+        try:
+            food.delete()
+        except IntegrityError:
+            return Response(
+                {
+                    "detail": (
+                        "Food cannot be deleted because "
+                        "it is referenced by consumption records."
+                    )
+                },
+                status=409
+            )
+
+        return Response(status=204)

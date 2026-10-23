@@ -13,9 +13,9 @@ POST http://127.0.0.1:8002/api/foods/
 Content-Type: application/json
 
 {
-    "category_id": "fdf27f12-53b9-48d0-835d-6bd6122bbdd7",
-    "name": "Manzana",
-    "description": "Manzana fresca",
+    "category_id": "9a0220cd-a67e-4c0a-b013-9bccd10aa6ca",
+    "name": "Pera",
+    "description": "Pera fresca",
     "serving_size": 100,
     "serving_unit": "G",
     "nutrients": [
