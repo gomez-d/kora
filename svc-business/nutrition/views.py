@@ -2,12 +2,17 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import NutritionalProfile, Food
+from .models import (
+    NutritionalProfile,
+    Food,
+    ConsumptionRecord
+)
 from .serializers import (
     NutritionalProfileSerializer,
     FoodCategorySerializer,
     FoodSerializer,
-    FoodReadSerializer
+    FoodReadSerializer,
+    ConsumptionRecordSerializer
 )
 from .pagination import FoodPagination
 
@@ -114,3 +119,21 @@ class FoodDetailView(APIView):
 
         serializer = FoodReadSerializer(food)
         return Response(serializer.data)
+
+
+class ConsumptionRecordCreateView(APIView):
+    def post(self, request):
+        serializer = ConsumptionRecordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=201
+            )
+
+        return Response(
+            serializer.errors,
+            status=400
+        )
