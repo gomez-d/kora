@@ -4,12 +4,17 @@ from rest_framework.views import APIView
 
 from django.db import IntegrityError
 
-from .models import NutritionalProfile, Food
+from .models import (
+    NutritionalProfile,
+    Food,
+    ConsumptionRecord
+)
 from .serializers import (
     NutritionalProfileSerializer,
     FoodCategorySerializer,
     FoodSerializer,
-    FoodReadSerializer
+    FoodReadSerializer,
+    ConsumptionRecordSerializer
 )
 from .pagination import FoodPagination
 
@@ -211,3 +216,21 @@ class FoodDetailView(APIView):
             )
 
         return Response(status=204)
+
+      
+class ConsumptionRecordCreateView(APIView):
+    def post(self, request):
+        serializer = ConsumptionRecordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=201
+            )
+
+        return Response(
+            serializer.errors,
+            status=400
+        )

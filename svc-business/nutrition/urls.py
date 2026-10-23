@@ -4,7 +4,8 @@ from .views import (
     NutritionalProfileListCreateView,
     FoodView,
     FoodCategoryCreateView,
-    FoodDetailView
+    FoodDetailView,
+    ConsumptionRecordCreateView
 )
 
 urlpatterns = [
@@ -32,5 +33,10 @@ urlpatterns = [
         "foods/<uuid:food_id>/",
         FoodDetailView.as_view(),
         name="food-detail"
+    ),
+    path(
+        "consumptions/",
+        ConsumptionRecordCreateView.as_view(),
+        name="consumption-create"
     )
 ]
