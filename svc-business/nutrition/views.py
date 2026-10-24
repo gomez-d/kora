@@ -7,6 +7,7 @@ from django.db import IntegrityError
 from .models import (
     NutritionalProfile,
     Food,
+    FoodCategory,
     ConsumptionRecord
 )
 from .serializers import (
@@ -32,11 +33,15 @@ class NutritionalProfileListCreateView(generics.ListCreateAPIView):
     serializer_class = NutritionalProfileSerializer
 
 
-class FoodCategoryCreateView(APIView):
+
+class FoodCategoryView(APIView):
+    def get(self, request):
+        categories = FoodCategory.objects.all().order_by("name")
+        serializer = FoodCategorySerializer(categories, many=True)
+        return Response(serializer.data)
+
     def post(self, request):
-        serializer = FoodCategorySerializer(
-            data=request.data
-        )
+        serializer = FoodCategorySerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -50,6 +55,7 @@ class FoodCategoryCreateView(APIView):
             serializer.errors,
             status=400
         )
+
 
 
 class FoodView(APIView):

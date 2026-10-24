@@ -26,17 +26,21 @@ var isDockerFrontend =
     API_BASE: API_BASE.replace(/\/$/, ""),
     AI_BASE: AI_BASE.replace(/\/$/, ""),
 
-    // Rutas públicas vía API Gateway
-    endpoints: {
-      identityHealth: "/api/identity/users/health/",
-      register: "/api/identity/users/register/",
-      businessHealth: "/api/business/health/",
-      nutritionalProfiles: "/api/business/nutritional-profiles/",
-      foods: "/api/business/foods/",
-      // IA (proxificadas por nginx o directas en local)
-      llmProcess: "/ai/process",
-      visionAnalyze: "/vision/analyze"
-    },
+endpoints: {
+    identityHealth: "/api/identity/users/health/",
+    register: "/api/identity/users/register/",
+
+    businessHealth: "/api/business/health/",
+    nutritionalProfiles: "/api/business/nutritional-profiles/",
+
+    foods: "/api/business/foods/",
+    foodCategories: "/api/business/food-categories/",
+
+    // AI endpoints
+    llmProcess: "/ai/process",
+    visionAnalyze: "/vision/analyze"
+},
+
 
     storageKeys: {
       user: "kora_user",

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Administración — Gestión de usuarios</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="../css/vendor.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/header-kora.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+</head>
+<body >
+     <header class="kora-header">
+            <div class="kora-header__inner">
+
+                
+                <div class="kora-header__logo">
+                    <a href="#">
+                        <img src="../images/logo.svg" alt="Logo Kora">
+                        
+                    </a>
+                </div>
+
+                
+                <nav class="kora-header__nav kora-header__nav--left">
+                    <a href="admin_panel.html">INICIO</a>
+                    <a href="admin_foods.html">ALIMENTOS</a>
+                </nav>
+
+                
+                <div class="kora-header__brand">
+                    <a href="#">
+                        <span class="kora-header__brand-text">KORA</span>
+                    </a>
+                </div>
+
+                
+                <nav class="kora-header__nav kora-header__nav--right">
+                    <a href="admin_users.html">USUARIOS</a>
+                    <a href="admin_audit.html">AUDITORIA</a>
+                </nav>
+
+                
+                <div class="kora-header__profile">
+                    <img src="../images/avatars/user-02.jpg" alt="Perfil">
+                    
+                </div>
+
+            </div>
+        </header>
+    <div class="admin-shell">
+            <div class="admin-content">
+                <div class="admin-page-header">
+                    <div>
+                        <h1>Gestión de usuarios</h1>
+                        <p>Consulta cuentas, revisa su estado y administra permisos de acceso.</p>
+                    </div>
+                </div>
+
+                <div class="admin-note">
+                    Cambiar roles, desactivar cuentas y otras acciones sensibles deben validarse en el backend.
+                    No se recomienda que el administrador modifique peso, restricciones alimentarias u objetivos
+                    nutricionales de los usuarios; esos datos son personales.
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-toolbar">
+                        <div class="admin-toolbar__search">
+                            <input type="search" id="user-search" placeholder="Buscar por nombre o correo…" aria-label="Buscar usuario">
+                        </div>
+                        <div class="admin-toolbar__filters">
+                            <select id="user-filter-role" aria-label="Filtrar por rol">
+                                <option value="">Todos los roles</option>
+                                <option value="administrador">Administrador</option>
+                                <option value="usuario">Usuario</option>
+                            </select>
+                            <select id="user-filter-status" aria-label="Filtrar por estado">
+                                <option value="">Todos los estados</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="admin-table-wrap">
+                        <table class="admin-table" id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Correo</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                    <th>Fecha de registro</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody">
+                                <tr data-id="u1">
+                                    <td>Ana García</td>
+                                    <td>ana.garcia@ejemplo.com</td>
+                                    <td><span class="admin-badge admin-badge--user">Usuario</span></td>
+                                    <td><span class="admin-badge admin-badge--active">Activo</span></td>
+                                    <td>12 ene 2026</td>
+                                    <td class="actions">
+                                        <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm" data-action="detail">Consultar</button>
+                                        <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-action="role">Permisos</button>
+                                        <button type="button" class="admin-btn admin-btn--danger admin-btn--sm" data-action="deactivate">Desactivar</button>
+                                    </td>
+                                </tr>
+                                <tr data-id="u2">
+                                    <td>Carlos Méndez</td>
+                                    <td>carlos.m@ejemplo.com</td>
+                                    <td><span class="admin-badge admin-badge--admin">Administrador</span></td>
+                                    <td><span class="admin-badge admin-badge--active">Activo</span></td>
+                                    <td>03 dic 2025</td>
+                                    <td class="actions">
+                                        <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm" data-action="detail">Consultar</button>
+                                        <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-action="role">Permisos</button>
+                                        <button type="button" class="admin-btn admin-btn--danger admin-btn--sm" data-action="deactivate">Desactivar</button>
+                                    </td>
+                                </tr>
+                                <tr data-id="u3">
+                                    <td>María López</td>
+                                    <td>maria.lopez@ejemplo.com</td>
+                                    <td><span class="admin-badge admin-badge--user">Usuario</span></td>
+                                    <td><span class="admin-badge admin-badge--inactive">Inactivo</span></td>
+                                    <td>28 feb 2026</td>
+                                    <td class="actions">
+                                        <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm" data-action="detail">Consultar</button>
+                                        <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-action="role">Permisos</button>
+                                        <button type="button" class="admin-btn admin-btn--secondary admin-btn--sm" data-action="activate">Activar</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Detalle de usuario (panel) -->
+                <div class="admin-card" id="user-detail-panel" hidden>
+                    <div class="admin-card__header">
+                        <h2 class="admin-card__title">Detalle de la cuenta</h2>
+                        <button type="button" class="admin-btn admin-btn--ghost admin-btn--sm" id="btn-close-detail">Cerrar</button>
+                    </div>
+                    <div class="admin-detail-grid">
+                        <div class="admin-detail-item">
+                            <label>Usuario</label>
+                            <span id="detail-name">—</span>
+                        </div>
+                        <div class="admin-detail-item">
+                            <label>Correo</label>
+                            <span id="detail-email">—</span>
+                        </div>
+                        <div class="admin-detail-item">
+                            <label>Rol</label>
+                            <span id="detail-role">—</span>
+                        </div>
+                        <div class="admin-detail-item">
+                            <label>Estado</label>
+                            <span id="detail-status">—</span>
+                        </div>
+                        <div class="admin-detail-item">
+                            <label>Fecha de registro</label>
+                            <span id="detail-date">—</span>
+                        </div>
+                    </div>
+                    <p class="admin-note" style="margin-bottom: 0;">
+                        La actividad relevante de la cuenta se mostrará aquí cuando esté disponible y sea necesaria.
+                        No se exponen datos personales de perfil nutricional (peso, objetivos, restricciones).
+                    </p>
+                    <div class="admin-form__actions" style="border-top: none; padding-top: 12px;">
+                        <button type="button" class="admin-btn admin-btn--secondary" id="btn-change-role">Cambiar rol</button>
+                        <button type="button" class="admin-btn admin-btn--danger" id="btn-toggle-status">Cambiar estado</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var toggle = document.getElementById('admin-menu-toggle');
+            var sidebar = document.getElementById('admin-sidebar');
+            if (toggle && sidebar) {
+                toggle.addEventListener('click', function () {
+                    sidebar.classList.toggle('is-open');
+                });
+            }
+
+            var detailPanel = document.getElementById('user-detail-panel');
+
+            function showDetail(row) {
+                document.getElementById('detail-name').textContent = row.cells[0].textContent;
+                document.getElementById('detail-email').textContent = row.cells[1].textContent;
+                document.getElementById('detail-role').textContent = row.cells[2].textContent.trim();
+                document.getElementById('detail-status').textContent = row.cells[3].textContent.trim();
+                document.getElementById('detail-date').textContent = row.cells[4].textContent;
+                detailPanel.hidden = false;
+                detailPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            document.getElementById('btn-close-detail').addEventListener('click', function () {
+                detailPanel.hidden = true;
+            });
+
+            document.getElementById('users-tbody').addEventListener('click', function (e) {
+                var btn = e.target.closest('[data-action]');
+                if (!btn) return;
+                var row = btn.closest('tr');
+                var action = btn.getAttribute('data-action');
+                if (action === 'detail' || action === 'role') showDetail(row);
+                // deactivate / activate / role change → backend validation required
+            });
+
+            function filterTable() {
+                var q = (document.getElementById('user-search').value || '').toLowerCase();
+                var role = document.getElementById('user-filter-role').value;
+                var st = document.getElementById('user-filter-status').value;
+                document.querySelectorAll('#users-tbody tr').forEach(function (row) {
+                    var name = row.cells[0].textContent.toLowerCase();
+                    var email = row.cells[1].textContent.toLowerCase();
+                    var r = row.cells[2].textContent.toLowerCase();
+                    var s = row.cells[3].textContent.toLowerCase();
+                    var matchQ = !q || name.indexOf(q) !== -1 || email.indexOf(q) !== -1;
+                    var matchR = !role || r.indexOf(role) !== -1;
+                    var matchS = !st || s.indexOf(st) !== -1;
+                    row.style.display = matchQ && matchR && matchS ? '' : 'none';
+                });
+            }
+            ['user-search', 'user-filter-role', 'user-filter-status'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', filterTable);
+                    el.addEventListener('change', filterTable);
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

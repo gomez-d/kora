@@ -11,6 +11,16 @@
     const sortSelect = document.getElementById("catalog-sort");
     const modal = document.getElementById("food-detail-modal");
 
+    
+    function showCatalogAlert(type, message) {
+        if (window.KoraAlerts && typeof window.KoraAlerts[type] === "function") {
+            window.KoraAlerts[type](message);
+        } else {
+            console.error("KoraAlerts no está disponible:", message);
+        }
+    }
+
+
     let foods = [];
     let currentFood = null;
 
@@ -309,24 +319,50 @@
                 throw new Error("La respuesta del catálogo no tiene el formato esperado.");
             }
 
+            
             foods = list;
             loadingEl.style.display = "none";
 
             if (!foods.length) {
                 showEmpty("El catálogo no contiene alimentos registrados.");
                 setStatus("Consulta completada.");
+
+                showCatalogAlert(
+                    "info",
+                    "El catálogo todavía no contiene alimentos registrados."
+                );
+
                 return;
             }
 
             filterAndSort();
-        } catch (error) {
-            loadingEl.style.display = "none";
-            showEmpty(
-                "No fue posible cargar el catálogo. Verifica que el API Gateway y svc-business estén activos."
+
+            showCatalogAlert(
+                "success",
+                "El catálogo de alimentos se cargó correctamente."
             );
-            setStatus(error.message || "Error al consultar los alimentos.", true);
-            console.error("Error al consultar svc-business:", error);
-        }
+
+        
+    } catch (error) {
+        loadingEl.style.display = "none";
+
+        showEmpty(
+            "No fue posible cargar el catálogo. Verifica que el API Gateway y svc-business estén activos."
+        );
+
+        setStatus(
+            "Error al consultar los alimentos.",
+            true
+        );
+
+        showCatalogAlert(
+            "error",
+            "No fue posible cargar los alimentos. Verifica tu conexión e inténtalo nuevamente."
+        );
+
+        console.error("Error al consultar svc-business:", error);
+    }
+
     }
 
     loadFromApi();
