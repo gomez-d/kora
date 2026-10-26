@@ -338,3 +338,48 @@ class ConsumptionRecordSerializer(serializers.ModelSerializer):
             )
 
         return record
+
+
+class ConsumptionItemReadSerializer(serializers.ModelSerializer):
+    food = serializers.CharField(
+        source="food.name",
+        read_only=True
+    )
+
+    serving_unit = serializers.CharField(
+        source="food.serving_unit",
+        read_only=True
+    )
+
+    class Meta:
+        model = ConsumptionItem
+        fields = [
+            "id",
+            "food",
+            "quantity",
+            "serving_unit",
+            "calories",
+            "protein",
+            "carbohydrates",
+            "fat",
+            "fiber",
+            "sugar",
+            "sodium"
+        ]
+
+
+class ConsumptionHistorySerializer(serializers.ModelSerializer):
+    consumption_items = ConsumptionItemReadSerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = ConsumptionRecord
+        fields = [
+            "id",
+            "consumed_at",
+            "notes",
+            "consumption_items",
+            "created_at"
+        ]

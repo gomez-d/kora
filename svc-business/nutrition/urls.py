@@ -5,7 +5,7 @@ from .views import (
     FoodView,
     FoodCategoryCreateView,
     FoodDetailView,
-    ConsumptionRecordCreateView
+    ConsumptionRecordView
 )
 
 urlpatterns = [
@@ -36,7 +36,7 @@ urlpatterns = [
     ),
     path(
         "consumptions/",
-        ConsumptionRecordCreateView.as_view(),
+        ConsumptionRecordView.as_view(),
         name="consumption-create"
     )
 ]
