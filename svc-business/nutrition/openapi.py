@@ -550,6 +550,13 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     '404': {
                         'description': 'Food not found.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/NotFoundResponse',
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -574,9 +581,23 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     '400': {
                         'description': 'Invalid food data.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/ValidationError',
+                                },
+                            },
+                        },
                     },
                     '404': {
                         'description': 'Food not found.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/NotFoundResponse',
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -601,9 +622,23 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     '400': {
                         'description': 'Invalid food data.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/ValidationError',
+                                },
+                            },
+                        },
                     },
                     '404': {
                         'description': 'Food not found.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/NotFoundResponse',
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -618,11 +653,26 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     '404': {
                         'description': 'Food not found.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/NotFoundResponse',
+                                },
+                            },
+                        },
                     },
                     '409': {
                         'description': (
-                            'Food is referenced by consumption records.'
+                            'Food cannot be deleted because it is referenced '
+                            'by consumption records.'
                         ),
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/ConflictResponse',
+                                },
+                            },
+                        },
                     },
                 },
             },

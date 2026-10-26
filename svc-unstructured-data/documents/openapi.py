@@ -292,6 +292,13 @@ class UnstructuredDataSchemaGenerator(SchemaGenerator):
                     },
                     '400': {
                         'description': 'Unsupported document type.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/ValidationError',
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -328,6 +335,13 @@ class UnstructuredDataSchemaGenerator(SchemaGenerator):
                     },
                     '404': {
                         'description': 'Document not found.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/NotFoundResponse',
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -353,9 +367,23 @@ class UnstructuredDataSchemaGenerator(SchemaGenerator):
                     },
                     '400': {
                         'description': 'Invalid document data.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/ValidationError',
+                                },
+                            },
+                        },
                     },
                     '404': {
                         'description': 'Document not found.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/NotFoundResponse',
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -370,6 +398,13 @@ class UnstructuredDataSchemaGenerator(SchemaGenerator):
                     },
                     '404': {
                         'description': 'Document not found.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/NotFoundResponse',
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -404,6 +439,13 @@ class UnstructuredDataSchemaGenerator(SchemaGenerator):
                     },
                     '400': {
                         'description': 'Invalid identity event data.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/ValidationError',
+                                },
+                            },
+                        },
                     },
                 },
             },
