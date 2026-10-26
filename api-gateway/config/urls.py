@@ -16,12 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+
 from rest_framework.schemas import get_schema_view
+from gateway.openapi import KoraSchemaGenerator
 
 schema_view = get_schema_view(
     title='Kora API',
     description='OpenAPI documentation for Kora V1 APIs.',
     version='1.0.0',
+    generator_class=KoraSchemaGenerator
 )
 
 urlpatterns = [
