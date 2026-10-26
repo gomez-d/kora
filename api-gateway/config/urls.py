@@ -15,10 +15,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
 from django.urls import include, path
+from rest_framework.schemas import get_schema_view
+
+schema_view = get_schema_view(
+    title='Kora API',
+    description='OpenAPI documentation for Kora V1 APIs.',
+    version='1.0.0',
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('gateway.urls')),
+
+    # OpenAPI schema endpoint for V1 API documentation.
+    path(
+        'api/schema/',
+        schema_view,
+        name='openapi-schema',
+    )
 ]
