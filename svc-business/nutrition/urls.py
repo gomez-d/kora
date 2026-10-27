@@ -3,7 +3,7 @@ from .views import (
     HealthCheckView,
     NutritionalProfileListCreateView,
     FoodView,
-    FoodCategoryCreateView,
+    FoodCategoryView,
     FoodDetailView,
     ConsumptionRecordCreateView
 )
@@ -21,8 +21,8 @@ urlpatterns = [
     ),
     path(
         "food-categories/",
-        FoodCategoryCreateView.as_view(),
-        name="food-category-create"
+        FoodCategoryView.as_view(),
+        name="food-category"
     ),
     path(
         "foods/",
