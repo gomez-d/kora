@@ -15,9 +15,13 @@ from .serializers import (
     FoodCategorySerializer,
     FoodSerializer,
     FoodReadSerializer,
-    ConsumptionRecordSerializer
+    ConsumptionRecordSerializer,
+    ConsumptionHistorySerializer
 )
-from .pagination import FoodPagination
+from .pagination import ConsumptionPagination
+
+from datetime import date
+from uuid import UUID
 
 
 class HealthCheckView(APIView):
@@ -89,7 +93,7 @@ class FoodView(APIView):
 
         foods = foods.order_by(ordering)
 
-        paginator = FoodPagination()
+        paginator = ConsumptionPagination()
         page = paginator.paginate_queryset(foods, request, view=self)
 
         serializer = FoodReadSerializer(page, many=True)
@@ -223,8 +227,84 @@ class FoodDetailView(APIView):
 
         return Response(status=204)
 
-      
-class ConsumptionRecordCreateView(APIView):
+
+class ConsumptionRecordView(APIView):
+    def get(self, request):
+        consumptions = ConsumptionRecord.objects.prefetch_related(
+            "consumption_items__food"
+        )
+
+        user_id = request.query_params.get("user_id")
+
+        if not user_id:
+            return Response(
+                {"detail": "The user_id parameter is required."},
+                status=400
+            )
+
+        try:
+            user_id = UUID(user_id)
+        except ValueError:
+            return Response(
+                {"detail": "Invalid user_id format."},
+                status=400
+            )
+
+        consumptions = consumptions.filter(user_id=user_id)
+
+        start_date = request.query_params.get("start_date")
+        end_date = request.query_params.get("end_date")
+
+        try:
+            if start_date:
+                start_date = date.fromisoformat(start_date)
+                consumptions = consumptions.filter(
+                    consumed_at__date__gte=start_date
+                )
+
+            if end_date:
+                end_date = date.fromisoformat(end_date)
+                consumptions = consumptions.filter(
+                    consumed_at__date__lte=end_date
+                )
+        except ValueError:
+            return Response(
+                {"detail": "Dates must use YYYY-MM-DD format."},
+                status=400
+            )
+
+        if start_date and end_date and start_date > end_date:
+            return Response(
+                {"detail": "start_date cannot be after end_date."},
+                status=400
+            )
+
+        ordering = request.query_params.get(
+            "ordering",
+            "-consumed_at"
+        )
+
+        allowed_orderings = {
+            "consumed_at",
+            "-consumed_at"
+        }
+
+        if ordering not in allowed_orderings:
+            ordering = "-consumed_at"
+
+        consumptions = consumptions.order_by(ordering)
+
+        paginator = ConsumptionPagination()
+        page = paginator.paginate_queryset(
+            consumptions,
+            request,
+            view=self
+        )
+
+        serializer = ConsumptionHistorySerializer(page, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
+
     def post(self, request):
         serializer = ConsumptionRecordSerializer(data=request.data)
 
