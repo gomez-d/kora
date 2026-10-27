@@ -1,4 +1,9 @@
 from fastapi import APIRouter, HTTPException
+from app.schemas.ai import (
+    AIErrorResponse,
+    AIRequest,
+    LLMResponse
+)
 
 from app.schemas.ai import (
     AIRequest,
@@ -13,7 +18,15 @@ router = APIRouter()
 ai_service = AIService()
 
 
-@router.post("/ai/process", response_model=LLMResponse)
+@router.post(
+        "/ai/process", response_model=LLMResponse,
+        responses={
+            400: {
+                "model": AIErrorResponse,
+                "description": 'Invalid AI request or missing prompt.',
+            }
+        }
+    )
 def process_ai(request: AIRequest):
 
     if request.type != "llm":

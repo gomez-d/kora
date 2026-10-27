@@ -16,9 +16,24 @@ Including another URLconf
 """
 from django.urls import include, path
 
+from rest_framework.schemas import get_schema_view
+from documents.openapi import UnstructuredDataSchemaGenerator
+
+schema_view = get_schema_view(
+    title='Kora Unstructured Data API',
+    description=(
+        'OpenAPI documentation for the Kora '
+        'unstructured data service.'
+    ),
+    version='1.0.0',
+    generator_class=UnstructuredDataSchemaGenerator,
+)
+
 urlpatterns = [
     path('api/', include('unstructured_data.urls')),
 
     # Routes for the unstructured document API.
     path('api/documents/', include('documents.urls')),
+
+    path('api/schema/', schema_view, name='openapi-schema'),
 ]
