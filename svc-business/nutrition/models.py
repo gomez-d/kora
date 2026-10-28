@@ -31,8 +31,7 @@ NUTRITION_RESTRICTIONS_CHOICES = [
 # Define Food choices
 SERVING_UNIT_CHOICES = [
     ("G", "Gramos"),
-    ("ML", "Mililitros"),
-    ("UNIT", "Unidad")
+    ("ML", "Mililitros")
 ]
 
 # Define FoodNutrient choices

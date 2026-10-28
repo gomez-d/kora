@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.utils import timezone
+from decimal import Decimal, ROUND_HALF_UP
+from django.db import transaction
 
 from .models import (
     NutritionalProfile,
@@ -191,9 +193,9 @@ class FoodSerializer(serializers.ModelSerializer):
         return value.strip().upper()
 
     def validate_serving_size(self, value):
-        if value <= 0:
+        if value != 100:
             raise serializers.ValidationError(
-                "The portion size must be greater than zero."
+                "The serving size must be exactly 100."
             )
 
         return value
@@ -278,9 +280,33 @@ class ConsumptionItemSerializer(serializers.ModelSerializer):
             "sugar",
             "sodium"
         ]
-        read_only_field = [
-            "id"
+
+        read_only_fields = [
+            "id",
+            "calories",
+            "protein",
+            "carbohydrates",
+            "fat",
+            "fiber",
+            "sugar",
+            "sodium"
         ]
+
+    def get_fields(self):
+        fields = super().get_fields()
+
+        for field_name in [
+            "calories",
+            "protein",
+            "carbohydrates",
+            "fat",
+            "fiber",
+            "sugar",
+            "sodium"
+        ]:
+            fields[field_name].required = False
+
+        return fields
 
     def validate_quantity(self, value):
         if value <= 0:
@@ -329,13 +355,65 @@ class ConsumptionRecordSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         items_data = validated_data.pop("consumption_items")
 
-        record = ConsumptionRecord.objects.create(**validated_data)
+        with transaction.atomic():
+            record = ConsumptionRecord.objects.create(**validated_data)
 
-        for item_data in items_data:
-            ConsumptionItem.objects.create(
-                consumption=record,
-                **item_data
-            )
+            for item_data in items_data:
+                food = item_data["food"]
+                quantity = item_data["quantity"]
+
+                nutrients = {
+                    nutrient.nutrient_type: nutrient
+                    for nutrient in food.nutrients.all()
+                }
+
+                def calculate_nutrient(nutrient_type):
+                    nutrient = nutrients.get(nutrient_type)
+
+                    if nutrient is None:
+                        raise serializers.ValidationError({
+                            "consumption_items": (
+                                f"Food '{food.name}' is missing "
+                                f"the nutrient '{nutrient_type}'"
+                            )
+                        })
+
+                    expected_unit = (
+                        "KCAL" if nutrient_type == "CALORIES"
+                        else "MG" if nutrient_type == "SODIUM"
+                        else "G"
+                    )
+
+                    if nutrient.unit != expected_unit:
+                        raise serializers.ValidationError({
+                            "consumption_items": (
+                                f"Food '{food.name}' has an invalid unit "
+                                f"for nutrient '{nutrient_type}'. "
+                                f"Expected '{expected_unit}'."
+                            )
+                        })
+
+                    return (
+                        (nutrient.amount * quantity / Decimal("100"))
+                        .quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                    )
+
+                nutrition_data = {
+                    "calories": calculate_nutrient("CALORIES"),
+                    "protein": calculate_nutrient("PROTEIN"),
+                    "carbohydrates": calculate_nutrient("CARBOHYDRATES"),
+                    "fat": calculate_nutrient("FAT"),
+                    "fiber": calculate_nutrient("FIBER"),
+                    "sugar": calculate_nutrient("SUGAR"),
+                    "sodium": calculate_nutrient("SODIUM")
+                }
+
+                ConsumptionItem.objects.create(
+                    consumption=record,
+                    food=food,
+                    quantity=quantity,
+                    **nutrition_data
+                )
 
         return record
 
