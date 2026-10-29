@@ -1,7 +1,8 @@
 
 from datetime import timedelta
-import uuid
 from decimal import Decimal
+import uuid
+from unittest.mock import patch
 
 from django.utils import timezone
 from rest_framework import status
@@ -18,6 +19,13 @@ from nutrition.models import (
 
 class ConsumptionRecordTests(APITestCase):
     def setUp(self):
+        patcher = patch(
+            "nutrition.views.user_exists",
+            return_value=True,
+        )
+        self.mock_user_exists = patcher.start()
+        self.addCleanup(patcher.stop)
+
         self.category = FoodCategory.objects.create(
             name="FRUTAS",
             description="FRUTAS FRESCAS",
@@ -296,3 +304,60 @@ class ConsumptionRecordTests(APITestCase):
             status.HTTP_400_BAD_REQUEST,
         )
         self.assertEqual(ConsumptionRecord.objects.count(), 0)
+
+    def test_create_consumption_with_nonexistent_user(self):
+        """A nonexistent user should be rejected."""
+        self.mock_user_exists.return_value = False
+
+        response = self.client.post(
+            self.url, self.payload, format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+        self.assertEqual(ConsumptionRecord.objects.count(), 0)
+
+    def test_create_consumption_when_identity_is_unavailable(self):
+        """An unavailable Identity service should return 503."""
+        self.mock_user_exists.return_value = None
+
+        response = self.client.post(
+            self.url, self.payload, format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+        self.assertEqual(ConsumptionRecord.objects.count(), 0)
+
+    def test_create_consumption_without_user_id(self):
+        """A missing user ID should be rejected."""
+        self.payload.pop("user_id")
+
+        response = self.client.post(
+            self.url, self.payload, format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+        self.assertEqual(ConsumptionRecord.objects.count(), 0)
+
+    def test_create_consumption_with_invalid_user_id(self):
+        """An invalid user ID should be rejected."""
+        self.payload["user_id"] = "invalid-uuid"
+
+        response = self.client.post(
+            self.url, self.payload, format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+        self.assertEqual(ConsumptionRecord.objects.count(), 0)
+        self.mock_user_exists.assert_not_called()

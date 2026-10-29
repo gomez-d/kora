@@ -38,9 +38,7 @@ class NutritionalProfileView(APIView):
 
         if not user_id:
             return Response(
-                {
-                    "detail": "The user_id query parameter is required."
-                },
+                {"detail": "The user_id query parameter is required."},
                 status=400
             )
 
@@ -373,10 +371,40 @@ class ConsumptionRecordView(APIView):
         return paginator.get_paginated_response(serializer.data)
 
     def post(self, request):
+        user_id = request.data.get("user_id")
+
+        if not user_id:
+            return Response(
+                {"detail": "The user_id field is required."},
+                status=400
+            )
+
+        try:
+            user_uuid = UUID(str(user_id))
+        except (ValueError, TypeError, AttributeError):
+            return Response(
+                {"detail": "The user_id field must be a valid UUID."},
+                status=400
+            )
+
+        exists = user_exists(user_uuid)
+
+        if exists is False:
+            return Response(
+                {"detail": "The specified user does not exist."},
+                status=400
+            )
+
+        if exists is None:
+            return Response(
+                {"detail": "Unable to verify the user with Identity Service."},
+                status=503
+            )
+
         serializer = ConsumptionRecordSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user_id=user_uuid)
 
             return Response(
                 serializer.data,
