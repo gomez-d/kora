@@ -66,7 +66,7 @@ class FoodTests(APITestCase):
             "category_id": str(self.category.id),
             "name": "Manzana actualizada",
             "description": "Manzana fresca actualizada",
-            "serving_size": 150,
+            "serving_size": 100,
             "serving_unit": "G",
             "nutrients": [
                 {
@@ -434,7 +434,7 @@ class FoodTests(APITestCase):
             "category_id": str(self.category.id),
             "name": "manzana",
             "description": "Otra manzana",
-            "serving_size": 150,
+            "serving_size": 100,
             "serving_unit": "G",
             "nutrients": [
                 {
@@ -468,6 +468,8 @@ class FoodTests(APITestCase):
             format="json",
         )
 
+        print(response.data)
+
         self.assertEqual(
             response.status_code,
             status.HTTP_200_OK,
@@ -479,7 +481,7 @@ class FoodTests(APITestCase):
             self.food.description,
             "MANZANA FRESCA ACTUALIZADA",
         )
-        self.assertEqual(str(self.food.serving_size), "150.00")
+        self.assertEqual(str(self.food.serving_size), "100.00")
 
         nutrients = list(self.food.nutrients.order_by("nutrient_type"))
         self.assertEqual(len(nutrients), 2)

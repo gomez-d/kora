@@ -61,6 +61,7 @@ services:
       PORT: "8000"
       ALLOWED_HOSTS: "*"
       DATABASE_URL: postgresql://kora:kora@postgres:5432/kora_business
+      IDENTITY_SERVICE_URL: http://svc-identity:8000
     depends_on:
       postgres:
         condition: service_healthy

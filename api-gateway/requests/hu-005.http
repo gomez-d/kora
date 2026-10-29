@@ -1,0 +1,90 @@
+@baseUrl = http://localhost:8000
+@userId = dd26f30e-28c2-4f20-ba3b-0a0da47d717d
+
+
+### HU-005 - Create nutritional profile
+POST {{baseUrl}}/api/business/nutritional-profiles/
+Content-Type: application/json
+
+{
+    "user_id": "{{userId}}",
+    "date_of_birth": "1995-05-15",
+    "sex": "MALE",
+    "weight": "75.50",
+    "height": "175.00",
+    "activity_level": "MODERATE"
+}
+
+
+### HU-005 - Get nutritional profiles by user
+GET {{baseUrl}}/api/business/nutritional-profiles/?user_id={{userId}}
+Accept: application/json
+
+
+### HU-005 - Get consumption history for user
+GET {{baseUrl}}/api/business/consumptions/?user_id={{userId}}
+Accept: application/json
+
+
+### HU-005 - Register test user
+POST {{baseUrl}}/api/identity/users/register/
+Content-Type: application/json
+
+{
+    "username": "usuario_prueba_hu005",
+    "email": "usuario.prueba.hu005@example.com",
+    "password": "KoraTest2026!",
+    "first_name": "Usuario",
+    "last_name": "Prueba"
+}
+
+
+### HU-005 - Get existing user
+GET {{baseUrl}}/api/identity/users/users/{{userId}}/
+Accept: application/json
+
+
+### HU-005 - Get non-existing user
+GET {{baseUrl}}/api/identity/users/users/550e8400-e29b-41d4-a716-446655440000/
+Accept: application/json
+
+
+### HU-005 - Create profile for existing user
+POST {{baseUrl}}/api/business/nutritional-profiles/
+Content-Type: application/json
+
+{
+    "user_id": "{{userId}}",
+    "date_of_birth": "1995-05-15",
+    "sex": "MALE",
+    "weight": "75.50",
+    "height": "175.00",
+    "activity_level": "MODERATE"
+}
+
+
+### HU-005 - Create profile for non-existing user
+POST {{baseUrl}}/api/business/nutritional-profiles/
+Content-Type: application/json
+
+{
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "date_of_birth": "1995-05-15",
+    "sex": "MALE",
+    "weight": "75.50",
+    "height": "175.00",
+    "activity_level": "MODERATE"
+}
+
+
+### HU-005 - Create profile without user ID
+POST {{baseUrl}}/api/business/nutritional-profiles/
+Content-Type: application/json
+
+{
+    "date_of_birth": "1995-05-15",
+    "sex": "MALE",
+    "weight": "75.50",
+    "height": "175.00",
+    "activity_level": "MODERATE"
+}
