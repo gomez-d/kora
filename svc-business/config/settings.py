@@ -22,6 +22,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load .env
 load_dotenv(BASE_DIR / '.env')
 
+IDENTITY_SERVICE_URL = os.getenv(
+    "IDENTITY_SERVICE_URL",
+    "http://localhost:8001"
+)
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 

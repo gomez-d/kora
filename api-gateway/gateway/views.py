@@ -6,6 +6,8 @@ from django.http import HttpResponse
 from django.conf import settings
 from gateway.clients.base import forward_request
 from rest_framework import status
+
+
 class HealthCheckView(APIView):
     def get(self, request):
         return Response({

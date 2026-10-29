@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     HealthCheckView,
-    NutritionalProfileListCreateView,
+    NutritionalProfileView,
     FoodView,
     FoodCategoryView,
     FoodDetailView,
@@ -16,7 +16,7 @@ urlpatterns = [
     ),
     path(
         "nutritional-profiles/",
-        NutritionalProfileListCreateView.as_view(),
+        NutritionalProfileView.as_view(),
         name="nutritional-profile-list-create"
     ),
     path(

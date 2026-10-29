@@ -3,6 +3,7 @@ from rest_framework.validators import UniqueValidator
 from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 from django.db import transaction
+from datetime import date
 
 from .models import (
     NutritionalProfile,
@@ -20,19 +21,37 @@ class NutritionalProfileSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user_id",
-            "age",
+            "date_of_birth",
             "sex",
             "weight",
             "height",
             "activity_level",
-            "nutrition_goal"
+            "created_at",
+            "updated_at"
+        ]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at"
         ]
 
-    def validate_age(self, value):
-        if value < 1 or value > 120:
+    def validate_date_of_birth(self, value):
+        today = date.today()
+
+        if value > today:
+            raise serializers.ValidationError(
+                "Date of birth cannot be in the future"
+            )
+
+        age = today.year - value.year
+        if (today.month, today.day) < (value.month, value.day):
+            age -= 1
+
+        if age < 1 or age > 120:
             raise serializers.ValidationError(
                 "Age must be between 1 and 120 years."
             )
+
         return value
 
     def validate_weight(self, value):
