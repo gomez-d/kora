@@ -1,8 +1,9 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from django.contrib.auth import authenticate
 
-from .serializers import UserRegistrationSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer
 from .models import User
 
 
@@ -59,6 +60,44 @@ class UserDetailView(APIView):
                 "data": {
                     "user_id": str(user.id)
                 }
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class UserLoginView(APIView):
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "success": False,
+                    "message": "Validation error.",
+                    "errors": serializer.errors
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = authenticate(
+            request=request,
+            username=serializer.validated_data["username"],
+            password=serializer.validated_data["password"]
+        )
+
+        if user is None:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Invalid credentials."
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        return Response(
+            {
+                "success": True,
+                "message": "Credentials verified successfully."
             },
             status=status.HTTP_200_OK
         )

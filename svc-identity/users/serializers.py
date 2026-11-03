@@ -2,6 +2,7 @@ from rest_framework import serializers
 from users.models import User
 from clients.unstructured_data_client import send_identity_event
 
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     Serializer used to register Kora users.
@@ -16,8 +17,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     )
 
     password = serializers.CharField(
-        write_only = True,
-        required = True
+        write_only=True,
+        required=True
     )
 
     class Meta:
@@ -67,3 +68,21 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             )
 
         return value
+
+
+class UserLoginSerializer(serializers.Serializer):
+    """
+    Serializer used to validate login credentials.
+    """
+
+    username = serializers.CharField(
+        required=True,
+        allow_blank=False
+    )
+
+    password = serializers.CharField(
+        required=True,
+        allow_blank=False,
+        write_only=True,
+        trim_whitespace=False
+    )
