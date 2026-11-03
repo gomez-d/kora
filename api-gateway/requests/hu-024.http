@@ -1,0 +1,8 @@
+### Login through API Gateway
+POST http://127.0.0.1:8000/api/identity/users/login/
+Content-Type: application/json
+
+{
+    "username": "daniel",
+    "password": "12345"
+}

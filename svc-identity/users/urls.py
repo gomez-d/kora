@@ -2,7 +2,8 @@ from django.urls import path
 from users.views import (
     HealthCheckView,
     UserRegistrationView,
-    UserDetailView
+    UserDetailView,
+    UserLoginView
 )
 
 urlpatterns = [
@@ -20,5 +21,10 @@ urlpatterns = [
         'users/<uuid:user_id>/',
         UserDetailView.as_view(),
         name="user-detail"
+    ),
+    path(
+        'login/',
+        UserLoginView.as_view(),
+        name="user-login"
     )
 ]

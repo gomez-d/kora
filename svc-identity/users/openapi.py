@@ -19,6 +19,7 @@ class IdentitySchemaGenerator(SchemaGenerator):
         schema['paths'] = {
             '/api/users/health/': self._health_path(),
             '/api/users/register/': self._register_path(),
+            '/api/users/login/': self._login_path()
         }
 
         schema['components'] = {
@@ -70,6 +71,24 @@ class IdentitySchemaGenerator(SchemaGenerator):
                         'last_name',
                     ],
                 },
+                'UserLoginRequest': {
+                    'type': 'object',
+                    'properties': {
+                        'username': {
+                            'type': 'string',
+                            'example': 'testuser'
+                        },
+                        'password': {
+                            'type': 'string',
+                            'format': 'password',
+                            'writeOnly': True
+                        }
+                    },
+                    'required': [
+                        'username',
+                        'password'
+                    ]
+                },
                 'UserRegistrationData': {
                     'type': 'object',
                     'properties': {
@@ -111,6 +130,23 @@ class IdentitySchemaGenerator(SchemaGenerator):
                         },
                     },
                 },
+                'UserLoginResponse': {
+                    'type': 'object',
+                    'properties': {
+                        'success': {
+                            'type': 'boolean',
+                            'example': True
+                        },
+                        'message': {
+                            'type': 'string',
+                            'example': 'Credentials verified successfully.'
+                        }
+                    },
+                    'required': [
+                        'success',
+                        'message'
+                    ]
+                },
                 'ValidationErrorResponse': {
                     'type': 'object',
                     'properties': {
@@ -128,6 +164,23 @@ class IdentitySchemaGenerator(SchemaGenerator):
                         },
                     },
                 },
+                'AuthenticationErrorResponse': {
+                    'type': 'object',
+                    'properties': {
+                        'success': {
+                            'type': 'boolean',
+                            'example': False
+                        },
+                        'message': {
+                            'type': 'string',
+                            'example': 'Invalid credentials.'
+                        }
+                    },
+                    'required': [
+                        'success',
+                        'message'
+                    ]
+                }
             },
         }
 
@@ -213,4 +266,71 @@ class IdentitySchemaGenerator(SchemaGenerator):
                     },
                 },
             },
+        }
+
+    def _login_path(self):
+        """
+        Document the user login endpoint.
+        """
+
+        return {
+            'post': {
+                'operationId': 'loginUser',
+                'summary': 'Authenticate a Kora user',
+                'tags': ['Identity'],
+                'requestBody': {
+                    'required': True,
+                    'content': {
+                        'application/json': {
+                            'schema': {
+                                '$ref': (
+                                    '#/components/schemas/'
+                                    'UserLoginRequest'
+                                )
+                            }
+                        }
+                    }
+                },
+                'responses': {
+                    '200': {
+                        'description': 'Credentials verified successfully.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'UserLoginResponse'
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    '400': {
+                        'description': 'Invalid login data.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'ValidationErrorResponse'
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    '401': {
+                        'description': 'Invalid credentials.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'AuthenticationErrorResponse'
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
