@@ -5,13 +5,7 @@ from app.schemas.ai import (
     LLMResponse
 )
 
-from app.schemas.ai import (
-    AIRequest,
-    LLMResponse
-)
-
 from app.services.ai_service import AIService
-
 
 router = APIRouter()
 

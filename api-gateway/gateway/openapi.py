@@ -159,30 +159,60 @@ class KoraSchemaGenerator(SchemaGenerator):
                         'id': {
                             'type': 'string',
                             'format': 'uuid',
+                            'readOnly': True,
                         },
                         'user_id': {
                             'type': 'string',
                             'format': 'uuid',
                         },
-                        'age': {
-                            'type': 'integer',
+                        'date_of_birth': {
+                            'type': 'string',
+                            'format': 'date',
                         },
                         'sex': {
                             'type': 'string',
+                            'enum': [
+                                'MALE',
+                                'FEMALE',
+                            ],
                         },
                         'weight': {
                             'type': 'number',
+                            'exclusiveMinimum': 0,
                         },
                         'height': {
                             'type': 'number',
+                            'exclusiveMinimum': 0,
                         },
                         'activity_level': {
                             'type': 'string',
+                            'enum': [
+                                'NONE',
+                                'LOW',
+                                'MODERATE',
+                                'HIGH',
+                                'VERY_HIGH',
+                            ],
                         },
-                        'nutrition_goal': {
+                        'created_at': {
                             'type': 'string',
+                            'format': 'date-time',
+                            'readOnly': True,
+                        },
+                        'updated_at': {
+                            'type': 'string',
+                            'format': 'date-time',
+                            'readOnly': True,
                         },
                     },
+                    'required': [
+                        'user_id',
+                        'date_of_birth',
+                        'sex',
+                        'weight',
+                        'height',
+                        'activity_level',
+                    ],
                 },
                 'FoodCategory': {
                     'type': 'object',
@@ -213,12 +243,27 @@ class KoraSchemaGenerator(SchemaGenerator):
                         },
                         'nutrient_type': {
                             'type': 'string',
+                            'enum': [
+                                'CALORIES',
+                                'PROTEIN',
+                                'CARBOHYDRATES',
+                                'FAT',
+                                'FIBER',
+                                'SUGAR',
+                                'SODIUM',
+                            ],
                         },
                         'amount': {
                             'type': 'number',
+                            'minimum': 0,
                         },
                         'unit': {
                             'type': 'string',
+                            'enum': [
+                                'G',
+                                'MG',
+                                'KCAL',
+                            ],
                         },
                     },
                     'required': [
@@ -242,9 +287,15 @@ class KoraSchemaGenerator(SchemaGenerator):
                         },
                         'serving_size': {
                             'type': 'number',
+                            'enum': [100],
                         },
                         'serving_unit': {
                             'type': 'string',
+                            'enum': [
+                                'G',
+                                'ML',
+                                'UNIT',
+                            ],
                         },
                         'nutrients': {
                             'type': 'array',
@@ -283,11 +334,60 @@ class KoraSchemaGenerator(SchemaGenerator):
                         },
                         'serving_unit': {
                             'type': 'string',
+                            'enum': [
+                                'G',
+                                'ML',
+                                'UNIT',
+                            ],
                         },
                         'nutrients': {
                             'type': 'array',
                             'items': {
                                 '$ref': '#/components/schemas/FoodNutrient',
+                            },
+                        },
+                        'created_at': {
+                            'type': 'string',
+                            'format': 'date-time',
+                        },
+                        'updated_at': {
+                            'type': 'string',
+                            'format': 'date-time',
+                        },
+                    },
+                },
+                'FoodWriteResponse': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {
+                            'type': 'string',
+                            'format': 'uuid',
+                        },
+                        'category_id': {
+                            'type': 'string',
+                            'format': 'uuid',
+                        },
+                        'name': {
+                            'type': 'string',
+                        },
+                        'description': {
+                            'type': 'string',
+                        },
+                        'serving_size': {
+                            'type': 'number',
+                        },
+                        'serving_unit': {
+                            'type': 'string',
+                            'enum': [
+                                'G',
+                                'ML',
+                                'UNIT',
+                            ],
+                        },
+                        'nutrients': {
+                            'type': 'array',
+                            'items': {
+                                '$ref': '#/components/schemas/FoodNutrient'
                             },
                         },
                         'created_at': {
@@ -389,7 +489,53 @@ class KoraSchemaGenerator(SchemaGenerator):
                     'required': [
                         'user_id',
                         'consumed_at',
-                        'notes',
+                        'consumption_items',
+                    ],
+                },
+                'ConsumptionItemRequest': {
+                    'type': 'object',
+                    'properties': {
+                        'food_id': {
+                            'type': 'string',
+                            'format': 'uuid',
+                        },
+                        'quantity': {
+                            'type': 'number',
+                            'exclusiveMinimum': 0,
+                        },
+                    },
+                    'required': [
+                        'food_id',
+                        'quantity',
+                    ],
+                },
+                'ConsumptionRecordRequest': {
+                    'type': 'object',
+                    'properties': {
+                        'user_id': {
+                            'type': 'string',
+                            'format': 'uuid',
+                        },
+                        'consumed_at': {
+                            'type': 'string',
+                            'format': 'date-time',
+                        },
+                        'notes': {
+                            'type': 'string',
+                        },
+                        'consumption_items': {
+                            'type': 'array',
+                            'items': {
+                                '$ref': (
+                                    '#/components/schemas/'
+                                    'ConsumptionItemRequest'
+                                ),
+                            },
+                        },
+                    },
+                    'required': [
+                        'user_id',
+                        'consumed_at',
                         'consumption_items',
                     ],
                 },
@@ -922,7 +1068,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                         'content': {
                             'application/json': {
                                 'schema': {
-                                    '$ref': '#/components/schemas/FoodResponse',
+                                    '$ref': '#/components/schemas/FoodWriteResponse',
                                 },
                             },
                         },
@@ -1005,6 +1151,16 @@ class KoraSchemaGenerator(SchemaGenerator):
                     '404': not_found_response,
                     '503': {
                         'description': 'Business service is unavailable.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'ServiceUnavailableResponse'
+                                    ), 
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -1031,6 +1187,16 @@ class KoraSchemaGenerator(SchemaGenerator):
                     '404': not_found_response,
                     '503': {
                         'description': 'Business service is unavailable.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                   '$ref': (
+                                        '#/components/schemas/'
+                                        'ServiceUnavailableResponse'
+                                    ), 
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -1057,6 +1223,16 @@ class KoraSchemaGenerator(SchemaGenerator):
                     '404': not_found_response,
                     '503': {
                         'description': 'Business service is unavailable.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'ServiceUnavailableResponse'
+                                    ), 
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -1087,6 +1263,16 @@ class KoraSchemaGenerator(SchemaGenerator):
                     },
                     '503': {
                         'description': 'Business service is unavailable.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'ServiceUnavailableResponse'
+                                    ), 
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -1109,7 +1295,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                             'schema': {
                                 '$ref': (
                                     '#/components/schemas/'
-                                    'ConsumptionRecord'
+                                    'ConsumptionRecordRequest'
                                 ),
                             },
                         },
