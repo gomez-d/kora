@@ -27,9 +27,7 @@ class LLMResponse(BaseModel):
     response: str
 
 class AIErrorResponse(BaseModel):
-    success: bool = False
-    type: str
-    error: str
+    detail: str
 
 class VisionResponse(BaseModel):
     success: bool

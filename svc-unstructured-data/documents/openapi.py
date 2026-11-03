@@ -70,7 +70,15 @@ class UnstructuredDataSchemaGenerator(SchemaGenerator):
                         'additionalProperties': True,
                     },
                     'recommendation': {
-                        'type': 'string',
+                        'oneOf': [
+                            {
+                                'type': 'string',
+                            },
+                            {
+                                'type': 'object',
+                                'additionalProperties': True,
+                            },
+                        ],
                     },
                     'metadata': {
                         'type': 'object',
@@ -181,6 +189,18 @@ class UnstructuredDataSchemaGenerator(SchemaGenerator):
                     'document',
                 ],
             },
+            'UpdateDocumentRequest': {
+                'type': 'object',
+                'properties': {
+                    'document': {
+                        'type': 'object',
+                        'additionalProperties': True,
+                    },
+                },
+                'required': [
+                    'document',
+                ],
+            },
             'ValidationError': {
                 'type': 'object',
                 'additionalProperties': True,
@@ -195,7 +215,31 @@ class UnstructuredDataSchemaGenerator(SchemaGenerator):
             },
             'IdentityEventRequest': {
                 'type': 'object',
-                'additionalProperties': True,
+                'additionalProperties':{
+                    'user_id': {
+                        'type': 'string',
+                        'format': 'uuid',
+                    },
+                    'event': {
+                        'type': 'string',
+                    },
+                    'level': {
+                        'type': 'string',
+                    },
+                    'data': {
+                        'type': 'object',
+                        'additionalProperties': True,
+                    },
+                    'metadata': {
+                        'type': 'object',
+                        'additionalProperties': True,
+                    },
+                },
+                'required': [
+                    'user_id',
+                    'event',
+                    'level',
+                ],
             },
         }
 
@@ -355,8 +399,7 @@ class UnstructuredDataSchemaGenerator(SchemaGenerator):
                     'content': {
                         'application/json': {
                             'schema': {
-                                'type': 'object',
-                                'additionalProperties': True,
+                                '$ref': '#/components/schemas/UpdateDocumentRequest'
                             },
                         },
                     },

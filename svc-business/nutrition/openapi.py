@@ -72,13 +72,16 @@ class BusinessSchemaGenerator(SchemaGenerator):
                         'type': 'string',
                         'format': 'uuid',
                     },
-                    'age': {
-                        'type': 'integer',
-                        'minimum': 1,
-                        'maximum': 120,
+                    'date_of_birth': {
+                        'type': 'string',
+                        'format': 'date',
                     },
                     'sex': {
                         'type': 'string',
+                        'enum': [
+                            'MALE',
+                            'FEMALE'
+                        ],
                     },
                     'weight': {
                         'type': 'number',
@@ -90,11 +93,33 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     'activity_level': {
                         'type': 'string',
+                        'enum': [
+                            'NONE',
+                            'LOW', 
+                            'MODERATE',
+                            'HIGH',
+                            'VERY_HIGH'
+                        ],
                     },
-                    'nutrition_goal': {
+                    'created_at': {
                         'type': 'string',
+                        'format': 'date-time',
+                        'readOnly': True
+                    },
+                    'updated_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                        'readOnly': True,
                     },
                 },
+                'required': [
+                    'user_id',
+                    'date_of_birth',
+                    'sex',
+                    'weight',
+                    'height',
+                    'activity_level'
+                ],
             },
             'FoodCategory': {
                 'type': 'object',
@@ -122,6 +147,15 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     'nutrient_type': {
                         'type': 'string',
+                        'enum': [
+                            'CALORIES',
+                            'PROTEIN',
+                            'CARBOHYDRATES',
+                            'FAT',
+                            'FIBER',
+                            'SUGAR',
+                            'SODIUM'
+                        ],
                     },
                     'amount': {
                         'type': 'number',
@@ -129,6 +163,11 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     'unit': {
                         'type': 'string',
+                        'enum': [
+                            'G',
+                            'MG',
+                            'KCAL'
+                        ],
                     },
                 },
                 'required': [
@@ -152,10 +191,15 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     'serving_size': {
                         'type': 'number',
-                        'exclusiveMinimum': 0,
+                        'enum': [100],
                     },
                     'serving_unit': {
                         'type': 'string',
+                        'enum': [
+                            'G',
+                            'ML',
+                            'UNIT',
+                        ],
                     },
                     'nutrients': {
                         'type': 'array',
@@ -194,6 +238,11 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     'serving_unit': {
                         'type': 'string',
+                        'enum': [
+                            'G',
+                            'ML',
+                            'UNIT',
+                        ],
                     },
                     'nutrients': {
                         'type': 'array',
@@ -208,6 +257,50 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     'updated_at': {
                         'type': 'string',
                         'format': 'date-time',
+                    },
+                },
+            },
+            'FoodWriteResponse': {
+                'type': 'object',
+                'properties': {
+                    'id': {
+                        'type': 'string',
+                        'format': 'uuid',
+                    },
+                    'category_id': {
+                        'type': 'string',
+                        'format': 'uuid',
+                    },
+                    'name': {
+                        'type': 'string',
+                    },
+                    'description': {
+                        'type': 'string',
+                    },
+                    'serving_size': {
+                        'type': 'number',
+                    },
+                    'serving_unit': {
+                        'type': 'string',
+                        'enum': [
+                            'G',
+                            'ML',
+                            'UNIT',
+                        ],
+                    },
+                    'nutrients': {
+                        'type': 'array',
+                        'items': {
+                            '$ref': '#/components/schemas/FoodNutrient',
+                        },
+                    },
+                    'created_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                    },
+                    'updated_at': {
+                        'type': 'string',
+                        'format': 'date-time'
                     },
                 },
             },
@@ -250,6 +343,23 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                 },
             },
+            'ConsumptionItemRequest': {
+                'type': 'object',
+                'properties': {
+                    'food_id': {
+                        'type': 'string',
+                        'format': 'uuid',
+                    },
+                    'quantity': {
+                        'type': 'number',
+                        'exclusiveMinimum': 0,
+                    },
+                },
+                'required': [
+                    'food_id',
+                    'quantity',
+                ],
+            },
             'ConsumptionRecord': {
                 'type': 'object',
                 'properties': {
@@ -281,6 +391,36 @@ class BusinessSchemaGenerator(SchemaGenerator):
                         'readOnly': True,
                     },
                 },
+            },
+            'ConsumptionRecordRequest': {
+                'type': 'object',
+                'properties': {
+                    'user_id': {
+                        'type': 'string',
+                        'format': 'uuid',
+                    },
+                    'consumed_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                    },
+                    'notes': {
+                        'type': 'string',
+                    },
+                    'consumption_items': {
+                        'type': 'array',
+                        'items': {
+                            '$ref': (
+                                '#/components/schemas/'
+                                'ConsumptionItemRequest'
+                            ),
+                        },
+                    },
+                },
+                'required': [
+                    'user_id',
+                    'consumed_at',
+                    'consumption_items',
+                ],
             },
             'ValidationError': {
                 'type': 'object',
@@ -430,6 +570,13 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     '400': {
                         'description': 'Invalid category data.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/ValidationError',
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -508,13 +655,20 @@ class BusinessSchemaGenerator(SchemaGenerator):
                         'content': {
                             'application/json': {
                                 'schema': {
-                                    '$ref': '#/components/schemas/FoodResponse',
+                                    '$ref': '#/components/schemas/FoodWriteResponse',
                                 },
                             },
                         },
                     },
                     '400': {
                         'description': 'Invalid food data.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/ValidationError',
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -578,6 +732,13 @@ class BusinessSchemaGenerator(SchemaGenerator):
                 'responses': {
                     '200': {
                         'description': 'Food updated successfully.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/FoodResponse',
+                                },
+                            },
+                        },
                     },
                     '400': {
                         'description': 'Invalid food data.',
@@ -619,6 +780,13 @@ class BusinessSchemaGenerator(SchemaGenerator):
                 'responses': {
                     '200': {
                         'description': 'Food updated successfully.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/FoodResponse',
+                                },
+                            },
+                        },
                     },
                     '400': {
                         'description': 'Invalid food data.',
@@ -691,7 +859,7 @@ class BusinessSchemaGenerator(SchemaGenerator):
                             'schema': {
                                 '$ref': (
                                     '#/components/schemas/'
-                                    'ConsumptionRecord'
+                                    'ConsumptionRecordRequest'
                                 ),
                             },
                         },
@@ -713,6 +881,13 @@ class BusinessSchemaGenerator(SchemaGenerator):
                     },
                     '400': {
                         'description': 'Invalid consumption data.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': '#/components/schemas/ValidationError',
+                                },
+                            },
+                        },
                     },
                 },
             },
