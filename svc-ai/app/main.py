@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from dotenv import load_dotenv
+
 from app.api.routes.ai import router as ai_router
 from app.api.routes.vision import router as vision_router
 
+load_dotenv()
 
 app = FastAPI(
     title="Kora AI",

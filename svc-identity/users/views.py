@@ -2,14 +2,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 
-from users.serializers import UserRegistrationSerializer
+from .serializers import UserRegistrationSerializer
+from .models import User
+
 
 class HealthCheckView(APIView):
     def get(self, request):
-        return Response ({
+        return Response({
             "status": "ok",
             "service": "identity"
         })
+
 
 class UserRegistrationView(APIView):
     def post(self, request):
@@ -34,4 +37,28 @@ class UserRegistrationView(APIView):
                 "errors": serializer.errors,
             },
             status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class UserDetailView(APIView):
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "success": False,
+                    "message": "User not found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response(
+            {
+                "success": True,
+                "data": {
+                    "user_id": str(user.id)
+                }
+            },
+            status=status.HTTP_200_OK
         )

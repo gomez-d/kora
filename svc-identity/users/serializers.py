@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from users.models import User
+from clients.unstructured_data_client import send_identity_event
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
@@ -37,7 +38,27 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        """
+        Create the user and notify the unstructured data service
+        about the registration event.
+        """
+
+        # Create the user in the identity database.
+        user = User.objects.create_user(**validated_data)
+
+        # Send the registration event to the unstructured data service.
+        send_identity_event(
+            user_id=user.id,
+            event='user_registered',
+            data={
+                'username': user.username
+            },
+            metadata={
+                'source': 'user_registration',
+            },
+        )
+
+        return user
 
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():

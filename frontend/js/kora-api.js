@@ -154,21 +154,47 @@
     }
     return data;
   }
+  
+  async function listFoodCategories() {
+      return request(cfg().endpoints.foodCategories, {
+          method: "GET"
+      });
+  }
 
+  async function createFoodCategory(payload) {
+      return request(cfg().endpoints.foodCategories, {
+          method: "POST",
+          json: payload
+      });
+  }
+  async function createFood(payload) {
+      return request(cfg().endpoints.foods, {
+          method: "POST",
+          json: payload
+      });
+  }
+
+  
   global.KoraApi = {
-    url: url,
-    request: request,
-    getToken: getToken,
-    getUser: getUser,
-    setSession: setSession,
-    clearSession: clearSession,
-    registerUser: registerUser,
-    loginUser: loginUser,
-    listFoods: listFoods,
-    createFood: createFood,
-    listNutritionalProfiles: listNutritionalProfiles,
-    createNutritionalProfile: createNutritionalProfile,
-    processLlm: processLlm,
-    analyzeVision: analyzeVision
+      url: url,
+      request: request,
+      getToken: getToken,
+      getUser: getUser,
+      setSession: setSession,
+      clearSession: clearSession,
+      registerUser: registerUser,
+      loginUser: loginUser,
+
+      listFoods: listFoods,
+      createFood: createFood,
+      createFoodCategory: createFoodCategory,
+        listFoodCategories,
+      listNutritionalProfiles: listNutritionalProfiles,
+      createNutritionalProfile: createNutritionalProfile,
+      processLlm: processLlm,
+      analyzeVision: analyzeVision
   };
+
 })(window);
+
+

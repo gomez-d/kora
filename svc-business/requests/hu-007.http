@@ -1,0 +1,82 @@
+### List foods
+GET http://localhost:8002/api/foods/
+Accept: application/json
+
+
+### Retrieve an existing food
+GET  http://localhost:8002/api/foods/5223f163-c930-4dcc-a9d1-aa3135b04de8/
+Accept: application/json
+
+
+### Retrieve a non-existing food
+GET  http://localhost:8002/api/foods/00000000-0000-4000-8000-000000000000/
+Accept: application/json
+
+
+### Retrieve first page of foods
+GET http://localhost:8002/api/foods/
+Accept: application/json
+
+
+### Retrieve second page of foods
+GET http://localhost:8002/api/foods/?page=2
+Accept: application/json
+
+
+### Retrieve five foods per page
+GET http://localhost:8002/api/foods/?page_size=1
+Accept: application/json
+
+
+### Filter foods by name
+GET http://localhost:8002/api/foods/?search=manzana
+Accept: application/json
+
+
+### Filter foods by category
+GET http://localhost:8002/api/foods/?category_id=fdf27f12-53b9-48d0-835d-6bd6122bbdd7
+Accept: application/json
+
+
+### Filter foods by name and category
+GET http://localhost:8002/api/foods/?search=pera&category_id=fdf27f12-53b9-48d0-835d-6bd6122bbdd7
+Accept: application/json
+
+
+### Order foods by name ascending
+GET http://localhost:8002/api/foods/?ordering=name
+Accept: application/json
+
+
+### Order foods by name descending
+GET http://localhost:8002/api/foods/?ordering=-name
+Accept: application/json
+
+
+### Order foods by creation date ascending
+GET http://localhost:8002/api/foods/?ordering=created_at
+Accept: application/json
+
+
+### Order foods by creation date descending
+GET http://localhost:8002/api/foods/?ordering=-created_at
+Accept: application/json
+
+
+### Test invalid ordering
+GET http://localhost:8002/api/foods/?ordering=invalid_field
+Accept: application/json
+
+
+### Verify food list does not allow PUT
+PUT http://localhost:8002/api/foods/
+Content-Type: application/json
+
+{}
+
+
+### Verify food detail does not allow POST
+POST http://localhost:8002/api/foods/5223f163-c930-4dcc-a9d1-aa3135b04de8/
+Content-Type: application/json
+
+{}

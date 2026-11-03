@@ -1272,3 +1272,198 @@
         height: 58px;
     }
 }
+
+/* ============================================
+   HEADER KORA – estilo imagen
+   ============================================ */
+
+.page-main .s-header--kora {
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    background: #ffffff;
+    padding: 0;
+    min-height: auto;
+    display: block;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Barra superior verde oscuro */
+.page-main .s-header--kora .s-header__top-bar {
+    height: 8px;
+    background: #2D4200;
+    width: 100%;
+}
+
+/* Contenedor principal del header */
+.page-main .s-header--kora .s-header__block--main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.9rem 1.5rem;
+    min-height: 72px;
+    position: relative;
+    background: #ffffff;
+}
+
+/* Logo izquierda */
+.page-main .s-header--kora .s-header__logo-left {
+    flex-shrink: 0;
+}
+
+.page-main .s-header--kora .s-header__brand-img {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    display: block;
+}
+
+/* Navegación (izquierda y derecha) */
+.page-main .s-header--kora .s-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+}
+
+.page-main .s-header--kora .s-header__nav--left {
+    margin-left: 2rem;
+    margin-right: auto;
+}
+
+.page-main .s-header--kora .s-header__nav--right {
+    margin-left: auto;
+    margin-right: 1.5rem;
+}
+
+/* Links de texto */
+.page-main .s-header--kora .s-header__link {
+    font-family: var(--font-3, "Inter", sans-serif);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #2a2a2a;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+}
+
+.page-main .s-header--kora .s-header__link:hover {
+    color: var(--main-orange, #c93f1d);
+}
+
+/* KORA centrado – TEXTO */
+.page-main .s-header--kora .s-header__kora {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+.page-main .s-header--kora .s-header__kora-text {
+    font-family: var(--font-4, "Cormorant SC", serif);
+    font-size: 2.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: #1a1a1a;
+    text-decoration: none;
+    line-height: 1;
+    display: block;
+    /* Efecto sutil de fondo como en la imagen */
+    background: linear-gradient(90deg, 
+        rgba(201, 63, 29, 0.08) 0%, 
+        rgba(54, 89, 2, 0.08) 50%, 
+        rgba(201, 63, 29, 0.08) 100%);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+}
+
+/* Avatar derecha */
+.page-main .s-header--kora .s-header__right {
+    position: static;
+    transform: none;
+    flex-shrink: 0;
+}
+
+.page-main .s-header--kora .s-header__perfil {
+    display: block;
+    line-height: 0;
+}
+
+.page-main .s-header--kora .s-header__perfil img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e8e4df;
+    transition: border-color 0.2s ease, transform 0.15s ease;
+}
+
+.page-main .s-header--kora .s-header__perfil:hover img {
+    border-color: var(--main-orange, #c93f1d);
+    transform: scale(1.05);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media screen and (max-width: 1100px) {
+    .page-main .s-header--kora .s-header__nav--left,
+    .page-main .s-header--kora .s-header__nav--right {
+        gap: 1.1rem;
+    }
+    
+    .page-main .s-header--kora .s-header__link {
+        font-size: 0.72rem;
+    }
+    
+    .page-main .s-header--kora .s-header__kora-text {
+        font-size: 2.2rem;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .page-main .s-header--kora .s-header__nav--left {
+        display: none; /* se puede convertir en menú hamburguesa después */
+    }
+    
+    .page-main .s-header--kora .s-header__nav--right {
+        margin-right: 1rem;
+        gap: 1rem;
+    }
+    
+    .page-main .s-header--kora .s-header__kora-text {
+        font-size: 2rem;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .page-main .s-header--kora .s-header__block--main {
+        padding: 0.75rem 1rem;
+        min-height: 64px;
+    }
+    
+    .page-main .s-header--kora .s-header__nav--right {
+        display: none;
+    }
+    
+    .page-main .s-header--kora .s-header__kora-text {
+        font-size: 1.7rem;
+        letter-spacing: 0.08em;
+    }
+    
+    .page-main .s-header--kora .s-header__brand-img {
+        width: 42px;
+        height: 42px;
+    }
+    
+    .page-main .s-header--kora .s-header__perfil img {
+        width: 42px;
+        height: 42px;
+    }
+}
