@@ -47,10 +47,12 @@ services:
       PORT: "8000"
       ALLOWED_HOSTS: "*"
       DATABASE_URL: postgresql://kora:kora@postgres:5432/kora_identity
+      JWT_SIGNING_KEY: ${JWT_SIGNING_KEY}
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    
 
   svc-business:
     build: ./svc-business
@@ -104,6 +106,7 @@ services:
       IDENTITY_SERVICE_URL: http://svc-identity:8000
       BUSINESS_SERVICE_URL: http://svc-business:8000
       AI_SERVICE_URL: http://svc-ai:8000
+      JWT_SIGNING_KEY: ${JWT_SIGNING_KEY}
     depends_on:
       - svc-identity
       - svc-business
