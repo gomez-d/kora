@@ -194,7 +194,165 @@ Kora/
 
 ---
 
-## 🚀 Installation
+## 🐳 Containerization 
+
+Kora V1 runs locally using Docker Compose. The environment includes the frontend, API Gateway, backend microservices, PostgreSQL, and MongoDB.
+
+### Requirements
+
+Before starting the environment, install:
+
+- Docker Desktop on Windows, or Docker Engine on Linux.
+- Docker Compose v2.
+- Git, to clone the repository.
+
+On Windows, make sure Docker Desktop is running before executing the commands.
+
+### Configuration
+
+The AI microservice requires an environment file at `svc-ai/.env`, as specified in `docker-compose.yml`.
+
+Create this file and configure the environment variables required by the AI service. For example, if the application uses a Groq API key, configure the variable name expected by the service. Do not commit API keys or other secrets to the repository.
+
+### Starting the Environment
+
+Open a terminal in the repository root directory and run:
+
+```bash
+docker compose config
+docker compose up --build -d
+```
+
+The first command validates and resolves the Compose configuration. The second builds the service images and starts the containers in the background.
+
+To check the container status, run:
+
+```bash
+docker compose ps
+```
+
+To inspect the logs, run:
+
+```bash
+docker compose logs --tail=50
+```
+
+To follow the logs in real time, run:
+
+```bash
+docker compose logs -f
+```
+
+Press `Ctrl+C` to stop following the logs. This does not stop the containers.
+
+### Services and Ports
+
+| Service | Local address / port |
+|---|---|
+| Frontend | http://localhost:5500 |
+| API Gateway | http://localhost:8000 |
+| Identity Service | http://localhost:8001 |
+| Business Service | http://localhost:8002 |
+| AI Service | http://localhost:8003 |
+| Unstructured Data Service | http://localhost:8004 |
+| PostgreSQL | `localhost:5432` |
+| MongoDB | `localhost:27017` |
+
+The frontend is served through its Docker container on port `5500`. The API Gateway routes requests to the backend services.
+
+Within the Docker Compose network, services communicate using their Compose service names and internal ports. For example, the Gateway accesses the Identity Service at `http://svc-identity:8000`.
+
+### Database Initialization
+
+PostgreSQL uses the `docker/postgres/init.sql` script to initialize the databases when the PostgreSQL data directory is first created.
+
+The configured databases are:
+
+- `kora_identity`
+- `kora_business`
+
+The PostgreSQL container uses the `postgres_data` volume to persist its data.
+
+MongoDB stores its data in the `mongo_data` volume and uses the `kora_unstructured` database for the unstructured-data service.
+
+### Verification
+
+Check that the containers are running:
+
+```bash
+docker compose ps
+```
+
+Verify the frontend responds:
+
+```bash
+curl -I http://localhost:5500
+```
+
+Verify the AI service's FastAPI documentation responds, if enabled:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8003/docs
+```
+
+An HTTP `200` response indicates that the requested page is available. Other endpoints should be checked against the routes actually implemented by each service.
+
+### Stopping the Environment
+
+To stop the containers without deleting persisted database data, run:
+
+```bash
+docker compose down
+```
+
+To start the existing environment again without rebuilding the images, run:
+
+```bash
+docker compose up -d
+```
+
+To stop the environment and delete its named data volumes, run:
+
+```bash
+docker compose down -v
+```
+
+**Warning:** The `-v` option removes the named PostgreSQL and MongoDB volumes. Persisted database data will be lost.
+
+### Rebuilding a Service
+
+To rebuild and restart a specific service after changing its code, run:
+
+```bash
+docker compose up --build -d frontend
+```
+
+Replace `frontend` with the name of the service you want to rebuild. To rebuild all services, run:
+
+```bash
+docker compose up --build -d
+```
+
+### Dockerfiles
+
+Each application service is built using its own Dockerfile:
+
+- `api-gateway/Dockerfile`
+- `svc-identity/Dockerfile`
+- `svc-business/Dockerfile`
+- `svc-ai/Dockerfile`
+- `svc-unstructured-data/Dockerfile`
+- `frontend/Dockerfile`
+
+### Troubleshooting
+
+- **Docker is not running:** Start Docker Desktop or the Docker Engine service.
+- **Port already in use:** Stop the process occupying the required port or change the host port mapping in `docker-compose.yml`.
+- **AI service fails to start:** Verify that `svc-ai/.env` exists and contains the required variables.
+- **Database connection errors:** Check the database container health and inspect service logs.
+- **Changes are not reflected:** Rebuild the affected service using `docker compose up --build -d <service-name>`.
+
+
 
 ### 📋 Requirements
 
@@ -337,91 +495,3 @@ Kora is an academic project currently under development. Its features, technolog
 
 </div>
 
----
-
-## 🐳 Containerization (HU-023)
-
-Kora V1 can be run in a reproducible environment using Docker Compose.
-
-### Requirements
-
-- Docker Engine
-- Docker Compose v2
-
-### Configuration
-
-```bash
-cp .env.example .env
-
-# Optional: Edit .env and configure GROQ_API_KEY or other AI API keys.
-```
-
-### Starting the Environment
-
-From the repository root directory, run:
-
-```bash
-docker compose up --build -d
-```
-
-On the first run, Docker builds the images and creates the PostgreSQL databases (`kora_identity` and `kora_business`) and the MongoDB database.
-
-### Services and Ports
-
-| Service | URL / Host Port |
-|---|---|
-| API Gateway | [http://localhost:8000](http://localhost:8000) |
-| Identity | [http://localhost:8001](http://localhost:8001) |
-| Business | [http://localhost:8002](http://localhost:8002) |
-| AI | [http://localhost:8003](http://localhost:8003) |
-| Unstructured Data | [http://localhost:8004](http://localhost:8004) |
-| PostgreSQL | `localhost:5432` (user/password: `kora` / `kora`) |
-| MongoDB | `localhost:27017` |
-
-Within the Docker Compose network, microservices can communicate using their service names, such as `svc-identity`, `postgres`, and `mongo`.
-
-### Quick Verification
-
-```bash
-# Gateway (adjust the health endpoint if your API uses a different route).
-curl -s http://localhost:8000/ || true
-
-# Identity health check (depending on the current implementation).
-curl -s http://localhost:8001/api/users/health/ || curl -s http://localhost:8001/
-
-# Business health check.
-curl -s http://localhost:8002/api/nutrition/health/ || curl -s http://localhost:8002/
-
-# AI (FastAPI documentation).
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8003/docs
-```
-
-### Stopping the Environment
-
-```bash
-docker compose down
-```
-
-To also remove the data volumes, run:
-
-```bash
-docker compose down -v
-```
-
-> ⚠️ **Warning:** Removing volumes deletes the persisted data stored in those volumes.
-
-### Dockerfiles
-
-Each microservice includes its own `Dockerfile`:
-
-- `api-gateway/Dockerfile`
-- `svc-identity/Dockerfile`
-- `svc-business/Dockerfile`
-- `svc-ai/Dockerfile`
-- `svc-unstructured-data/Dockerfile`
-
-PostgreSQL is initialized using `docker/postgres/init.sql`, which creates the `kora_identity` and `kora_business` databases.
-
-### Frontend
-
-The static frontend in `frontend/` is not included in the V1 `docker-compose.yml`. It can be served using any local static web server or integrated with Nginx in a future version.

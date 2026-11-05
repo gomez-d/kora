@@ -19,7 +19,8 @@ class IdentitySchemaGenerator(SchemaGenerator):
         schema['paths'] = {
             '/api/users/health/': self._health_path(),
             '/api/users/register/': self._register_path(),
-            '/api/users/login/': self._login_path()
+            '/api/users/login/': self._login_path(),
+            '/api/users/token/refresh/': self._refresh_path(),
         }
 
         schema['components'] = {
@@ -267,70 +268,76 @@ class IdentitySchemaGenerator(SchemaGenerator):
                 },
             },
         }
-
+        
     def _login_path(self):
-        """
-        Document the user login endpoint.
-        """
-
         return {
             'post': {
                 'operationId': 'loginUser',
-                'summary': 'Authenticate a Kora user',
+                'summary': 'Authenticate a user and generate JWT tokens',
                 'tags': ['Identity'],
                 'requestBody': {
                     'required': True,
                     'content': {
                         'application/json': {
                             'schema': {
-                                '$ref': (
-                                    '#/components/schemas/'
-                                    'UserLoginRequest'
-                                )
-                            }
-                        }
-                    }
+                                'type': 'object',
+                                'properties': {
+                                    'username': {'type': 'string'},
+                                    'password': {
+                                        'type': 'string',
+                                        'format': 'password',
+                                    },
+                                },
+                                'required': ['username', 'password'],
+                            },
+                        },
+                    },
                 },
                 'responses': {
                     '200': {
-                        'description': 'Credentials verified successfully.',
-                        'content': {
-                            'application/json': {
-                                'schema': {
-                                    '$ref': (
-                                        '#/components/schemas/'
-                                        'UserLoginResponse'
-                                    )
-                                }
-                            }
-                        }
+                        'description': 'Login successful. JWT tokens generated.',
                     },
                     '400': {
-                        'description': 'Invalid login data.',
-                        'content': {
-                            'application/json': {
-                                'schema': {
-                                    '$ref': (
-                                        '#/components/schemas/'
-                                        'ValidationErrorResponse'
-                                    )
-                                }
-                            }
-                        }
+                        'description': 'Invalid request data.',
                     },
                     '401': {
                         'description': 'Invalid credentials.',
-                        'content': {
-                            'application/json': {
-                                'schema': {
-                                    '$ref': (
-                                        '#/components/schemas/'
-                                        'AuthenticationErrorResponse'
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                    },
+                },
+            },
         }
+
+
+    def _refresh_path(self):
+        return {
+            'post': {
+                'operationId': 'refreshAccessToken',
+                'summary': 'Generate a new access token',
+                'tags': ['Identity'],
+                'requestBody': {
+                    'required': True,
+                    'content': {
+                        'application/json': {
+                            'schema': {
+                                'type': 'object',
+                                'properties': {
+                                    'refresh': {'type': 'string'},
+                                },
+                                'required': ['refresh'],
+                            },
+                        },
+                    },
+                },
+                'responses': {
+                    '200': {
+                        'description': 'Access token successfully renewed.',
+                    },
+                    '401': {
+                        'description': 'Invalid or expired refresh token.',
+                    },
+                },
+            },
+        }
+        
+                
+            

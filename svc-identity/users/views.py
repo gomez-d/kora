@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth import authenticate
-
+from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserRegistrationSerializer, UserLoginSerializer
 from .models import User
 
@@ -93,11 +93,16 @@ class UserLoginView(APIView):
                 },
                 status=status.HTTP_401_UNAUTHORIZED
             )
-
+        refresh = RefreshToken.for_user(user)
         return Response(
             {
                 "success": True,
-                "message": "Credentials verified successfully."
+                "message": "Credentials verified successfully.",
+                "data": {
+                    "user_id": str(user.id),
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                }
             },
             status=status.HTTP_200_OK
         )

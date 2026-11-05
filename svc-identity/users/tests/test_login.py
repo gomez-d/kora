@@ -133,3 +133,19 @@ class UserLoginTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST
         )
+    def test_login_with_valid_credentials_returns_tokens(self):
+        response = self.client.post(
+            self.login_url,
+            self.valid_credentials,
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["success"])
+        self.assertIn("access", response.data["data"])
+        self.assertIn("refresh", response.data["data"])
+        self.assertIn("user_id", response.data["data"])
+        self.assertEqual(
+            response.data["data"]["user_id"],
+            str(self.user.id)
+        )
