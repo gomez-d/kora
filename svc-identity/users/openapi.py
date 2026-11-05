@@ -268,8 +268,76 @@ class IdentitySchemaGenerator(SchemaGenerator):
                 },
             },
         }
-    
-
-    
-            
         
+    def _login_path(self):
+        return {
+            'post': {
+                'operationId': 'loginUser',
+                'summary': 'Authenticate a user and generate JWT tokens',
+                'tags': ['Identity'],
+                'requestBody': {
+                    'required': True,
+                    'content': {
+                        'application/json': {
+                            'schema': {
+                                'type': 'object',
+                                'properties': {
+                                    'username': {'type': 'string'},
+                                    'password': {
+                                        'type': 'string',
+                                        'format': 'password',
+                                    },
+                                },
+                                'required': ['username', 'password'],
+                            },
+                        },
+                    },
+                },
+                'responses': {
+                    '200': {
+                        'description': 'Login successful. JWT tokens generated.',
+                    },
+                    '400': {
+                        'description': 'Invalid request data.',
+                    },
+                    '401': {
+                        'description': 'Invalid credentials.',
+                    },
+                },
+            },
+        }
+
+
+    def _refresh_path(self):
+        return {
+            'post': {
+                'operationId': 'refreshAccessToken',
+                'summary': 'Generate a new access token',
+                'tags': ['Identity'],
+                'requestBody': {
+                    'required': True,
+                    'content': {
+                        'application/json': {
+                            'schema': {
+                                'type': 'object',
+                                'properties': {
+                                    'refresh': {'type': 'string'},
+                                },
+                                'required': ['refresh'],
+                            },
+                        },
+                    },
+                },
+                'responses': {
+                    '200': {
+                        'description': 'Access token successfully renewed.',
+                    },
+                    '401': {
+                        'description': 'Invalid or expired refresh token.',
+                    },
+                },
+            },
+        }
+        
+                
+            
