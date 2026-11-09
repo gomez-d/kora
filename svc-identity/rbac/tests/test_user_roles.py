@@ -152,3 +152,158 @@ class UserRoleTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertFalse(response.data["success"])
+
+class UserRolesQueryTests(APITestCase):
+    """
+    Test authorized user-role consultation.
+    """
+
+    def setUp(self):
+        self.user_role = Role.objects.get_or_create(
+            name="USER",
+            defaults={
+                "description": "Standard Kora user role."
+            }
+        )[0]
+
+        self.admin_role = Role.objects.get_or_create(
+            name="ADMIN",
+            defaults={
+                "description": "Kora administrator role."
+            }
+        )[0]
+
+        self.user = User.objects.create_user(
+            email="user@example.com",
+            password="TestPassword123!",
+            first_name="Standard",
+            last_name="User"
+        )
+
+        self.other_user = User.objects.create_user(
+            email="other@example.com",
+            password="TestPassword123!",
+            first_name="Other",
+            last_name="User"
+        )
+
+        self.admin = User.objects.create_user(
+            email="admin@example.com",
+            password="TestPassword123!",
+            first_name="Admin",
+            last_name="User"
+        )
+
+        UserRole.objects.create(
+            user=self.user,
+            role=self.user_role
+        )
+
+        UserRole.objects.create(
+            user=self.other_user,
+            role=self.user_role
+        )
+
+        UserRole.objects.create(
+            user=self.admin,
+            role=self.admin_role
+        )
+
+    def test_user_can_view_own_roles(self):
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "user-roles-query",
+            kwargs={"user_id": self.user.id}
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+        self.assertEqual(
+            response.data["user_id"],
+            str(self.user.id)
+        )
+
+        self.assertIn(
+            "USER",
+            response.data["roles"]
+        )
+
+    def test_admin_can_view_other_user_roles(self):
+        self.client.force_authenticate(user=self.admin)
+
+        url = reverse(
+            "user-roles-query",
+            kwargs={"user_id": self.other_user.id}
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+        self.assertIn(
+            "USER",
+            response.data["roles"]
+        )
+
+    def test_user_cannot_view_other_user_roles(self):
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "user-roles-query",
+            kwargs={"user_id": self.other_user.id}
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN
+        )
+
+    def test_unauthenticated_user_cannot_view_roles(self):
+        url = reverse(
+            "user-roles-query",
+            kwargs={"user_id": self.user.id}
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_401_UNAUTHORIZED
+        )
+
+    def test_role_query_exposes_only_required_information(self):
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "user-roles-query",
+            kwargs={"user_id": self.user.id}
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+        self.assertEqual(
+            set(response.data.keys()),
+            {"user_id", "roles"}
+        )
+
+        self.assertNotIn("email", response.data)
+        self.assertNotIn("first_name", response.data)
+        self.assertNotIn("last_name", response.data)
+        self.assertNotIn("date_of_birth", response.data)
+        self.assertNotIn("permissions", response.data)

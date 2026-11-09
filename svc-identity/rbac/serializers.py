@@ -109,3 +109,15 @@ class RolePermissionWriteSerializer(serializers.ModelSerializer):
             "role",
             "permission"
         ]
+
+class UserRolesQuerySerializer(serializers.Serializer):
+    """
+    Serialize the minimum role information required to determine
+    a user's capabilities.
+    """
+
+    user_id = serializers.UUIDField(read_only=True)
+    roles = serializers.ListField(
+        child=serializers.CharField(),
+        read_only=True
+    )

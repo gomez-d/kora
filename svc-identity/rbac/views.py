@@ -1,6 +1,9 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+
+from users.models import User
 
 from rbac.models import (
     Role,
@@ -17,7 +20,8 @@ from rbac.serializers import (
     UserRoleReadSerializer,
     UserRoleWriteSerializer,
     RolePermissionReadSerializer,
-    RolePermissionWriteSerializer
+    RolePermissionWriteSerializer,
+    UserRolesQuerySerializer
 )
 
 
@@ -469,5 +473,63 @@ class RolePermissionDetailView(APIView):
                 "success": True,
                 "message": "Permission unassigned from role successfully."
             },
+            status=status.HTTP_200_OK
+        )
+
+class UserRolesQueryView(APIView):
+    """
+    Allow authorized users to retrieve the roles assigned to a user.
+
+    Standard users may only retrieve their own roles.
+    Administrators may retrieve roles assigned to other users.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        # Retrieve only active users.
+        try:
+            user = User.objects.get(
+                id=user_id,
+                is_active=True
+            )
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "detail": "User not found."
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Standard users may only consult their own roles.
+        is_own_user = request.user.id == user.id
+
+        # Administrators may consult roles assigned to other users.
+        is_admin = request.user.roles.filter(
+            name="ADMIN"
+        ).exists()
+
+        if not is_own_user and not is_admin:
+            return Response(
+                {
+                    "detail": "You are not authorized to view this user's roles."
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        data = {
+            "user_id": user.id,
+            "roles": list(
+                user.roles.values_list(
+                    "name",
+                    flat=True
+                )
+            )
+        }
+
+        serializer = UserRolesQuerySerializer(data)
+
+        return Response(
+            serializer.data,
             status=status.HTTP_200_OK
         )
