@@ -99,6 +99,22 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         return user
 
+    def validate(self, attrs):
+        """
+        Prevent clients from assigning roles during registration.
+        """
+
+        if "role" in self.initial_data or "roles" in self.initial_data:
+            raise serializers.ValidationError(
+                {
+                    "role": [
+                        "Role assignment is not allowed during registration."
+                    ]
+                }
+            )
+
+        return attrs
+
 
 class UserDetailSerializer(serializers.ModelSerializer):
     """
