@@ -5,6 +5,8 @@ from django.utils import timezone
 
 from users.models import User
 
+from rbac.models import Role, UserRole
+
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
@@ -73,6 +75,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         # Create the user in the identity database.
         user = User.objects.create_user(**validated_data)
+
+        # Get the default role assigned to standard Kora users.
+        default_role = Role.objects.get(name="USER")
+
+        # Associate the default role with the new user.
+        UserRole.objects.create(
+            user=user,
+            role=default_role
+        )
 
         # Send the registration event to the unstructured data service.
         send_identity_event(
