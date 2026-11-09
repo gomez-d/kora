@@ -24,6 +24,7 @@ from rbac.serializers import (
     UserRolesQuerySerializer
 )
 
+from rbac.permissions import IsKoraAdmin
 
 class RoleView(APIView):
     def get(self, request):
@@ -296,6 +297,11 @@ class PermissionDetailView(APIView):
 
 
 class UserRoleView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        IsKoraAdmin
+    ]
+
     def get(self, request):
         user_roles = UserRole.objects.all()
 
@@ -335,6 +341,11 @@ class UserRoleView(APIView):
 
 
 class UserRoleDetailView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        IsKoraAdmin
+    ]
+
     def get_object(self, user_role_id):
         try:
             return UserRole.objects.get(id=user_role_id)

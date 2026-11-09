@@ -33,7 +33,26 @@ class UserRoleTests(APITestCase):
             kwargs={"user_role_id": self.user_role.id}
         )
 
+        self.admin_role = Role.objects.get_or_create(
+            name="ADMIN",
+            defaults={
+                "description": "Kora administrator role."
+            }
+        )[0]
+
+        self.admin = User.objects.create_user(
+            email="testadmin@example.com",
+            password="TestPassword123!"
+        )
+
+        UserRole.objects.create(
+            user=self.admin,
+            role=self.admin_role
+        )
+
     def test_assign_role_to_user(self):
+        self.client.force_authenticate(user=self.admin)
+
         another_user = User.objects.create_user(
             email="another@example.com",
             password="TestPassword123!",
@@ -62,6 +81,8 @@ class UserRoleTests(APITestCase):
         )
 
     def test_assign_role_with_nonexistent_user(self):
+        self.client.force_authenticate(user=self.admin)
+
         data = {
             "user": "00000000-0000-0000-0000-000000000000",
             "role": str(self.role.id)
@@ -77,6 +98,7 @@ class UserRoleTests(APITestCase):
         self.assertFalse(response.data["success"])
 
     def test_assign_nonexistent_role_to_user(self):
+        self.client.force_authenticate(user=self.admin)
         data = {
             "user": str(self.user.id),
             "role": "00000000-0000-0000-0000-000000000000"
@@ -92,6 +114,8 @@ class UserRoleTests(APITestCase):
         self.assertFalse(response.data["success"])
 
     def test_assign_duplicate_role_to_user(self):
+        self.client.force_authenticate(user=self.admin)
+
         data = {
             "user": str(self.user.id),
             "role": str(self.role.id)
@@ -107,6 +131,7 @@ class UserRoleTests(APITestCase):
         self.assertFalse(response.data["success"])
 
     def test_get_all_user_role_assignments(self):
+        self.client.force_authenticate(user=self.admin)
         response = self.client.get(self.user_roles_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -114,12 +139,14 @@ class UserRoleTests(APITestCase):
         self.assertGreaterEqual(len(response.data["data"]), 1)
 
     def test_get_user_role_assignment_by_id(self):
+        self.client.force_authenticate(user=self.admin)
         response = self.client.get(self.user_role_detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["success"])
 
     def test_get_nonexistent_user_role_assignment(self):
+        self.client.force_authenticate(user=self.admin)
         url = reverse(
             "user-role-detail",
             kwargs={"user_role_id": "00000000-0000-0000-0000-000000000000"}
@@ -131,6 +158,7 @@ class UserRoleTests(APITestCase):
         self.assertFalse(response.data["success"])
 
     def test_remove_role_from_user(self):
+        self.client.force_authenticate(user=self.admin)
         response = self.client.delete(self.user_role_detail_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -143,6 +171,7 @@ class UserRoleTests(APITestCase):
         self.assertTrue(Role.objects.filter(id=self.role.id).exists())
 
     def test_remove_nonexistent_user_role_assignment(self):
+        self.client.force_authenticate(user=self.admin)
         url = reverse(
             "user-role-detail",
             kwargs={"user_role_id": "00000000-0000-0000-0000-000000000000"}
@@ -307,3 +336,188 @@ class UserRolesQueryTests(APITestCase):
         self.assertNotIn("last_name", response.data)
         self.assertNotIn("date_of_birth", response.data)
         self.assertNotIn("permissions", response.data)
+
+class UserRoleAuthorizationTests(APITestCase):
+    """
+    Test authorization rules for user-role modifications.
+    """
+
+    def setUp(self):
+        self.user_role = Role.objects.get_or_create(
+            name="USER",
+            defaults={
+                "description": "Standard Kora user role."
+            }
+        )[0]
+
+        self.admin_role = Role.objects.get_or_create(
+            name="ADMIN",
+            defaults={
+                "description": "Kora administrator role."
+            }
+        )[0]
+
+        self.user = User.objects.create_user(
+            email="user@example.com",
+            password="TestPassword123!"
+        )
+
+        self.other_user = User.objects.create_user(
+            email="other@example.com",
+            password="TestPassword123!"
+        )
+
+        self.admin = User.objects.create_user(
+            email="admin@example.com",
+            password="TestPassword123!"
+        )
+
+        self.user_assignment = UserRole.objects.create(
+            user=self.user,
+            role=self.user_role
+        )
+
+        UserRole.objects.create(
+            user=self.admin,
+            role=self.admin_role
+        )
+
+        self.user_roles_url = reverse("user-roles")
+
+    def test_admin_can_assign_role(self):
+        self.client.force_authenticate(user=self.admin)
+
+        data = {
+            "user": str(self.other_user.id),
+            "role": str(self.user_role.id)
+        }
+
+        response = self.client.post(
+            self.user_roles_url,
+            data,
+            format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED
+        )
+
+        self.assertTrue(
+            UserRole.objects.filter(
+                user=self.other_user,
+                role=self.user_role
+            ).exists()
+        )
+
+    def test_user_cannot_assign_role_to_self(self):
+        self.client.force_authenticate(user=self.user)
+
+        data = {
+            "user": str(self.user.id),
+            "role": str(self.admin_role.id)
+        }
+
+        response = self.client.post(
+            self.user_roles_url,
+            data,
+            format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN
+        )
+
+        self.assertFalse(
+            UserRole.objects.filter(
+                user=self.user,
+                role=self.admin_role
+            ).exists()
+        )
+
+    def test_user_cannot_assign_role_to_other_user(self):
+        self.client.force_authenticate(user=self.user)
+
+        data = {
+            "user": str(self.other_user.id),
+            "role": str(self.admin_role.id)
+        }
+
+        response = self.client.post(
+            self.user_roles_url,
+            data,
+            format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN
+        )
+
+    def test_admin_can_remove_role(self):
+        assignment = UserRole.objects.create(
+            user=self.other_user,
+            role=self.user_role
+        )
+
+        self.client.force_authenticate(user=self.admin)
+
+        url = reverse(
+            "user-role-detail",
+            kwargs={"user_role_id": assignment.id}
+        )
+
+        response = self.client.delete(url)
+
+        self.assertIn(
+            response.status_code,
+            [
+                status.HTTP_200_OK,
+                status.HTTP_204_NO_CONTENT
+            ]
+        )
+
+        self.assertFalse(
+            UserRole.objects.filter(
+                id=assignment.id
+            ).exists()
+        )
+
+    def test_user_cannot_remove_own_role(self):
+        self.client.force_authenticate(user=self.user)
+
+        url = reverse(
+            "user-role-detail",
+            kwargs={"user_role_id": self.user_assignment.id}
+        )
+
+        response = self.client.delete(url)
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN
+        )
+
+        self.assertTrue(
+            UserRole.objects.filter(
+                id=self.user_assignment.id
+            ).exists()
+        )
+
+    def test_unauthenticated_user_cannot_assign_role(self):
+        data = {
+            "user": str(self.other_user.id),
+            "role": str(self.user_role.id)
+        }
+
+        response = self.client.post(
+            self.user_roles_url,
+            data,
+            format="json"
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_401_UNAUTHORIZED
+        )
