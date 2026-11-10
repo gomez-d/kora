@@ -40,6 +40,8 @@ services:
   # ---------------------------------------------------------------------------
   svc-identity:
     build: ./svc-identity
+    volumes:
+      - ./svc-identity:/app
     ports:
       - "8001:8000"
     environment:
@@ -97,6 +99,8 @@ services:
 
   api-gateway:
     build: ./api-gateway
+    volumes:
+      - ./api-gateway:/app
     ports:
       - "8000:8000"
     environment:
