@@ -1,4 +1,3 @@
-
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -15,32 +14,37 @@ class UserLoginTests(APITestCase):
         self.login_url = reverse("user-login")
 
         self.user = User.objects.create_user(
-            username="testuser",
             email="testuser@example.com",
-            password="TestPassword123!"
+            password="TestPassword123!",
+            first_name="Test",
+            last_name="User"
         )
 
         self.valid_credentials = {
-            "username": "testuser",
+            "email": "testuser@example.com",
             "password": "TestPassword123!"
         }
 
-    def test_login_with_valid_credentials(self):
+    def test_login_with_valid_credentials_returns_tokens(self):
         response = self.client.post(
             self.login_url,
             self.valid_credentials,
             format="json"
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["success"])
+        self.assertIn("access", response.data["data"])
+        self.assertIn("refresh", response.data["data"])
+        self.assertIn("user_id", response.data["data"])
+        self.assertEqual(
+            response.data["data"]["user_id"],
+            str(self.user.id)
+        )
 
     def test_login_with_incorrect_password(self):
         credentials = {
-            "username": "testuser",
+            "email": "testuser@example.com",
             "password": "WrongPassword123!"
         }
 
@@ -58,7 +62,7 @@ class UserLoginTests(APITestCase):
 
     def test_login_with_nonexistent_user(self):
         credentials = {
-            "username": "nonexistent",
+            "email": "nonexistent@example.com",
             "password": "TestPassword123!"
         }
 
@@ -90,7 +94,7 @@ class UserLoginTests(APITestCase):
         )
         self.assertFalse(response.data["success"])
 
-    def test_login_without_username(self):
+    def test_login_without_email(self):
         credentials = {
             "password": "TestPassword123!"
         }
@@ -108,7 +112,7 @@ class UserLoginTests(APITestCase):
 
     def test_login_without_password(self):
         credentials = {
-            "username": "testuser"
+            "email": "testuser@example.com"
         }
 
         response = self.client.post(
@@ -132,20 +136,4 @@ class UserLoginTests(APITestCase):
         self.assertEqual(
             response.status_code,
             status.HTTP_400_BAD_REQUEST
-        )
-    def test_login_with_valid_credentials_returns_tokens(self):
-        response = self.client.post(
-            self.login_url,
-            self.valid_credentials,
-            format="json"
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data["success"])
-        self.assertIn("access", response.data["data"])
-        self.assertIn("refresh", response.data["data"])
-        self.assertIn("user_id", response.data["data"])
-        self.assertEqual(
-            response.data["data"]["user_id"],
-            str(self.user.id)
         )

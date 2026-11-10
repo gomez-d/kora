@@ -1,6 +1,9 @@
 from rest_framework import serializers
-from users.models import User
 from clients.unstructured_data_client import send_identity_event
+from django.contrib.auth.password_validation import validate_password
+from django.utils import timezone
+
+from users.models import User
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -12,31 +15,55 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     """
 
     user_id = serializers.UUIDField(
-        source='id',
+        source="id",
         read_only=True
     )
-
     password = serializers.CharField(
         write_only=True,
-        required=True
+        required=True,
+        trim_whitespace=False
     )
 
     class Meta:
         model = User
+
         fields = [
-            'user_id',
-            'username',
-            'email',
-            'password',
-            'first_name',
-            'last_name'
+            "user_id",
+            "email",
+            "password",
+            "first_name",
+            "last_name",
+            "date_of_birth",
         ]
+
         extra_kwargs = {
-            'username': {'required': True},
-            'email': {'required': True},
-            'first_name': {'required': True},
-            'last_name': {'required': True}
+            "email": {"required": True},
+            "first_name": {"required": True},
+            "last_name": {"required": True},
+            "date_of_birth": {
+                "required": True,
+                "allow_null": False
+            }
         }
+
+    def validate_password(self, value):
+        user = User(
+            email=self.initial_data.get("email", ""),
+            first_name=self.initial_data.get("first_name", ""),
+            last_name=self.initial_data.get("last_name", "")
+        )
+
+        validate_password(value, user=user)
+
+        return value
+
+    def validate_date_of_birth(self, value):
+        if value > timezone.localdate():
+            raise serializers.ValidationError(
+                "Date of birth cannot be in the future."
+            )
+
+        return value
 
     def create(self, validated_data):
         """
@@ -52,19 +79,59 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             user_id=user.id,
             event='user_registered',
             data={
-                'username': user.username
+                "email": user.email
             },
             metadata={
-                'source': 'user_registration',
+                "source": "user_registration",
             },
         )
 
         return user
 
-    def validate_username(self, value):
-        if User.objects.filter(username=value).exists():
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    """
+    Serializer used to retrieve user information.
+    """
+
+    user_id = serializers.UUIDField(
+        source="id",
+        read_only=True
+    )
+
+    class Meta:
+        model = User
+
+        fields = [
+            "user_id",
+            "email",
+            "first_name",
+            "last_name",
+            "date_of_birth"
+        ]
+
+        read_only_fields = fields
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer used to update user information.
+    """
+
+    class Meta:
+        model = User
+
+        fields = [
+            "email",
+            "first_name",
+            "last_name",
+            "date_of_birth"
+        ]
+
+    def validate_date_of_birth(self, value):
+        if value > timezone.localdate():
             raise serializers.ValidationError(
-                "A user with this username already exists."
+                "Date of birth cannot be in the future."
             )
 
         return value
@@ -75,11 +142,10 @@ class UserLoginSerializer(serializers.Serializer):
     Serializer used to validate login credentials.
     """
 
-    username = serializers.CharField(
+    email = serializers.EmailField(
         required=True,
         allow_blank=False
     )
-
     password = serializers.CharField(
         required=True,
         allow_blank=False,

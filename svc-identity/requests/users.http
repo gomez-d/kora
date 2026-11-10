@@ -1,0 +1,71 @@
+@baseUrl = http://localhost:8001/api/users
+@userId = 72771740-d625-4617-9e79-dcd5a57141b0
+@refreshToken = YOUR_REFRESH_TOKEN
+
+### Health Check
+GET {{baseUrl}}/health/
+
+
+### Register User
+POST {{baseUrl}}/register/
+Content-Type: application/json
+
+{
+    "email": "testuser@example.com",
+    "password": "TestPassword123!",
+    "first_name": "Test",
+    "last_name": "User",
+    "date_of_birth": "1995-05-15"
+}
+
+
+### Get All Users
+GET {{baseUrl}}/users/
+
+
+### Get User By ID
+GET {{baseUrl}}/users/{{userId}}/
+
+
+### Update User (PUT)
+PUT {{baseUrl}}/users/{{userId}}/update/
+Content-Type: application/json
+
+{
+    "email": "updated@example.com",
+    "first_name": "Updated",
+    "last_name": "User",
+    "date_of_birth": "1995-05-15"
+}
+
+
+### Partial Update User (PATCH)
+PATCH {{baseUrl}}/users/{{userId}}/update/
+Content-Type: application/json
+
+{
+    "first_name": "Changed"
+}
+
+
+### Login
+POST {{baseUrl}}/login/
+Content-Type: application/json
+
+{
+    "email": "updated@example.com",
+    "password": "TestPassword123!"
+}
+
+
+### Refresh Token
+POST {{baseUrl}}/token/refresh/
+Content-Type: application/json
+
+{
+    "refresh": "{{refreshToken}}"
+}
+
+
+### Deactivate User
+DELETE {{baseUrl}}/users/{{userId}}/
