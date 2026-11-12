@@ -8,7 +8,8 @@ from rbac.views import (
     UserRoleView,
     UserRoleDetailView,
     RolePermissionView,
-    RolePermissionDetailView
+    RolePermissionDetailView,
+    UserRolesQueryView
 )
 
 urlpatterns = [
@@ -54,5 +55,10 @@ urlpatterns = [
         "role-permissions/<uuid:role_permission_id>/",
         RolePermissionDetailView.as_view(),
         name="role-permission-detail"
-    )
+    ),
+    path(
+        "users/<uuid:user_id>/roles/",
+        UserRolesQueryView.as_view(),
+        name="user-roles-query"
+    ),
 ]
