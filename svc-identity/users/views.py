@@ -3,13 +3,16 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
     UserDetailSerializer,
-    UserUpdateSerializer
+    UserUpdateSerializer,
+    UserTokenRefreshSerializer
 )
 from .models import User
+from rbac.utils import get_user_role_names
 
 
 class HealthCheckView(APIView):
@@ -183,6 +186,10 @@ class UserLoginView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED
             )
         refresh = RefreshToken.for_user(user)
+
+        # Add the current user roles to the signed identity context.
+        refresh["roles"] = get_user_role_names(user)
+
         return Response(
             {
                 "success": True,
@@ -195,3 +202,10 @@ class UserLoginView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+class UserTokenRefreshView(TokenRefreshView):
+    """
+    Refresh access tokens using the user's current identity context.
+    """
+
+    serializer_class = UserTokenRefreshSerializer
