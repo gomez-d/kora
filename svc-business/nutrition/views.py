@@ -154,11 +154,17 @@ class FoodCategoryView(APIView):
 
 
 class FoodView(APIView):
+
+    # Require a valid authenticated identity before checking
+    # the permissions associated with food catalog operations.
     permission_classes = [
         IsAuthenticated,
         HasBusinessPermission
     ]
 
+    # Define the permission required for each supported HTTP method.
+    # Reading the catalog is available to authorized users,
+    # while creating foods is restricted to administrative permissions.
     required_permissions = {
         "GET": "foods.read",
         "POST": "foods.create",
@@ -220,11 +226,16 @@ class FoodView(APIView):
 
 
 class FoodDetailView(APIView):
+
+    # Require an authenticated identity before evaluating
+    # permissions for individual food resources.
     permission_classes = [
         IsAuthenticated,
         HasBusinessPermission
     ]
 
+    # Associate each HTTP operation with its corresponding
+    # RBAC permission.
     required_permissions = {
         "GET": "foods.read",
         "PUT": "foods.update",
