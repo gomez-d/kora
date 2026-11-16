@@ -159,3 +159,11 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY")
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "nutrition.authentication.KoraJWTAuthentication",
+    ],
+}

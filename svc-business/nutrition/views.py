@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 from django.db import IntegrityError
 
@@ -20,6 +21,11 @@ from .serializers import (
 from .pagination import ConsumptionPagination
 from .clients.identity import user_exists
 
+from .permissions import (
+    HasBusinessPermission,
+    HasSelfBusinessPermission
+)
+
 from datetime import date
 from uuid import UUID
 
@@ -33,6 +39,16 @@ class HealthCheckView(APIView):
 
 
 class NutritionalProfileView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        HasSelfBusinessPermission
+    ]
+
+    required_permissions = {
+        "GET": "nutritional_profiles.read_self",
+        "POST": "nutritional_profiles.create_self",
+    }
+
     def get(self, request):
         user_id = request.query_params.get("user_id")
 
@@ -105,6 +121,16 @@ class NutritionalProfileView(APIView):
 
 
 class FoodCategoryView(APIView):
+    permission_classes = [
+        IsAuthenticated, 
+        HasBusinessPermission
+    ]
+
+    required_permissions = {
+        "GET": "food_categories.read",
+        "POST": "food_categories.create",
+    }
+
     def get(self, request):
         categories = FoodCategory.objects.all().order_by("name")
         serializer = FoodCategorySerializer(categories, many=True)
@@ -128,6 +154,16 @@ class FoodCategoryView(APIView):
 
 
 class FoodView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        HasBusinessPermission
+    ]
+
+    required_permissions = {
+        "GET": "foods.read",
+        "POST": "foods.create",
+    }
+
     def get(self, request):
         foods = Food.objects.select_related(
             "category"
@@ -184,6 +220,18 @@ class FoodView(APIView):
 
 
 class FoodDetailView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        HasBusinessPermission
+    ]
+
+    required_permissions = {
+        "GET": "foods.read",
+        "PUT": "foods.update",
+        "PATCH": "foods.update",
+        "DELETE": "foods.delete",
+    }
+
     def get(self, request, food_id):
         try:
             food = Food.objects.select_related(
@@ -294,6 +342,27 @@ class FoodDetailView(APIView):
 
 
 class ConsumptionRecordView(APIView):
+
+    # Require a valid authenticated identity before evaluating
+    # any business authorization rule.
+    permission_classes = [
+        IsAuthenticated,
+        HasSelfBusinessPermission
+    ]
+
+    # Define the specific permission required for each HTTP method.
+    #
+    # GET:
+    # The authenticated user may only read their own consumption history.
+    #
+    # POST:
+    # The authenticated user may only create consumption records
+    # associated with their own identity.
+    required_permissions = {
+        "GET": "consumptions.read_self",
+        "POST": "consumptions.create_self",
+    }
+
     def get(self, request):
         consumptions = ConsumptionRecord.objects.prefetch_related(
             "consumption_items__food"

@@ -12,7 +12,10 @@ from .serializers import (
     UserTokenRefreshSerializer
 )
 from .models import User
-from rbac.utils import get_user_role_names
+from rbac.utils import (
+    get_user_role_names,
+    get_user_permission_names,
+)
 
 
 class HealthCheckView(APIView):
@@ -189,6 +192,9 @@ class UserLoginView(APIView):
 
         # Add the current user roles to the signed identity context.
         refresh["roles"] = get_user_role_names(user)
+
+        # Add the user's effective permissions to the signed identity context.
+        refresh["permissions"] = get_user_permission_names(user)
 
         return Response(
             {
