@@ -10,11 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
+
 from datetime import timedelta
 from pathlib import Path
-import os
-import dj_database_url
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,13 +26,28 @@ load_dotenv(BASE_DIR / '.env')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(fn)=o4e6-=@!ho@5)($t2i3ylq*pqe*&7ntud$3lh_d5q-v$0'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Security settings
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+if not SECRET_KEY:
+    raise ImproperlyConfigured("SECRET_KEY is not configured")
+
+DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes", "on")
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if host.strip()
+]
+
+
+UNSTRUCTURED_DATA_SERVICE_URL = os.getenv("UNSTRUCTURED_DATA_SERVICE_URL")
+
+if not UNSTRUCTURED_DATA_SERVICE_URL:
+    raise ImproperlyConfigured(
+        "UNSTRUCTURED_DATA_SERVICE_URL is not configured.")
 
 
 # Application definition
@@ -83,13 +99,53 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database
+# Database configuration
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    'default': dj_database_url.parse(
-        os.getenv('DATABASE_URL')
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+
+# Read database password from Docker Secret or Local environment
+DB_PASSWORD_FILE = os.getenv(
+    "DB_PASSWORD_FILE",
+    "/run/secrets/identity_password"
+)
+
+if os.path.isfile(DB_PASSWORD_FILE):
+    with open(DB_PASSWORD_FILE, encoding="utf-8") as secret_file:
+        DB_PASSWORD = secret_file.read().strip()
+else:
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+# Validate required database configuration
+required_db_vars = {
+    "DB_NAME": DB_NAME,
+    "DB_USER": DB_USER,
+    "DB_PASSWORD": DB_PASSWORD
+}
+
+missing_db_vars = [
+    name
+    for name, value in required_db_vars.items()
+    if not value
+]
+
+if missing_db_vars:
+    raise ImproperlyConfigured(
+        f"Missing database configuration: {', '.join(missing_db_vars)}"
     )
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": DB_NAME,
+        "USER": DB_USER,
+        "PASSWORD": DB_PASSWORD,
+        "HOST": DB_HOST,
+        "PORT": DB_PORT
+    }
 }
 
 

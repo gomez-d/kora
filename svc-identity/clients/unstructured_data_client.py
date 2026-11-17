@@ -1,5 +1,6 @@
-import os
 import requests
+
+from django.conf import settings
 from requests.exceptions import (
     ConnectionError,
     RequestException,
@@ -7,9 +8,8 @@ from requests.exceptions import (
 )
 
 # Base URL of the unstructured data microservice.
-UNSTRUCTURED_DATA_SERVICE_URL = os.getenv(
-    'UNSTRUCTURED_DATA_SERVICE_URL'
-)
+UNSTRUCTURED_DATA_SERVICE_URL = settings.UNSTRUCTURED_DATA_SERVICE_URL
+
 
 def send_identity_event(user_id, event, level='INFO', data=None, metadata=None,):
     """
