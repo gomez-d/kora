@@ -1,6 +1,9 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+)
 
 from django.db import IntegrityError
 
@@ -32,6 +35,15 @@ from uuid import UUID
 
 
 class HealthCheckView(APIView):
+    """
+    Expose the Business service health status without requiring
+    authentication.
+    """
+
+    # Health checks must remain publicly accessible so infrastructure
+    # components can verify service availability without a user session.
+    permission_classes = [AllowAny]
+
     def get(self, request):
         return Response({
             "status": "ok",
