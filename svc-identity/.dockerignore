@@ -1,11 +1,30 @@
-__pycache__
-*.py[cod]
-*.egg-info
-.venv
-venv
+# Environment variables and secrets
 .env
-.git
+.env.*
+
+# Python environments
+venv/
+.venv/
+env/
+
+# Python files
+__pycache__/
+*.py[cod]
+*.log
+
+# Git
+.git/
 .gitignore
-*.md
-.pytest_cache
-.mypy_cache
+
+# Development tools
+.vscode/
+.idea/
+
+# Coverage and testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Django
+media/
+staticfiles/
