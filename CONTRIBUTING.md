@@ -1,5 +1,4 @@
-# Contributing to Kora AI
-
+# Contributing to Kora
 This document defines the development and collaboration conventions for the Kora AI project.
 
 ## 1. General Guidelines
