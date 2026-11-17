@@ -23,7 +23,8 @@ from .clients.identity import user_exists
 
 from .permissions import (
     HasBusinessPermission,
-    HasSelfBusinessPermission
+    HasSelfBusinessPermission,
+    HasOwnedBusinessPermission
 )
 
 from datetime import date
@@ -119,6 +120,82 @@ class NutritionalProfileView(APIView):
             status=400
         )
 
+class NutritionalProfileDetailView(APIView):
+    """
+    Manage an existing nutritional profile while enforcing
+    permission and resource ownership rules.
+    """
+
+    # Require authentication and validate the permission associated
+    # with the requested operation.
+    permission_classes = [
+        IsAuthenticated,
+        HasOwnedBusinessPermission
+    ]
+
+    # Updating a nutritional profile is allowed only through the
+    # self-scoped update permission.
+    required_permissions = {
+        "PATCH": "nutritional_profiles.update_self",
+    }
+
+    def patch(self, request, profile_id):
+        """
+        Partially update an existing nutritional profile only when
+        the authenticated identity owns the stored resource.
+        """
+
+        # Retrieve the profile using its own resource identifier.
+        # Ownership is not determined from data supplied by the client.
+        try:
+            profile = NutritionalProfile.objects.get(id=profile_id)
+        except NutritionalProfile.DoesNotExist:
+            return Response(
+                {"detail": "Nutritional profile not found."},
+                status=404
+            )
+
+        # Execute the object-level permission check.
+        # HasOwnedBusinessPermission compares profile.user_id stored
+        # in PostgreSQL against the trusted user_id from the JWT.
+        self.check_object_permissions(
+            request,
+            profile
+        )
+
+        # The owner of the resource must remain immutable.
+        # A client must not be able to transfer a nutritional profile
+        # to another user by changing user_id through PATCH.
+        if "user_id" in request.data:
+            return Response(
+                {
+                    "detail": (
+                        "The user_id field cannot be modified."
+                    )
+                },
+                status=400
+            )
+
+        # Perform a partial update after authentication,
+        # permission validation and ownership validation succeed.
+        serializer = NutritionalProfileSerializer(
+            profile,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=200
+            )
+
+        return Response(
+            serializer.errors,
+            status=400
+        )
 
 class FoodCategoryView(APIView):
     permission_classes = [
@@ -489,6 +566,85 @@ class ConsumptionRecordView(APIView):
             return Response(
                 serializer.data,
                 status=201
+            )
+
+        return Response(
+            serializer.errors,
+            status=400
+        )
+
+class ConsumptionRecordDetailView(APIView):
+    """
+    Manage an existing consumption record while enforcing
+    permission and resource ownership rules.
+    """
+
+    # Require authentication and verify the permission associated
+    # with the requested operation.
+    permission_classes = [
+        IsAuthenticated,
+        HasOwnedBusinessPermission
+    ]
+
+    # A user may update only consumption records that belong
+    # to their own authenticated identity.
+    required_permissions = {
+        "PATCH": "consumptions.update_self",
+    }
+
+    def patch(self, request, consumption_id):
+        """
+        Partially update an existing consumption record only when
+        the authenticated identity owns the stored resource.
+        """
+
+        # Retrieve the consumption record using its resource identifier.
+        # Ownership is determined from the persisted resource and not
+        # from a user_id supplied by the client.
+        try:
+            consumption = ConsumptionRecord.objects.get(
+                id=consumption_id
+            )
+        except ConsumptionRecord.DoesNotExist:
+            return Response(
+                {"detail": "Consumption record not found."},
+                status=404
+            )
+
+        # Execute the object-level permission check.
+        # HasOwnedBusinessPermission compares consumption.user_id
+        # stored in PostgreSQL with the trusted user_id from the JWT.
+        self.check_object_permissions(
+            request,
+            consumption
+        )
+
+        # Resource ownership must remain immutable.
+        # A client cannot transfer a consumption record to another user.
+        if "user_id" in request.data:
+            return Response(
+                {
+                    "detail": (
+                        "The user_id field cannot be modified."
+                    )
+                },
+                status=400
+            )
+
+        # Perform a partial update only after authentication,
+        # permission validation and ownership validation succeed.
+        serializer = ConsumptionRecordSerializer(
+            consumption,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+
+            return Response(
+                serializer.data,
+                status=200
             )
 
         return Response(
