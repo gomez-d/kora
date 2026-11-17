@@ -166,4 +166,5 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "nutrition.authentication.KoraJWTAuthentication",
     ],
+    "EXCEPTION_HANDLER": "config.exceptions.kora_exception_handler",
 }

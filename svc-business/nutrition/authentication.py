@@ -74,3 +74,13 @@ class KoraJWTAuthentication(BaseAuthentication):
         )
 
         return identity, payload
+
+    def authenticate_header(self, request):
+        """
+        Return the authentication scheme used by protected endpoints.
+
+        DRF uses this value to distinguish authentication failures
+        from authorization failures and return HTTP 401 when credentials
+        are missing or invalid.
+        """
+        return self.keyword
