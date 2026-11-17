@@ -4,6 +4,8 @@ from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.settings import api_settings
 from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated
@@ -294,6 +296,56 @@ class UserLoginView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+class UserLogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        refresh_token = request.data.get("refresh")
+
+        if not refresh_token:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Refresh token is required."
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            token = RefreshToken(refresh_token)
+
+            user_id = token.get(api_settings.USER_ID_CLAIM)
+
+            if str(user_id) != str(request.user.id):
+                return Response(
+                    {
+                        "success": False,
+                        "message": "Invalid refresh token."
+                    },
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+            token.blacklist()
+
+            return Response(
+                {
+                    "success": True,
+                    "message": "Logout successful."
+                },
+                status=status.HTTP_200_OK
+            )
+
+        except TokenError:
+            return Response(
+                {
+                    "success": False,
+                    "message": "Invalid or expired refresh token."
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
 
 class UserTokenRefreshView(TokenRefreshView):
     """

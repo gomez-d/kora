@@ -6,6 +6,7 @@ from users.views import (
     UserDetailView,
     UserUpdateView,
     UserLoginView,
+    UserLogoutView,
     UserTokenRefreshView
 )
 
@@ -39,6 +40,11 @@ urlpatterns = [
         'login/',
         UserLoginView.as_view(),
         name="user-login"
+    ),
+    path(
+        'logout/',
+        UserLogoutView.as_view(),
+        name="user-logout"
     ),
     path(
         'token/refresh/',
