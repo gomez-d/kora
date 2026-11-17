@@ -12,3 +12,17 @@ def get_user_role_names(user):
             flat=True
         )
     )
+
+def get_user_permission_names(user):
+    """
+    Return the effective permission names granted to a user
+    through their assigned roles.
+    """
+    return list(
+        user.roles.filter(
+            permissions__isnull=False
+        ).values_list(
+            "permissions__name",
+            flat=True
+        ).distinct()
+    )
