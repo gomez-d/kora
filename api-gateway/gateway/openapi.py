@@ -1,29 +1,39 @@
 from rest_framework.schemas.openapi import SchemaGenerator
 
+
 class KoraSchemaGenerator(SchemaGenerator):
     """
     Generate the OpenAPI schema exposed by the Kora API Gateway.
 
     Gateway proxy routes are dynamic, so their public V1 contracts
-    are documented explicitly instead of relying only an automatic
+    are documented explicitly instead of relying only on automatic
     DRF route introspection.
     """
 
+    PUBLIC_PATHS = {
+        '/api/health/',
+        '/api/identity/users/register/',
+        '/api/identity/users/login/',
+        '/api/identity/users/token/refresh/',
+    }
+
     def get_schema(self, request=None, public=False):
         """
-        Build the OpenAPI shcema and replace dynamic proxy paths
+        Build the OpenAPI schema and replace dynamic proxy paths
         with the explicit public API contracts.
         """
 
         schema = super().get_schema(
             request=request,
-            public=public
+            public=public,
         )
 
         schema['paths'] = {
             '/api/health/': self._gateway_health_path(),
             '/api/identity/users/health/': self._identity_health_path(),
             '/api/identity/users/register/': self._identity_register_path(),
+            '/api/identity/users/login/': self._identity_login_path(),
+            '/api/identity/users/token/refresh/': self._identity_token_refresh_path(),
             '/api/business/health/': self._business_health_path(),
             '/api/business/nutritional-profiles/': (
                 self._nutritional_profiles_path()
@@ -38,601 +48,563 @@ class KoraSchemaGenerator(SchemaGenerator):
             '/api/ai/vision/analyze': self._ai_vision_path(),
         }
 
+        schema.setdefault('info', {})['description'] = (
+            'Authentication is handled by the API Gateway.\n\n'
+            'Public routes:\n'
+            '- POST /api/identity/users/register/\n'
+            '- POST /api/identity/users/login/\n'
+            '- POST /api/identity/users/token/refresh/\n'
+            '- GET /api/health/\n'
+            '- GET /api/schema/\n\n'
+            'Protected routes:\n'
+            '- Identity endpoints other than registration, login and token refresh.\n'
+            '- Business endpoints, including nutritional profiles, food categories, '
+            'foods and consumptions.\n'
+            '- AI endpoints for processing and image analysis.\n\n'
+            'Protected routes require a valid access token in the '
+            'Authorization: Bearer <access_token> header.\n\n'
+            'Access and refresh tokens are issued by the Identity microservice. '
+            'The API Gateway validates access tokens before forwarding requests.'
+        )
+
         schema['components'] = {
-            'schemas': {
-                'HealthResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'status': {
-                            'type': 'string',
-                            'example': 'ok',
-                        },
-                        'service': {
-                            'type': 'string',
-                            'example': 'api_gateway',
-                        },
-                    },
-                    'required': [
-                        'status',
-                        'service',
-                    ],
+            'securitySchemes': {
+                'BearerAuth': {
+                    'type': 'http',
+                    'scheme': 'bearer',
+                    'bearerFormat': 'JWT',
+                    'description': (
+                        'Enter the access token issued by the '
+                        'Identity microservice.'
+                    ),
                 },
-                'UserRegistrationRequest': {
-                    'type': 'object',
-                    'properties': {
-                        'username': {
-                            'type': 'string',
+            },
+            'schemas': self._components_schemas(),
+        }
+
+        for path, methods in schema['paths'].items():
+            for method, operation in methods.items():
+                if method.lower() not in (
+                    'get', 'post', 'put', 'patch', 'delete'
+                ):
+                    continue
+
+                if path in self.PUBLIC_PATHS:
+                    operation['security'] = []
+                else:
+                    operation['security'] = [{'BearerAuth': []}]
+                    operation.setdefault('responses', {})['401'] = {
+                        'description': (
+                            'Authentication failed. The access token '
+                            'is missing, invalid, malformed or expired.'
+                        ),
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'AuthenticationErrorResponse'
+                                    ),
+                                },
+                            },
                         },
-                        'email': {
-                            'type': 'string',
-                            'format': 'email',
-                        },
-                        'password': {
-                            'type': 'string',
-                            'format': 'password',
-                            'writeOnly': True,
-                        },
-                        'first_name': {
-                            'type': 'string',
-                        },
-                        'last_name': {
-                            'type': 'string',
-                        },
+                    }
+
+        return schema
+
+    def _components_schemas(self):
+        return {
+            'HealthResponse': {
+                'type': 'object',
+                'properties': {
+                    'status': {
+                        'type': 'string',
+                        'example': 'ok',
                     },
-                    'required': [
-                        'username',
-                        'email',
-                        'password',
-                        'first_name',
-                        'last_name',
-                    ],
-                },
-                'UserRegistrationData': {
-                    'type': 'object',
-                    'properties': {
-                        'user_id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'username': {
-                            'type': 'string',
-                        },
-                        'email': {
-                            'type': 'string',
-                            'format': 'email',
-                        },
-                        'first_name': {
-                            'type': 'string',
-                        },
-                        'last_name': {
-                            'type': 'string',
-                        },
+                    'service': {
+                        'type': 'string',
+                        'example': 'api_gateway',
                     },
                 },
-                'UserRegistrationResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'success': {
-                            'type': 'boolean',
-                            'example': True,
+                'required': ['status', 'service'],
+            },
+            'AuthenticationErrorResponse': {
+                'type': 'object',
+                'properties': {
+                    'success': {
+                        'type': 'boolean',
+                        'example': False,
+                    },
+                    'message': {
+                        'type': 'string',
+                        'example': (
+                            'Authentication credentials were not '
+                            'provided or are invalid.'
+                        ),
+                    },
+                },
+                'required': ['success', 'message'],
+            },
+            'UserRegistrationRequest': {
+                'type': 'object',
+                'properties': {
+                    'username': {'type': 'string'},
+                    'email': {'type': 'string', 'format': 'email'},
+                    'password': {
+                        'type': 'string',
+                        'format': 'password',
+                        'writeOnly': True,
+                    },
+                    'first_name': {'type': 'string'},
+                    'last_name': {'type': 'string'},
+                },
+                'required': [
+                    'username',
+                    'email',
+                    'password',
+                    'first_name',
+                    'last_name',
+                ],
+            },
+            'UserRegistrationData': {
+                'type': 'object',
+                'properties': {
+                    'user_id': {'type': 'string', 'format': 'uuid'},
+                    'username': {'type': 'string'},
+                    'email': {'type': 'string', 'format': 'email'},
+                    'first_name': {'type': 'string'},
+                    'last_name': {'type': 'string'},
+                },
+            },
+            'UserRegistrationResponse': {
+                'type': 'object',
+                'properties': {
+                    'success': {'type': 'boolean', 'example': True},
+                    'message': {
+                        'type': 'string',
+                        'example': 'User registered successfully.',
+                    },
+                    'data': {
+                        '$ref': '#/components/schemas/UserRegistrationData',
+                    },
+                },
+            },
+            'LoginRequest': {
+                'type': 'object',
+                'properties': {
+                    'username': {'type': 'string'},
+                    'password': {
+                        'type': 'string',
+                        'format': 'password',
+                        'writeOnly': True,
+                    },
+                },
+                'required': ['username', 'password'],
+            },
+            'LoginResponseData': {
+                'type': 'object',
+                'properties': {
+                    'user_id': {'type': 'string', 'format': 'uuid'},
+                    'access': {'type': 'string'},
+                    'refresh': {'type': 'string'},
+                },
+            },
+            'LoginResponse': {
+                'type': 'object',
+                'properties': {
+                    'success': {'type': 'boolean', 'example': True},
+                    'message': {
+                        'type': 'string',
+                        'example': 'Login successful.',
+                    },
+                    'data': {
+                        '$ref': '#/components/schemas/LoginResponseData',
+                    },
+                },
+            },
+            'TokenRefreshRequest': {
+                'type': 'object',
+                'properties': {
+                    'refresh': {'type': 'string'},
+                },
+                'required': ['refresh'],
+            },
+            'TokenRefreshResponse': {
+                'type': 'object',
+                'properties': {
+                    'access': {'type': 'string'},
+                    'refresh': {'type': 'string'},
+                },
+            },
+            'ValidationErrorResponse': {
+                'type': 'object',
+                'properties': {
+                    'success': {'type': 'boolean', 'example': False},
+                    'message': {
+                        'type': 'string',
+                        'example': 'Validation error.',
+                    },
+                    'errors': {
+                        'type': 'object',
+                        'additionalProperties': True,
+                    },
+                },
+            },
+            'ServiceUnavailableResponse': {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string'},
+                },
+            },
+            'NutritionalProfile': {
+                'type': 'object',
+                'properties': {
+                    'id': {
+                        'type': 'string',
+                        'format': 'uuid',
+                        'readOnly': True,
+                    },
+                    'user_id': {'type': 'string', 'format': 'uuid'},
+                    'date_of_birth': {'type': 'string', 'format': 'date'},
+                    'sex': {
+                        'type': 'string',
+                        'enum': ['MALE', 'FEMALE'],
+                    },
+                    'weight': {
+                        'type': 'number',
+                        'exclusiveMinimum': 0,
+                    },
+                    'height': {
+                        'type': 'number',
+                        'exclusiveMinimum': 0,
+                    },
+                    'activity_level': {
+                        'type': 'string',
+                        'enum': [
+                            'NONE',
+                            'LOW',
+                            'MODERATE',
+                            'HIGH',
+                            'VERY_HIGH',
+                        ],
+                    },
+                    'created_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                        'readOnly': True,
+                    },
+                    'updated_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                        'readOnly': True,
+                    },
+                },
+                'required': [
+                    'user_id',
+                    'date_of_birth',
+                    'sex',
+                    'weight',
+                    'height',
+                    'activity_level',
+                ],
+            },
+            'FoodCategory': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'string', 'format': 'uuid'},
+                    'name': {'type': 'string'},
+                    'description': {'type': 'string'},
+                },
+            },
+            'BusinessValidationError': {
+                'type': 'object',
+                'additionalProperties': True,
+            },
+            'FoodNutrient': {
+                'type': 'object',
+                'properties': {
+                    'id': {
+                        'type': 'string',
+                        'format': 'uuid',
+                        'readOnly': True,
+                    },
+                    'nutrient_type': {
+                        'type': 'string',
+                        'enum': [
+                            'CALORIES',
+                            'PROTEIN',
+                            'CARBOHYDRATES',
+                            'FAT',
+                            'FIBER',
+                            'SUGAR',
+                            'SODIUM',
+                        ],
+                    },
+                    'amount': {
+                        'type': 'number',
+                        'minimum': 0,
+                    },
+                    'unit': {
+                        'type': 'string',
+                        'enum': ['G', 'MG', 'KCAL'],
+                    },
+                },
+                'required': ['nutrient_type', 'amount', 'unit'],
+            },
+            'FoodRequest': {
+                'type': 'object',
+                'properties': {
+                    'category_id': {'type': 'string', 'format': 'uuid'},
+                    'name': {'type': 'string'},
+                    'description': {'type': 'string'},
+                    'serving_size': {
+                        'type': 'number',
+                        'enum': [100],
+                    },
+                    'serving_unit': {
+                        'type': 'string',
+                        'enum': ['G', 'ML', 'UNIT'],
+                    },
+                    'nutrients': {
+                        'type': 'array',
+                        'items': {
+                            '$ref': '#/components/schemas/FoodNutrient',
                         },
-                        'message': {
-                            'type': 'string',
-                            'example': 'User registered successfully.',
+                    },
+                },
+                'required': [
+                    'category_id',
+                    'name',
+                    'description',
+                    'serving_size',
+                    'serving_unit',
+                    'nutrients',
+                ],
+            },
+            'FoodResponse': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'string', 'format': 'uuid'},
+                    'category': {
+                        '$ref': '#/components/schemas/FoodCategory',
+                    },
+                    'name': {'type': 'string'},
+                    'description': {'type': 'string'},
+                    'serving_size': {'type': 'number'},
+                    'serving_unit': {
+                        'type': 'string',
+                        'enum': ['G', 'ML', 'UNIT'],
+                    },
+                    'nutrients': {
+                        'type': 'array',
+                        'items': {
+                            '$ref': '#/components/schemas/FoodNutrient',
                         },
-                        'data': {
+                    },
+                    'created_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                    },
+                    'updated_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                    },
+                },
+            },
+            'FoodWriteResponse': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'string', 'format': 'uuid'},
+                    'category_id': {'type': 'string', 'format': 'uuid'},
+                    'name': {'type': 'string'},
+                    'description': {'type': 'string'},
+                    'serving_size': {'type': 'number'},
+                    'serving_unit': {
+                        'type': 'string',
+                        'enum': ['G', 'ML', 'UNIT'],
+                    },
+                    'nutrients': {
+                        'type': 'array',
+                        'items': {
+                            '$ref': '#/components/schemas/FoodNutrient',
+                        },
+                    },
+                    'created_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                    },
+                    'updated_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                    },
+                },
+            },
+            'NotFoundResponse': {
+                'type': 'object',
+                'properties': {
+                    'detail': {
+                        'type': 'string',
+                        'example': 'Food not found.',
+                    },
+                },
+            },
+            'ConflictResponse': {
+                'type': 'object',
+                'properties': {
+                    'detail': {'type': 'string'},
+                },
+            },
+            'ConsumptionItem': {
+                'type': 'object',
+                'properties': {
+                    'id': {
+                        'type': 'string',
+                        'format': 'uuid',
+                        'readOnly': True,
+                    },
+                    'food_id': {'type': 'string', 'format': 'uuid'},
+                    'quantity': {'type': 'number'},
+                    'calories': {'type': 'number'},
+                    'protein': {'type': 'number'},
+                    'carbohydrates': {'type': 'number'},
+                    'fat': {'type': 'number'},
+                    'fiber': {'type': 'number'},
+                    'sugar': {'type': 'number'},
+                    'sodium': {'type': 'number'},
+                },
+            },
+            'ConsumptionRecord': {
+                'type': 'object',
+                'properties': {
+                    'id': {
+                        'type': 'string',
+                        'format': 'uuid',
+                        'readOnly': True,
+                    },
+                    'user_id': {'type': 'string', 'format': 'uuid'},
+                    'consumed_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                    },
+                    'notes': {'type': 'string'},
+                    'consumption_items': {
+                        'type': 'array',
+                        'items': {
+                            '$ref': '#/components/schemas/ConsumptionItem',
+                        },
+                    },
+                    'created_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                        'readOnly': True,
+                    },
+                },
+                'required': [
+                    'user_id',
+                    'consumed_at',
+                    'consumption_items',
+                ],
+            },
+            'ConsumptionItemRequest': {
+                'type': 'object',
+                'properties': {
+                    'food_id': {'type': 'string', 'format': 'uuid'},
+                    'quantity': {
+                        'type': 'number',
+                        'exclusiveMinimum': 0,
+                    },
+                },
+                'required': ['food_id', 'quantity'],
+            },
+            'ConsumptionRecordRequest': {
+                'type': 'object',
+                'properties': {
+                    'user_id': {'type': 'string', 'format': 'uuid'},
+                    'consumed_at': {
+                        'type': 'string',
+                        'format': 'date-time',
+                    },
+                    'notes': {'type': 'string'},
+                    'consumption_items': {
+                        'type': 'array',
+                        'items': {
                             '$ref': (
                                 '#/components/schemas/'
-                                'UserRegistrationData'
+                                'ConsumptionItemRequest'
                             ),
                         },
                     },
                 },
-                'ValidationErrorResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'success': {
-                            'type': 'boolean',
-                            'example': False,
-                        },
-                        'message': {
-                            'type': 'string',
-                            'example': 'Validation error.',
-                        },
-                        'errors': {
-                            'type': 'object',
-                            'additionalProperties': True,
+                'required': [
+                    'user_id',
+                    'consumed_at',
+                    'consumption_items',
+                ],
+            },
+            'AIRequest': {
+                'type': 'object',
+                'properties': {
+                    'type': {
+                        'type': 'string',
+                        'enum': ['llm'],
+                    },
+                    'prompt': {
+                        'type': 'string',
+                        'minLength': 1,
+                    },
+                    'user_id': {
+                        'type': 'string',
+                        'nullable': True,
+                    },
+                },
+                'required': ['type', 'prompt'],
+            },
+            'LLMResponse': {
+                'type': 'object',
+                'properties': {
+                    'success': {'type': 'boolean'},
+                    'type': {
+                        'type': 'string',
+                        'enum': ['llm'],
+                    },
+                    'response': {'type': 'string'},
+                },
+                'required': ['success', 'type', 'response'],
+            },
+            'Detection': {
+                'type': 'object',
+                'properties': {
+                    'food': {'type': 'string'},
+                    'confidence': {
+                        'type': 'number',
+                        'minimum': 0.0,
+                        'maximum': 1.0,
+                    },
+                },
+                'required': ['food', 'confidence'],
+            },
+            'VisionResponse': {
+                'type': 'object',
+                'properties': {
+                    'success': {'type': 'boolean'},
+                    'detections': {
+                        'type': 'array',
+                        'items': {
+                            '$ref': '#/components/schemas/Detection',
                         },
                     },
                 },
-                'ServiceUnavailableResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'error': {
-                            'type': 'string',
-                        },
-                    },
+                'required': ['success', 'detections'],
+            },
+            'AIErrorResponse': {
+                'type': 'object',
+                'properties': {
+                    'detail': {'type': 'string'},
                 },
-                'NutritionalProfile': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                            'readOnly': True,
-                        },
-                        'user_id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'date_of_birth': {
-                            'type': 'string',
-                            'format': 'date',
-                        },
-                        'sex': {
-                            'type': 'string',
-                            'enum': [
-                                'MALE',
-                                'FEMALE',
-                            ],
-                        },
-                        'weight': {
-                            'type': 'number',
-                            'exclusiveMinimum': 0,
-                        },
-                        'height': {
-                            'type': 'number',
-                            'exclusiveMinimum': 0,
-                        },
-                        'activity_level': {
-                            'type': 'string',
-                            'enum': [
-                                'NONE',
-                                'LOW',
-                                'MODERATE',
-                                'HIGH',
-                                'VERY_HIGH',
-                            ],
-                        },
-                        'created_at': {
-                            'type': 'string',
-                            'format': 'date-time',
-                            'readOnly': True,
-                        },
-                        'updated_at': {
-                            'type': 'string',
-                            'format': 'date-time',
-                            'readOnly': True,
-                        },
-                    },
-                    'required': [
-                        'user_id',
-                        'date_of_birth',
-                        'sex',
-                        'weight',
-                        'height',
-                        'activity_level',
-                    ],
-                },
-                'FoodCategory': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'name': {
-                            'type': 'string',
-                        },
-                        'description': {
-                            'type': 'string',
-                        },
-                    },
-                },
-                'BusinessValidationError': {
-                    'type': 'object',
-                    'additionalProperties': True,
-                },
-                'FoodNutrient': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                            'readOnly': True,
-                        },
-                        'nutrient_type': {
-                            'type': 'string',
-                            'enum': [
-                                'CALORIES',
-                                'PROTEIN',
-                                'CARBOHYDRATES',
-                                'FAT',
-                                'FIBER',
-                                'SUGAR',
-                                'SODIUM',
-                            ],
-                        },
-                        'amount': {
-                            'type': 'number',
-                            'minimum': 0,
-                        },
-                        'unit': {
-                            'type': 'string',
-                            'enum': [
-                                'G',
-                                'MG',
-                                'KCAL',
-                            ],
-                        },
-                    },
-                    'required': [
-                        'nutrient_type',
-                        'amount',
-                        'unit',
-                    ],
-                },
-                'FoodRequest': {
-                    'type': 'object',
-                    'properties': {
-                        'category_id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'name': {
-                            'type': 'string',
-                        },
-                            'description': {
-                            'type': 'string',
-                        },
-                        'serving_size': {
-                            'type': 'number',
-                            'enum': [100],
-                        },
-                        'serving_unit': {
-                            'type': 'string',
-                            'enum': [
-                                'G',
-                                'ML',
-                                'UNIT',
-                            ],
-                        },
-                        'nutrients': {
-                            'type': 'array',
-                            'items': {
-                                '$ref': '#/components/schemas/FoodNutrient',
-                            },
-                        },
-                    },
-                    'required': [
-                        'category_id',
-                        'name',
-                        'description',
-                        'serving_size', 
-                        'serving_unit',
-                        'nutrients',
-                    ],
-                },
-                'FoodResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'category': {
-                            '$ref': '#/components/schemas/FoodCategory',
-                        },
-                        'name': {
-                            'type': 'string',
-                        },
-                        'description': {
-                            'type': 'string',
-                        },
-                        'serving_size': {
-                            'type': 'number',
-                        },
-                        'serving_unit': {
-                            'type': 'string',
-                            'enum': [
-                                'G',
-                                'ML',
-                                'UNIT',
-                            ],
-                        },
-                        'nutrients': {
-                            'type': 'array',
-                            'items': {
-                                '$ref': '#/components/schemas/FoodNutrient',
-                            },
-                        },
-                        'created_at': {
-                            'type': 'string',
-                            'format': 'date-time',
-                        },
-                        'updated_at': {
-                            'type': 'string',
-                            'format': 'date-time',
-                        },
-                    },
-                },
-                'FoodWriteResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'category_id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'name': {
-                            'type': 'string',
-                        },
-                        'description': {
-                            'type': 'string',
-                        },
-                        'serving_size': {
-                            'type': 'number',
-                        },
-                        'serving_unit': {
-                            'type': 'string',
-                            'enum': [
-                                'G',
-                                'ML',
-                                'UNIT',
-                            ],
-                        },
-                        'nutrients': {
-                            'type': 'array',
-                            'items': {
-                                '$ref': '#/components/schemas/FoodNutrient'
-                            },
-                        },
-                        'created_at': {
-                            'type': 'string',
-                            'format': 'date-time',
-                        },
-                        'updated_at': {
-                            'type': 'string',
-                            'format': 'date-time',
-                        },
-                    },
-                },
-                'NotFoundResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'detail': {
-                            'type': 'string',
-                            'example': 'Food not found.',
-                        },
-                    },
-                },
-                'ConflictResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'detail': {
-                            'type': 'string',
-                        },
-                    },
-                },
-                'ConsumptionItem': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                            'readOnly': True,
-                        },
-                        'food_id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'quantity': {
-                            'type': 'number',
-                        },
-                        'calories': {
-                            'type': 'number',
-                        },
-                        'protein': {
-                            'type': 'number',
-                        },
-                        'carbohydrates': {
-                            'type': 'number',
-                        },
-                        'fat': {
-                            'type': 'number',
-                        },
-                        'fiber': {
-                            'type': 'number',
-                        },
-                        'sugar': {
-                            'type': 'number',
-                        },
-                        'sodium': {
-                            'type': 'number',
-                        },
-                    },
-                },
-                'ConsumptionRecord': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                            'readOnly': True,
-                        },
-                        'user_id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'consumed_at': {
-                            'type': 'string',
-                            'format': 'date-time',
-                        },
-                        'notes': {
-                            'type': 'string',
-                        },
-                        'consumption_items': {
-                            'type': 'array',
-                            'items': {
-                                '$ref': '#/components/schemas/ConsumptionItem',
-                            },
-                        },
-                        'created_at': {
-                            'type': 'string',
-                            'format': 'date-time',
-                            'readOnly': True,
-                        },
-                    },
-                    'required': [
-                        'user_id',
-                        'consumed_at',
-                        'consumption_items',
-                    ],
-                },
-                'ConsumptionItemRequest': {
-                    'type': 'object',
-                    'properties': {
-                        'food_id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'quantity': {
-                            'type': 'number',
-                            'exclusiveMinimum': 0,
-                        },
-                    },
-                    'required': [
-                        'food_id',
-                        'quantity',
-                    ],
-                },
-                'ConsumptionRecordRequest': {
-                    'type': 'object',
-                    'properties': {
-                        'user_id': {
-                            'type': 'string',
-                            'format': 'uuid',
-                        },
-                        'consumed_at': {
-                            'type': 'string',
-                            'format': 'date-time',
-                        },
-                        'notes': {
-                            'type': 'string',
-                        },
-                        'consumption_items': {
-                            'type': 'array',
-                            'items': {
-                                '$ref': (
-                                    '#/components/schemas/'
-                                    'ConsumptionItemRequest'
-                                ),
-                            },
-                        },
-                    },
-                    'required': [
-                        'user_id',
-                        'consumed_at',
-                        'consumption_items',
-                    ],
-                },
-                'AIRequest': {
-                    'type': 'object',
-                    'properties': {
-                        'type': {
-                            'type': 'string',
-                            'enum': ['llm'],
-                        },
-                        'prompt': {
-                            'type': 'string',
-                            'minLength': 1,
-                        },
-                        'user_id': {
-                            'type': 'string',
-                            'nullable': True,
-                        },
-                    },
-                    'required': [
-                        'type',
-                        'prompt',
-                    ],
-                },
-                'LLMResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'success': {
-                            'type': 'boolean',
-                        },
-                        'type': {
-                            'type': 'string',
-                            'enum': ['llm'],
-                        },
-                        'response': {
-                            'type': 'string',
-                        },
-                    },
-                    'required': [
-                        'success',
-                        'type',
-                        'response',
-                    ],
-                },
-                'Detection': {
-                    'type': 'object',
-                    'properties': {
-                        'food': {
-                            'type': 'string',
-                        },
-                        'confidence': {
-                            'type': 'number',
-                            'minimum': 0.0,
-                            'maximum': 1.0,
-                        },
-                    },
-                    'required': [
-                        'food',
-                        'confidence',
-                    ],
-                },
-                'VisionResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'success': {
-                            'type': 'boolean',
-                        },
-                        'detections': {
-                            'type': 'array',
-                            'items': {
-                                '$ref': '#/components/schemas/Detection',
-                            },
-                        },
-                    },
-                    'required': [
-                        'success',
-                        'detections',
-                    ],
-                },
-                'AIErrorResponse': {
-                    'type': 'object',
-                    'properties': {
-                        'detail': {
-                            'type': 'string',
-                        },
-                    },
-                }, 
             },
         }
 
-        return schema
-
     def _gateway_health_path(self):
-        """
-        Document the API Gateway health check.
-        """
-
         return {
             'get': {
                 'operationId': 'gatewayHealthCheck',
@@ -645,8 +617,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                             'application/json': {
                                 'schema': {
                                     '$ref': (
-                                        '#/components/schemas/'
-                                        'HealthResponse'
+                                        '#/components/schemas/HealthResponse'
                                     ),
                                 },
                             },
@@ -657,11 +628,6 @@ class KoraSchemaGenerator(SchemaGenerator):
         }
 
     def _identity_health_path(self):
-        """
-        Document the identity service health check exposed
-        through the API Gateway.
-        """
-
         return {
             'get': {
                 'operationId': 'identityHealthCheck',
@@ -674,8 +640,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                             'application/json': {
                                 'schema': {
                                     '$ref': (
-                                        '#/components/schemas/'
-                                        'HealthResponse'
+                                        '#/components/schemas/HealthResponse'
                                     ),
                                 },
                             },
@@ -699,15 +664,12 @@ class KoraSchemaGenerator(SchemaGenerator):
         }
 
     def _identity_register_path(self):
-        """
-        Document user registration exposed through the API Gateway.
-        """
-
         return {
             'post': {
                 'operationId': 'registerUser',
                 'summary': 'Register a new Kora user',
                 'tags': ['Identity'],
+                'security': [],
                 'requestBody': {
                     'required': True,
                     'content': {
@@ -765,13 +727,121 @@ class KoraSchemaGenerator(SchemaGenerator):
             },
         }
 
-    def _business_health_path(self):
-        """
-        Document the business service health check exposed
-        through the API Gateway.
-        """
+    def _identity_login_path(self):
+        return {
+            'post': {
+                'operationId': 'loginUser',
+                'summary': 'Authenticate a user',
+                'tags': ['Identity'],
+                'security': [],
+                'description': (
+                    'Public endpoint. Credentials are validated '
+                    'by the Identity microservice, which issues '
+                    'the access and refresh tokens.'
+                ),
+                'requestBody': {
+                    'required': True,
+                    'content': {
+                        'application/json': {
+                            'schema': {
+                                '$ref': '#/components/schemas/LoginRequest',
+                            },
+                        },
+                    },
+                },
+                'responses': {
+                    '200': {
+                        'description': 'Authentication successful.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/LoginResponse'
+                                    ),
+                                },
+                            },
+                        },
+                    },
+                    '401': {
+                        'description': 'Invalid credentials.',
+                    },
+                    '503': {
+                        'description': 'Identity service is unavailable.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'ServiceUnavailableResponse'
+                                    ),
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
 
-        return  {
+    def _identity_token_refresh_path(self):
+        return {
+            'post': {
+                'operationId': 'refreshToken',
+                'summary': 'Refresh authentication tokens',
+                'tags': ['Identity'],
+                'security': [],
+                'description': (
+                    'Public endpoint. The refresh token is validated '
+                    'by the Identity microservice.'
+                ),
+                'requestBody': {
+                    'required': True,
+                    'content': {
+                        'application/json': {
+                            'schema': {
+                                '$ref': (
+                                    '#/components/schemas/'
+                                    'TokenRefreshRequest'
+                                ),
+                            },
+                        },
+                    },
+                },
+                'responses': {
+                    '200': {
+                        'description': 'Tokens refreshed successfully.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'TokenRefreshResponse'
+                                    ),
+                                },
+                            },
+                        },
+                    },
+                    '401': {
+                        'description': 'Invalid or expired refresh token.',
+                    },
+                    '503': {
+                        'description': 'Identity service is unavailable.',
+                        'content': {
+                            'application/json': {
+                                'schema': {
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'ServiceUnavailableResponse'
+                                    ),
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+
+    def _business_health_path(self):
+        return {
             'get': {
                 'operationId': 'businessHealthCheck',
                 'summary': 'Check business service health',
@@ -783,8 +853,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                             'application/json': {
                                 'schema': {
                                     '$ref': (
-                                        '#/components/schemas/'
-                                        'HealthResponse'
+                                        '#/components/schemas/HealthResponse'
                                     ),
                                 },
                             },
@@ -808,10 +877,6 @@ class KoraSchemaGenerator(SchemaGenerator):
         }
 
     def _nutritional_profiles_path(self):
-        """
-        Document nutritional profile list and creation endpoints.
-        """
-
         return {
             'get': {
                 'operationId': 'listNutritionalProfiles',
@@ -819,7 +884,9 @@ class KoraSchemaGenerator(SchemaGenerator):
                 'tags': ['Business'],
                 'responses': {
                     '200': {
-                        'description': 'Nutritional profiles retrieved successfully.',
+                        'description': (
+                            'Nutritional profiles retrieved successfully.'
+                        ),
                         'content': {
                             'application/json': {
                                 'schema': {
@@ -859,8 +926,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                         'application/json': {
                             'schema': {
                                 '$ref': (
-                                    '#/components/schemas/'
-                                    'NutritionalProfile'
+                                    '#/components/schemas/NutritionalProfile'
                                 ),
                             },
                         },
@@ -868,7 +934,9 @@ class KoraSchemaGenerator(SchemaGenerator):
                 },
                 'responses': {
                     '201': {
-                        'description': 'Nutritional profile created successfully.',
+                        'description': (
+                            'Nutritional profile created successfully.'
+                        ),
                         'content': {
                             'application/json': {
                                 'schema': {
@@ -911,10 +979,6 @@ class KoraSchemaGenerator(SchemaGenerator):
         }
 
     def _food_categories_path(self):
-        """
-        Document food category creation.
-        """
-
         return {
             'post': {
                 'operationId': 'createFoodCategory',
@@ -925,10 +989,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                     'content': {
                         'application/json': {
                             'schema': {
-                                '$ref': (
-                                    '#/components/schemas/'
-                                    'FoodCategory'
-                                ),
+                                '$ref': '#/components/schemas/FoodCategory',
                             },
                         },
                     },
@@ -940,8 +1001,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                             'application/json': {
                                 'schema': {
                                     '$ref': (
-                                        '#/components/schemas/'
-                                        'FoodCategory'
+                                        '#/components/schemas/FoodCategory'
                                     ),
                                 },
                             },
@@ -978,10 +1038,6 @@ class KoraSchemaGenerator(SchemaGenerator):
         }
 
     def _foods_path(self):
-        """
-        Document food listing and creation endpoints.
-        """
-
         return {
             'get': {
                 'operationId': 'listFoods',
@@ -992,9 +1048,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                         'name': 'search',
                         'in': 'query',
                         'required': False,
-                        'schema': {
-                            'type': 'string',
-                        },
+                        'schema': {'type': 'string'},
                     },
                     {
                         'name': 'category_id',
@@ -1068,7 +1122,10 @@ class KoraSchemaGenerator(SchemaGenerator):
                         'content': {
                             'application/json': {
                                 'schema': {
-                                    '$ref': '#/components/schemas/FoodWriteResponse',
+                                    '$ref': (
+                                        '#/components/schemas/'
+                                        'FoodWriteResponse'
+                                    ),
                                 },
                             },
                         },
@@ -1104,10 +1161,6 @@ class KoraSchemaGenerator(SchemaGenerator):
         }
 
     def _food_detail_path(self):
-        """
-        Document food retrieval, update, partial update, and deletion.
-        """
-
         parameter = {
             'name': 'food_id',
             'in': 'path',
@@ -1140,6 +1193,20 @@ class KoraSchemaGenerator(SchemaGenerator):
             },
         }
 
+        unavailable = {
+            'description': 'Business service is unavailable.',
+            'content': {
+                'application/json': {
+                    'schema': {
+                        '$ref': (
+                            '#/components/schemas/'
+                            'ServiceUnavailableResponse'
+                        ),
+                    },
+                },
+            },
+        }
+
         return {
             'get': {
                 'operationId': 'retrieveFood',
@@ -1149,19 +1216,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                 'responses': {
                     '200': success_response,
                     '404': not_found_response,
-                    '503': {
-                        'description': 'Business service is unavailable.',
-                        'content': {
-                            'application/json': {
-                                'schema': {
-                                    '$ref': (
-                                        '#/components/schemas/'
-                                        'ServiceUnavailableResponse'
-                                    ), 
-                                },
-                            },
-                        },
-                    },
+                    '503': unavailable,
                 },
             },
             'put': {
@@ -1181,23 +1236,9 @@ class KoraSchemaGenerator(SchemaGenerator):
                 },
                 'responses': {
                     '200': success_response,
-                    '400': {
-                        'description': 'Invalid food data.',
-                    },
+                    '400': {'description': 'Invalid food data.'},
                     '404': not_found_response,
-                    '503': {
-                        'description': 'Business service is unavailable.',
-                        'content': {
-                            'application/json': {
-                                'schema': {
-                                   '$ref': (
-                                        '#/components/schemas/'
-                                        'ServiceUnavailableResponse'
-                                    ), 
-                                },
-                            },
-                        },
-                    },
+                    '503': unavailable,
                 },
             },
             'patch': {
@@ -1217,23 +1258,9 @@ class KoraSchemaGenerator(SchemaGenerator):
                 },
                 'responses': {
                     '200': success_response,
-                    '400': {
-                        'description': 'Invalid food data.',
-                    },
+                    '400': {'description': 'Invalid food data.'},
                     '404': not_found_response,
-                    '503': {
-                        'description': 'Business service is unavailable.',
-                        'content': {
-                            'application/json': {
-                                'schema': {
-                                    '$ref': (
-                                        '#/components/schemas/'
-                                        'ServiceUnavailableResponse'
-                                    ), 
-                                },
-                            },
-                        },
-                    },
+                    '503': unavailable,
                 },
             },
             'delete': {
@@ -1261,28 +1288,12 @@ class KoraSchemaGenerator(SchemaGenerator):
                             },
                         },
                     },
-                    '503': {
-                        'description': 'Business service is unavailable.',
-                        'content': {
-                            'application/json': {
-                                'schema': {
-                                    '$ref': (
-                                        '#/components/schemas/'
-                                        'ServiceUnavailableResponse'
-                                    ), 
-                                },
-                            },
-                        },
-                    },
+                    '503': unavailable,
                 },
             },
         }
 
     def _consumptions_path(self):
-        """
-        Document consumption record creation.
-        """
-
         return {
             'post': {
                 'operationId': 'createConsumption',
@@ -1303,7 +1314,9 @@ class KoraSchemaGenerator(SchemaGenerator):
                 },
                 'responses': {
                     '201': {
-                        'description': 'Consumption record created successfully.',
+                        'description': (
+                            'Consumption record created successfully.'
+                        ),
                         'content': {
                             'application/json': {
                                 'schema': {
@@ -1346,10 +1359,6 @@ class KoraSchemaGenerator(SchemaGenerator):
         }
 
     def _ai_process_path(self):
-        """
-        Document LLM processing exposed through the API Gateway.
-        """
-
         return {
             'post': {
                 'operationId': 'processAI',
@@ -1371,7 +1380,9 @@ class KoraSchemaGenerator(SchemaGenerator):
                         'content': {
                             'application/json': {
                                 'schema': {
-                                    '$ref': '#/components/schemas/LLMResponse',
+                                    '$ref': (
+                                        '#/components/schemas/LLMResponse'
+                                    ),
                                 },
                             },
                         },
@@ -1409,10 +1420,6 @@ class KoraSchemaGenerator(SchemaGenerator):
         }
 
     def _ai_vision_path(self):
-        """
-        Document image analysis exposed through the API Gateway.
-        """
-
         return {
             'post': {
                 'operationId': 'analyzeVision',
@@ -1430,9 +1437,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                                         'format': 'binary',
                                     },
                                 },
-                                'required': [
-                                    'image',
-                                ],
+                                'required': ['image'],
                             },
                         },
                     },
@@ -1444,8 +1449,7 @@ class KoraSchemaGenerator(SchemaGenerator):
                             'application/json': {
                                 'schema': {
                                     '$ref': (
-                                        '#/components/schemas/'
-                                        'VisionResponse'
+                                        '#/components/schemas/VisionResponse'
                                     ),
                                 },
                             },

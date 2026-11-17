@@ -6,8 +6,8 @@ from django.http import HttpResponse
 from django.conf import settings
 from gateway.clients.base import forward_request
 from rest_framework import status
-
-
+from gateway.permissions import IsAuthenticatedOrPublicRoute
+from rest_framework.exceptions import APIException
 class HealthCheckView(APIView):
     def get(self, request):
         return Response({
@@ -17,6 +17,7 @@ class HealthCheckView(APIView):
 
 
 class BusinessProxyView(APIView):
+    permission_classes = [IsAuthenticatedOrPublicRoute]
     def dispatch(self, request, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -24,10 +25,13 @@ class BusinessProxyView(APIView):
         # Convert Django's request into a DRF Request to access parsed API data
         request = self.initialize_request(request, *args, **kwargs)
         self.request = request
+        self.headers = self.default_response_headers
 
-        # Run DRF authentication, permissions, and throttling
-        self.initial(request, *args, **kwargs)
-
+        try:
+          self.initial(request, *args, **kwargs)
+        except APIException as exc:
+            response = self.handle_exception(exc)
+            return self.finalize_response(request, response, *args, **kwargs)
         path = kwargs["path"]
 
         url = f"{settings.BUSINESS_SERVICE_URL}/api/{path}/"
@@ -62,6 +66,7 @@ class BusinessProxyView(APIView):
 
 
 class IdentityProxyView(APIView):
+    permission_classes = [IsAuthenticatedOrPublicRoute]
     def dispatch(self, request, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -69,9 +74,13 @@ class IdentityProxyView(APIView):
         # Convert Django's request into a DRF Request to access parsed API data
         request = self.initialize_request(request, *args, **kwargs)
         self.request = request
+        self.headers = self.default_response_headers
 
-        # Run DRF authentication, permissions, and throttling
-        self.initial(request, *args, **kwargs)
+        try:
+            self.initial(request, *args, **kwargs)
+        except APIException as exc:
+            response = self.handle_exception(exc)
+            return self.finalize_response(request, response, *args, **kwargs)
 
         path = kwargs["path"]
 
@@ -107,6 +116,7 @@ class IdentityProxyView(APIView):
 
 
 class AIProxyView(APIView):
+    permission_classes = [IsAuthenticatedOrPublicRoute]
     def dispatch(self, request, *args, **kwargs):
         # Handle multipart uploads before DRF parses the request body.
         if request.method == "POST":
@@ -114,6 +124,16 @@ class AIProxyView(APIView):
             content_type = request.headers.get("Content-Type", "")
 
             if content_type.startswith("multipart/form-data"):
+                drf_request = self.initialize_request(request, *args, **kwargs)
+                self.request = drf_request
+                self.headers = self.default_response_headers
+
+                try:
+                    self.initial(drf_request, *args, **kwargs)
+                except APIException as exc:
+                    response = self.handle_exception(exc)
+                    return self.finalize_response(drf_request, response, *args, **kwargs)
+
                 if path.startswith("vision/"):
                     url = f"{settings.AI_SERVICE_URL}/{path}"
                 else:

@@ -67,6 +67,7 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    
 
   svc-business:
     build: ./svc-business
