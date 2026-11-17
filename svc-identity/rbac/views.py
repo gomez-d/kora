@@ -5,6 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 
 from users.models import User
 
+from rest_framework.permissions import IsAuthenticated
+from rbac.permissions import HasKoraPermission
+
 from rbac.models import (
     Role,
     Permission,
@@ -24,9 +27,17 @@ from rbac.serializers import (
     UserRolesQuerySerializer
 )
 
-from rbac.permissions import IsKoraAdmin
-
 class RoleView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        HasKoraPermission
+    ]
+
+    required_permissions = {
+        "GET": "roles.read",
+        "POST": "roles.create",
+    }
+
     def get(self, request):
         roles = Role.objects.all()
 
@@ -66,6 +77,18 @@ class RoleView(APIView):
 
 
 class RoleDetailView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        HasKoraPermission
+    ]
+
+    required_permissions = {
+        "GET": "roles.read",
+        "PUT": "roles.update",
+        "PATCH": "roles.update",
+        "DELETE": "roles.delete",
+    }
+
     def get_object(self, role_id):
         try:
             return Role.objects.get(id=role_id)
@@ -163,6 +186,16 @@ class RoleDetailView(APIView):
 
 
 class PermissionView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        HasKoraPermission
+    ]
+
+    required_permissions = {
+        "GET": "permissions.read",
+        "POST": "permissions.create",
+    }
+
     def get(self, request):
         permissions = Permission.objects.all()
 
@@ -202,6 +235,18 @@ class PermissionView(APIView):
 
 
 class PermissionDetailView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        HasKoraPermission
+    ]
+
+    required_permissions = {
+        "GET": "permissions.read",
+        "PUT": "permissions.update",
+        "PATCH": "permissions.update",
+        "DELETE": "permissions.delete",
+    }
+
     def get_object(self, permission_id):
         try:
             return Permission.objects.get(id=permission_id)
@@ -299,8 +344,13 @@ class PermissionDetailView(APIView):
 class UserRoleView(APIView):
     permission_classes = [
         IsAuthenticated,
-        IsKoraAdmin
+        HasKoraPermission
     ]
+
+    required_permissions = {
+        "GET": "user_roles.read_any",
+        "POST": "user_roles.assign",
+    }
 
     def get(self, request):
         user_roles = UserRole.objects.all()
@@ -343,8 +393,13 @@ class UserRoleView(APIView):
 class UserRoleDetailView(APIView):
     permission_classes = [
         IsAuthenticated,
-        IsKoraAdmin
+        HasKoraPermission
     ]
+
+    required_permissions = {
+        "GET": "user_roles.read_any",
+        "DELETE": "user_roles.remove",
+    }
 
     def get_object(self, user_role_id):
         try:
@@ -398,6 +453,16 @@ class UserRoleDetailView(APIView):
 
 
 class RolePermissionView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        HasKoraPermission
+    ]
+
+    required_permissions = {
+        "GET": "role_permissions.read",
+        "POST": "role_permissions.assign",
+    }
+
     def get(self, request):
         role_permissions = RolePermission.objects.all()
 
@@ -437,6 +502,16 @@ class RolePermissionView(APIView):
 
 
 class RolePermissionDetailView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        HasKoraPermission
+    ]
+
+    required_permissions = {
+        "GET": "role_permissions.read",
+        "DELETE": "role_permissions.remove",
+    }
+
     def get_object(self, role_permission_id):
         try:
             return RolePermission.objects.get(id=role_permission_id)
