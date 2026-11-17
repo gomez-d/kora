@@ -64,29 +64,3 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
-
-
-class RefreshToken(models.Model):
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="refresh_tokens"
-    )
-    token_jti = models.CharField(
-        max_length=255,
-        unique=True
-    )
-    expires_at = models.DateTimeField()
-    revoked_at = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.email} - {self.token_jti}"

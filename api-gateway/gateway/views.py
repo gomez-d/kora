@@ -8,6 +8,8 @@ from gateway.clients.base import forward_request
 from rest_framework import status
 from gateway.permissions import IsAuthenticatedOrPublicRoute
 from rest_framework.exceptions import APIException
+
+
 class HealthCheckView(APIView):
     def get(self, request):
         return Response({
@@ -103,9 +105,15 @@ class IdentityProxyView(APIView):
                 json=json
             )
         except requests.RequestException:
-            return Response(
+            response = Response(
                 {"error": "Identity service unavailable"},
-                status=503
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+            return self.finalize_response(
+                request,
+                response,
+                *args,
+                **kwargs
             )
 
         return HttpResponse(

@@ -202,6 +202,11 @@ REST_FRAMEWORK = {
     ],
 }
 
+JWT_SIGNING_KEY = os.getenv('JWT_SIGNING_KEY')
+
+if not JWT_SIGNING_KEY:
+    raise ImproperlyConfigured("JWT_SIGNING_KEY is not configured.")
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -210,5 +215,5 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': os.getenv('JWT_SIGNING_KEY'),
+    'SIGNING_KEY': JWT_SIGNING_KEY,
 }
