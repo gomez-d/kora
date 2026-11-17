@@ -70,6 +70,7 @@ The Users application manages user accounts and authentication.
 | PATCH | `/api/users/users/{user_id}/update/` | Partially update user information |
 | DELETE | `/api/users/users/{user_id}/` | Deactivate a user |
 | POST | `/api/users/login/` | Authenticate a user |
+| POST | `/api/users/logout/` | Revoke a refresh token and log out the authenticated user |
 | POST | `/api/users/token/refresh/` | Refresh an access token |
 
 `{user_id}` is a UUID identifying the user.
@@ -293,6 +294,7 @@ Authenticates a user using email and password.
 
 Invalid credentials return an authentication error.
 
+
 ## 2.9 Refresh Access Token
 
 ### POST `/api/users/token/refresh/`
@@ -311,11 +313,142 @@ Generates a new access token using a valid refresh token.
 
 ```json
 {
-  "access": "NEW_ACCESS_TOKEN"
+  "access": "NEW_ACCESS_TOKEN",
+  "refresh": "NEW_REFRESH_TOKEN"
 }
 ```
 
-This endpoint uses the SimpleJWT token refresh implementation.
+**Token rotation behavior:**
+
+The Identity Service uses the Simple JWT token refresh implementation with refresh token rotation enabled.
+
+- A valid refresh token is used to generate a new access token.
+- A new refresh token is issued during the rotation process.
+- The previously used refresh token is added to the blacklist.
+- The new refresh token can be used for subsequent refresh operations.
+- Blacklisted, invalid, or expired refresh tokens cannot be used to obtain new tokens.
+
+**Token validation:**
+
+- The refresh token must be valid and not blacklisted.
+- The associated user must exist and be active.
+- The user's current roles are included in the refreshed token claims.
+
+**Security considerations:**
+
+Refresh token rotation limits the reuse of previously issued refresh tokens. Once a refresh token has been rotated, the previous token can no longer be used.
+
+The refresh token blacklist is managed through the Simple JWT `token_blacklist` application.
+
+## 2.10 User Logout
+
+### POST `/api/users/logout/`
+
+Revokes the authenticated user's refresh token, preventing it from being used to obtain new access tokens.
+
+**Gateway endpoint:**
+
+`POST /api/identity/users/logout/`
+
+The frontend must access this operation through the API Gateway. The Gateway forwards the request to the Identity Service.
+
+**Authentication:**
+
+A valid JWT access token must be provided in the Authorization header.
+
+```http
+Authorization: Bearer ACCESS_TOKEN
+```
+
+**Request body:**
+
+```json
+{
+  "refresh": "REFRESH_TOKEN"
+}
+```
+
+**Fields:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| refresh | string | Yes | Refresh token to revoke |
+
+**Successful response:**
+
+HTTP `200 OK`
+
+```json
+{
+  "success": true,
+  "message": "Logout successful."
+}
+```
+
+**Expected behavior:**
+
+- The access token must be valid and authenticated.
+- The refresh token must belong to the authenticated user.
+- The refresh token is added to the Simple JWT blacklist.
+- A blacklisted refresh token cannot be used to obtain new access tokens.
+- The operation does not automatically invalidate access tokens that have already been issued.
+
+**Error responses:**
+
+| Status Code | Condition |
+|---|---|
+| 400 Bad Request | The refresh token is missing |
+| 401 Unauthorized | The access token is missing or invalid |
+| 401 Unauthorized | The refresh token is invalid, expired, or already revoked |
+| 401 Unauthorized | The refresh token belongs to another user |
+
+## 2.11 Refresh Token Revocation
+
+The Identity Service uses the native Simple JWT blacklist application to manage refresh token revocation.
+
+**Blacklist mechanism:**
+
+The `token_blacklist` application maintains two database models:
+
+- `OutstandingToken`: Stores refresh tokens issued by the service.
+- `BlacklistedToken`: Stores references to refresh tokens that have been revoked.
+
+Both models are managed by Simple JWT and persisted in the Identity Service PostgreSQL database.
+
+**Revocation process:**
+
+A refresh token can be revoked through the following operations:
+
+- **Logout:** The authenticated user submits their refresh token to the logout endpoint.
+- **Token rotation:** When a refresh token is successfully rotated, the previously used token is automatically blacklisted.
+
+**Security behavior:**
+
+- A refresh token must be valid and not blacklisted to be used.
+- Revoked refresh tokens cannot be reused to obtain new access tokens.
+- A user cannot revoke another user's refresh token through the logout endpoint.
+- Invalid, expired, or previously revoked refresh tokens are rejected.
+
+**Access token limitation:**
+
+Revoking a refresh token does not automatically invalidate access tokens that have already been issued.
+
+Previously issued access tokens remain valid until their expiration time unless another authentication invalidation mechanism is implemented.
+
+**Configuration:**
+
+The blacklist functionality is enabled through the following Django application:
+
+`rest_framework_simplejwt.token_blacklist`
+
+The relevant Simple JWT settings are:
+
+| Setting | Value | Description |
+|---|---|---|
+| ROTATE_REFRESH_TOKENS | True | Issues a new refresh token during token rotation |
+| BLACKLIST_AFTER_ROTATION | True | Blacklists the previously used refresh token |
+| ACCESS_TOKEN_LIFETIME | 15 minutes | Defines the access token lifetime |
+| REFRESH_TOKEN_LIFETIME | 1 day | Defines the refresh token lifetime |
 
 ---
 
@@ -617,7 +750,10 @@ The Identity Service currently provides:
 - User listing and individual retrieval.
 - User profile updates.
 - User account deactivation.
-- JWT access token generation and refresh.
+- JWT access and refresh token generation.
+- Access token renewal through refresh tokens.
+- Refresh token rotation and blacklist management.
+- Authenticated user logout and refresh token revocation.
 - Role management.
 - Permission management.
 - User-role assignments.
