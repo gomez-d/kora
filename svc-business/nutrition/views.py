@@ -3,13 +3,13 @@ from rest_framework.views import APIView
 
 from django.db import IntegrityError
 
-from .models import (
+from nutrition.models import (
     NutritionalProfile,
     Food,
     FoodCategory,
     ConsumptionRecord
 )
-from .serializers import (
+from nutrition.serializers import (
     NutritionalProfileSerializer,
     FoodCategorySerializer,
     FoodSerializer,
@@ -17,8 +17,8 @@ from .serializers import (
     ConsumptionRecordSerializer,
     ConsumptionHistorySerializer
 )
-from .pagination import ConsumptionPagination
-from .clients.identity import user_exists
+from nutrition.pagination import ConsumptionPagination
+from clients.identity_client import user_exists
 
 from datetime import date
 from uuid import UUID
