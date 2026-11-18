@@ -52,6 +52,7 @@ services:
     depends_on:
       - svc-identity
       - svc-business
+      - svc-ai
     restart: unless-stopped
 
   svc-identity:
