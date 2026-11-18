@@ -67,7 +67,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'gateway.middleware.GatewayJWTMiddleware',
-    ]
+]
 
 ROOT_URLCONF = 'config.urls'
 
@@ -155,6 +155,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
+    'DEFAULT_THROTTLE_RATES': {
+        'login': '5/min',
+        'registration': '3/hour',
+        'refresh': '10/min',
+        'authenticated_user': '60/min'
+    }
 }
 
 JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY")

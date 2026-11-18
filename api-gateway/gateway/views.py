@@ -8,6 +8,12 @@ from gateway.clients.base import forward_request
 from rest_framework import status
 from gateway.permissions import IsAuthenticatedOrPublicRoute
 from rest_framework.exceptions import APIException
+from gateway.throttling import (
+    LoginRateThrottle,
+    RegistrationRateThrottle,
+    RefreshRateThrottle,
+    AuthenticatedUserRateThrottle
+)
 
 
 class HealthCheckView(APIView):
@@ -20,6 +26,10 @@ class HealthCheckView(APIView):
 
 class BusinessProxyView(APIView):
     permission_classes = [IsAuthenticatedOrPublicRoute]
+
+    def get_throttles(self):
+        return [AuthenticatedUserRateThrottle()]
+
     def dispatch(self, request, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -30,7 +40,7 @@ class BusinessProxyView(APIView):
         self.headers = self.default_response_headers
 
         try:
-          self.initial(request, *args, **kwargs)
+            self.initial(request, *args, **kwargs)
         except APIException as exc:
             response = self.handle_exception(exc)
             return self.finalize_response(request, response, *args, **kwargs)
@@ -55,9 +65,15 @@ class BusinessProxyView(APIView):
                 json=json
             )
         except requests.RequestException:
-            return Response(
+            response = Response(
                 {"error": "Business service is unavailable"},
-                status=503
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+            return self.finalize_response(
+                request,
+                response,
+                *args,
+                **kwargs
             )
 
         return HttpResponse(
@@ -69,6 +85,21 @@ class BusinessProxyView(APIView):
 
 class IdentityProxyView(APIView):
     permission_classes = [IsAuthenticatedOrPublicRoute]
+
+    def get_throttles(self):
+        path = self.kwargs.get("path", "").strip("/")
+
+        if path == "users/login":
+            throttle_classes = [LoginRateThrottle]
+        elif path == "users/register":
+            throttle_classes = [RegistrationRateThrottle]
+        elif path == "users/token/refresh":
+            throttle_classes = [RefreshRateThrottle]
+        else:
+            throttle_classes = [AuthenticatedUserRateThrottle]
+
+        return [throttle() for throttle in throttle_classes]
+
     def dispatch(self, request, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
@@ -125,6 +156,10 @@ class IdentityProxyView(APIView):
 
 class AIProxyView(APIView):
     permission_classes = [IsAuthenticatedOrPublicRoute]
+
+    def get_throttles(self):
+        return [AuthenticatedUserRateThrottle()]
+
     def dispatch(self, request, *args, **kwargs):
         # Handle multipart uploads before DRF parses the request body.
         if request.method == "POST":
