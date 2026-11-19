@@ -7,6 +7,7 @@ from users.models import User
 
 from rest_framework.permissions import IsAuthenticated
 from rbac.permissions import HasKoraPermission
+from clients.unstructured_data_client import send_identity_event
 
 from rbac.models import (
     Role,
@@ -596,6 +597,17 @@ class UserRolesQueryView(APIView):
         ).exists()
 
         if not is_own_user and not is_admin:
+            send_identity_event(
+                user_id=request.user.id,
+                event="access_denied",
+                level="WARNING",
+                metadata={
+                    "source": "rbac_user_roles",
+                    "reason": "unauthorized_role_access",
+                    "method": request.method
+                }
+            )
+
             return Response(
                 {
                     "detail": "You are not authorized to view this user's roles."
