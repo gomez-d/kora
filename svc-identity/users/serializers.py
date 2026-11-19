@@ -11,8 +11,25 @@ from users.models import User
 from rbac.models import Role, UserRole
 from rbac.utils import get_user_role_names
 
+class StrictFieldsMixin:
+    """
+    Reject input fields that are not part of the serializer contract.
+    """
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
+    def to_internal_value(self, data):
+        if hasattr(data, "keys"):
+            unexpected_fields = set(data.keys()) - set(self.fields.keys())
+
+            if unexpected_fields:
+                raise serializers.ValidationError({
+                    "unexpected_fields": (
+                        "Unexpected field(s): "
+                        f"{', '.join(sorted(unexpected_fields))}."
+                    )
+                })
+        return super().to_internal_value(data)
+
+class UserRegistrationSerializer(StrictFieldsMixin, serializers.ModelSerializer):
     """
     Serializer used to register Kora users.
 
@@ -52,6 +69,34 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             }
         }
 
+    def validate_first_name(self, value):
+        """
+        Reject empty or whitespace-only first names.
+        """
+
+        value = value.strip()
+
+        if not value:
+            raise serializers.ValidationError(
+                "First name cannot be empty."
+            )
+
+        return value
+
+    def validate_last_name(self, value):
+        """
+        Reject empty or whitespace-only last names.
+        """
+
+        value = value.strip()
+
+        if not value:
+            raise serializers.ValidationError(
+                "Last name cannot be empty."
+            )
+
+        return value
+
     def validate_password(self, value):
         user = User(
             email=self.initial_data.get("email", ""),
@@ -64,12 +109,35 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def validate_date_of_birth(self, value):
-        if value > timezone.localdate():
+        """
+        Validate that the date produces an age between 1 and 120 years.
+        """
+
+        today = timezone.localdate()
+
+        if value > today:
             raise serializers.ValidationError(
                 "Date of birth cannot be in the future."
             )
 
+        age = today.year - value.year
+
+        if(today.month, today.day) < (value.month, value.day):
+            age -= 1
+
+        if age < 1 or age > 120:
+            raise serializers.ValidationError(
+                "Age must be between 1 and 120 years."
+            )
+
         return value
+
+    def validate_email(self, value):
+        """
+        Normalize the email before persistence.
+        """
+
+        return value.strip().lower()
 
     def create(self, validated_data):
         """
@@ -144,7 +212,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class UserUpdateSerializer(serializers.ModelSerializer):
+class UserUpdateSerializer(StrictFieldsMixin, serializers.ModelSerializer):
     """
     Serializer used to update user information.
     """
@@ -159,16 +227,67 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             "date_of_birth"
         ]
 
-    def validate_date_of_birth(self, value):
-        if value > timezone.localdate():
+    def validate_first_name(self, value):
+        """
+        Reject empty whitespace-only first names.
+        """
+
+        value = value.strip()
+
+        if not value:
             raise serializers.ValidationError(
-                "Date of birth cannot be in the future."
+                "First name cannot be empty."
             )
 
         return value
 
+    def validate_last_name(self, value):
+        """
+        Reject empty or whitespace-only last names.
+        """
 
-class UserLoginSerializer(serializers.Serializer):
+        value = value.strip()
+
+        if not value:
+            raise serializers.ValidationError(
+                "Last name cannot be empty."
+            )
+
+        return value
+
+    def validate_date_of_birth(self, value):
+        """
+        Validate that the date produces an age between 1 and 120 years.
+        """
+
+        today = timezone.localdate()
+
+        if value > today:
+            raise serializers.ValidationError(
+                "Date of birth cannot be in the future."
+            )
+
+        age = today.year - value.year
+
+        if(today.month, today.day) < (value.month, value.day):
+            age -= 1
+
+        if age < 1 or age > 120:
+            raise serializers.ValidationError(
+                "Age must be between 1 and 120 years."
+            )
+
+        return value
+
+    def validate_email(self, value):
+        """
+        Normalize the email before persistence.
+        """
+
+        return value.strip().lower()
+
+
+class UserLoginSerializer(StrictFieldsMixin, serializers.Serializer):
     """
     Serializer used to validate login credentials.
     """
@@ -183,6 +302,13 @@ class UserLoginSerializer(serializers.Serializer):
         write_only=True,
         trim_whitespace=False
     )
+
+    def validate_email(self, value):
+        """
+        Normalize the email before authentication.
+        """
+
+        return value.strip().lower()
 
 class UserTokenRefreshSerializer(TokenRefreshSerializer):
     """
