@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import ValidationError
 
 from django.db import IntegrityError
 
@@ -37,18 +38,16 @@ class NutritionalProfileView(APIView):
         user_id = request.query_params.get("user_id")
 
         if not user_id:
-            return Response(
-                {"detail": "The user_id query parameter is required."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id query parameter is required."
+            })
 
         try:
             user_uuid = UUID(user_id)
         except (ValueError, TypeError):
-            return Response(
-                {"detail": "The user_id must be a valid UUID."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id must be a valid UUID.",
+            })
 
         profiles = NutritionalProfile.objects.filter(user_id=user_uuid)
         serializer = NutritionalProfileSerializer(profiles, many=True)
@@ -62,26 +61,23 @@ class NutritionalProfileView(APIView):
         user_id = request.data.get("user_id")
 
         if not user_id:
-            return Response(
-                {"detail": "The user_id field is required."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id field is required.",
+            })
 
         try:
             user_uuid = UUID(str(user_id))
         except (ValueError, TypeError, AttributeError):
-            return Response(
-                {"detail": "The user_id field must be a valid UUID."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id field must be a valid UUID.",
+            })
 
         exists = user_exists(user_uuid)
 
         if exists is False:
-            return Response(
-                {"detail": "The specified user does not exist."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The specified user does not exist.",
+            })
 
         if exists is None:
             return Response(
@@ -91,16 +87,12 @@ class NutritionalProfileView(APIView):
 
         serializer = NutritionalProfileSerializer(data=request.data)
 
-        if serializer.is_valid():
-            serializer.save(user_id=user_uuid)
-            return Response(
-                serializer.data,
-                status=201
-            )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user_id=user_uuid)
 
         return Response(
-            serializer.errors,
-            status=400
+            serializer.data,
+            status=201
         )
 
 
@@ -120,12 +112,6 @@ class FoodCategoryView(APIView):
                 serializer.data,
                 status=201
             )
-
-        return Response(
-            serializer.errors,
-            status=400
-        )
-
 
 class FoodView(APIView):
     def get(self, request):
@@ -169,17 +155,12 @@ class FoodView(APIView):
             data=request.data
         )
 
-        if serializer.is_valid():
-            serializer.save()
-
-            return Response(
-                serializer.data,
-                status=201
-            )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
         return Response(
-            serializer.errors,
-            status=400
+            serializer.data,
+            status=201
         )
 
 
@@ -211,25 +192,20 @@ class FoodDetailView(APIView):
             data=request.data
         )
 
-        if serializer.is_valid():
-            serializer.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-            updated_food = Food.objects.select_related(
-                "category"
-            ).prefetch_related(
-                "nutrients"
-            ).get(id=food_id)
+        updated_food = Food.objects.select_related(
+            "category"
+        ).prefetch_related(
+            "nutrients"
+        ).get(id=food_id)
 
-            response_serializer = FoodReadSerializer(updated_food)
-
-            return Response(
-                response_serializer.data,
-                status=200
-            )
+        response_serializer = FoodReadSerializer(updated_food)
 
         return Response(
-            serializer.errors,
-            status=400
+            response_serializer.data,
+            status=200
         )
 
     def patch(self, request, food_id):
@@ -247,25 +223,20 @@ class FoodDetailView(APIView):
             partial=True
         )
 
-        if serializer.is_valid():
-            serializer.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-            updated_food = Food.objects.select_related(
-                "category"
-            ).prefetch_related(
-                "nutrients"
-            ).get(id=food_id)
+        updated_food = Food.objects.select_related(
+            "category"
+        ).prefetch_related(
+            "nutrients"
+        ).get(id=food_id)
 
-            response_serializer = FoodReadSerializer(updated_food)
-
-            return Response(
-                response_serializer.data,
-                status=200
-            )
+        response_serializer = FoodReadSerializer(updated_food)
 
         return Response(
-            serializer.errors,
-            status=400
+            response_serializer.data,
+            status=200
         )
 
     def delete(self, request, food_id):
@@ -302,18 +273,16 @@ class ConsumptionRecordView(APIView):
         user_id = request.query_params.get("user_id")
 
         if not user_id:
-            return Response(
-                {"detail": "The user_id parameter is required."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id parameter is required.",
+            })
 
         try:
             user_id = UUID(user_id)
         except ValueError:
-            return Response(
-                {"detail": "Invalid user_id format."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "Invalid user_id format.",
+            })
 
         consumptions = consumptions.filter(user_id=user_id)
 
@@ -333,16 +302,14 @@ class ConsumptionRecordView(APIView):
                     consumed_at__date__lte=end_date
                 )
         except ValueError:
-            return Response(
-                {"detail": "Dates must use YYYY-MM-DD format."},
-                status=400
-            )
+            raise ValidationError({
+                "date": "Dates must use YYYY-MM-DD format.",
+            })
 
         if start_date and end_date and start_date > end_date:
-            return Response(
-                {"detail": "start_date cannot be after end_date."},
-                status=400
-            )
+            raise ValidationError({
+                "date_range": "start_date cannot be after end_date.",
+            })
 
         ordering = request.query_params.get(
             "ordering",
@@ -374,26 +341,23 @@ class ConsumptionRecordView(APIView):
         user_id = request.data.get("user_id")
 
         if not user_id:
-            return Response(
-                {"detail": "The user_id field is required."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id field is required.",
+            })
 
         try:
             user_uuid = UUID(str(user_id))
         except (ValueError, TypeError, AttributeError):
-            return Response(
-                {"detail": "The user_id field must be a valid UUID."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id field must be a valid UUID.",
+            })
 
         exists = user_exists(user_uuid)
 
         if exists is False:
-            return Response(
-                {"detail": "The specified user does not exist."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The specified user does not exist.",
+            })
 
         if exists is None:
             return Response(
@@ -403,15 +367,10 @@ class ConsumptionRecordView(APIView):
 
         serializer = ConsumptionRecordSerializer(data=request.data)
 
-        if serializer.is_valid():
-            serializer.save(user_id=user_uuid)
-
-            return Response(
-                serializer.data,
-                status=201
-            )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user_id=user_uuid)
 
         return Response(
-            serializer.errors,
-            status=400
+            serializer.data,
+            status=201
         )
