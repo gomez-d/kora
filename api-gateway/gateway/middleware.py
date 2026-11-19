@@ -1,5 +1,7 @@
+
+from uuid import UUID
+
 from django.http import JsonResponse
-from django.conf import settings
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 
@@ -29,9 +31,7 @@ class GatewayJWTMiddleware:
             "/api/ai/",
         )
 
-        is_protected_route = path.startswith(
-            protected_prefixes
-        )
+        is_protected_route = path.startswith(protected_prefixes)
 
         if not is_protected_route:
             return self.get_response(request)
@@ -39,9 +39,7 @@ class GatewayJWTMiddleware:
         if path in PUBLIC_PATHS:
             return self.get_response(request)
 
-        authorization = request.headers.get(
-            "Authorization", ""
-        )
+        authorization = request.headers.get("Authorization", "")
 
         parts = authorization.split()
 
@@ -49,16 +47,30 @@ class GatewayJWTMiddleware:
             return JsonResponse(
                 {
                     "success": False,
-                    "message": "Authentication credentials were not provided."
+                    "message": (
+                        "Authentication credentials were not provided."
+                    )
                 },
                 status=401
             )
 
         try:
             token = AccessToken(parts[1])
-            request.jwt_payload = token.payload
+            payload = token.payload
 
-        except TokenError:
+            if payload.get("token_type") != "access":
+                raise TokenError("Access token required.")
+
+            user_id = payload.get("user_id")
+
+            if not isinstance(user_id, str) or not user_id.strip():
+                raise TokenError("Invalid user identity.")
+
+            UUID(user_id)
+
+            request.jwt_payload = payload
+
+        except (TokenError, ValueError):
             return JsonResponse(
                 {
                     "success": False,

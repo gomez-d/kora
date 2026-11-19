@@ -1,3 +1,4 @@
+
 from dataclasses import dataclass
 
 from django.conf import settings
@@ -50,25 +51,41 @@ class KoraJWTAuthentication(BaseAuthentication):
                 algorithms=["HS256"],
             )
         except ExpiredSignatureError:
-            raise AuthenticationFailed(
-                "Token has expired."
-            )
+            raise AuthenticationFailed("Token has expired.")
         except InvalidTokenError:
-            raise AuthenticationFailed(
-                "Invalid token."
-            )
+            raise AuthenticationFailed("Invalid token.")
 
         user_id = payload.get("user_id")
-        roles = payload.get("roles", [])
-        permissions = payload.get("permissions", [])
+        token_type = payload.get("token_type")
+        roles = payload.get("roles")
+        permissions = payload.get("permissions")
 
-        if not user_id:
+        if token_type != "access":
+            raise AuthenticationFailed(
+                "Only access tokens are accepted."
+            )
+
+        if not isinstance(user_id, str) or not user_id.strip():
             raise AuthenticationFailed(
                 "Token does not contain a valid user identity."
             )
 
+        if not isinstance(roles, list) or not all(
+            isinstance(role, str) for role in roles
+        ):
+            raise AuthenticationFailed(
+                "Invalid roles claim."
+            )
+
+        if not isinstance(permissions, list) or not all(
+            isinstance(permission, str) for permission in permissions
+        ):
+            raise AuthenticationFailed(
+                "Invalid permissions claim."
+            )
+
         identity = AuthenticatedIdentity(
-            user_id=str(user_id),
+            user_id=user_id,
             roles=roles,
             permissions=permissions,
         )
@@ -76,11 +93,4 @@ class KoraJWTAuthentication(BaseAuthentication):
         return identity, payload
 
     def authenticate_header(self, request):
-        """
-        Return the authentication scheme used by protected endpoints.
-
-        DRF uses this value to distinguish authentication failures
-        from authorization failures and return HTTP 401 when credentials
-        are missing or invalid.
-        """
         return self.keyword
