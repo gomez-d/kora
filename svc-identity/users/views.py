@@ -26,6 +26,7 @@ from rbac.permissions import (
     HasKoraPermission,
     HasSelfOrKoraPermission
 )
+from clients.unstructured_data_client import send_identity_event
 
 
 class HealthCheckView(APIView):
@@ -269,6 +270,15 @@ class UserLoginView(APIView):
         )
 
         if user is None:
+            send_identity_event(
+                user_id=None,
+                event="login_failed",
+                level="WARNING",
+                metadata={
+                    "source": "user_login"
+                }
+            )
+
             return Response(
                 {
                     "success": False,
@@ -319,6 +329,16 @@ class UserLogoutView(APIView):
             user_id = token.get(api_settings.USER_ID_CLAIM)
 
             if str(user_id) != str(request.user.id):
+                send_identity_event(
+                    user_id=request.user.id,
+                    event="invalid_token_attempt",
+                    level="WARNING",
+                    metadata={
+                        "source": "user_logout",
+                        "reason": "user_mismatch"
+                    }
+                )
+
                 return Response(
                     {
                         "success": False,
@@ -329,6 +349,15 @@ class UserLogoutView(APIView):
 
             token.blacklist()
 
+            send_identity_event(
+                user_id=request.user.id,
+                event="token_revoked",
+                level="INFO",
+                metadata={
+                    "source": "user_logout"
+                }
+            )
+
             return Response(
                 {
                     "success": True,
@@ -338,6 +367,16 @@ class UserLogoutView(APIView):
             )
 
         except TokenError:
+            send_identity_event(
+                user_id=request.user.id,
+                event="invalid_token_attempt",
+                level="WARNING",
+                metadata={
+                    "source": "user_logout",
+                    "reason": "invalid_or_expired"
+                }
+            )
+
             return Response(
                 {
                     "success": False,

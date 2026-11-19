@@ -43,12 +43,21 @@ ALLOWED_HOSTS = [
 ]
 
 
+#Internal service URLs
 UNSTRUCTURED_DATA_SERVICE_URL = os.getenv("UNSTRUCTURED_DATA_SERVICE_URL")
 
 if not UNSTRUCTURED_DATA_SERVICE_URL:
     raise ImproperlyConfigured(
         "UNSTRUCTURED_DATA_SERVICE_URL is not configured.")
 
+
+# Internal service authentication
+UNSTRUCTURED_DATA_SERVICE_TOKEN = os.getenv("UNSTRUCTURED_DATA_SERVICE_TOKEN")
+
+if not UNSTRUCTURED_DATA_SERVICE_TOKEN:
+    raise ImproperlyConfigured(
+        "UNSTRUCTURED_DATA_SERVICE_TOKEN is not configured."
+    )
 
 # Application definition
 
