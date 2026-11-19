@@ -25,7 +25,7 @@ def send_identity_event(user_id, event, level='INFO', data=None, metadata=None,)
     )
 
     payload = {
-        'user_id': str(user_id),
+        'user_id': str(user_id) if user_id is not None else None,
         'event': event,
         'level': level,
         'data': data or {},
@@ -34,8 +34,12 @@ def send_identity_event(user_id, event, level='INFO', data=None, metadata=None,)
 
     try:
         response = requests.post(
-            url, json=payload,
-            timeout=5,
+            url,
+            json=payload,
+            headers={
+                'Authorization': f'Bearer {settings.UNSTRUCTURED_DATA_SERVICE_TOKEN}'
+            },
+            timeout=2,
         )
 
         # Handle HTTP error responses returned by the remote service.

@@ -96,9 +96,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         send_identity_event(
             user_id=user.id,
             event='user_registered',
-            data={
-                "email": user.email
-            },
+            level='INFO',
             metadata={
                 "source": "user_registration",
             },
