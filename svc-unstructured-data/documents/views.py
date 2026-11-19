@@ -1,5 +1,6 @@
+import secrets
+from django.conf import settings
 from datetime import datetime, timezone
-
 from rest_framework import status, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -380,6 +381,19 @@ class IdentityEventView(APIView):
 
     def post(self, request):
 
+        # Validate internal service authentication.
+        auth_header = request.headers.get('Authorization', '')
+        expected_token = f'Bearer {settings.UNSTRUCTURED_DATA_SERVICE_TOKEN}'
+
+        if not secrets.compare_digest(auth_header, expected_token):
+            return Response(
+                {
+                    'success': False,
+                    'message': 'Unauthorized service request.'
+                },
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
         # Validate the event received from the identity service.
         serializer = IdentityEventSerializer(data=request.data)
 
@@ -402,8 +416,8 @@ class IdentityEventView(APIView):
             'level': validated_data['level'],
             'event': validated_data['event'],
             'data': {
-                'user_id': validated_data['user_id'],
                 **validated_data['data'],
+                'user_id': validated_data['user_id']
             },
             'metadata': validated_data['metadata'],
             'timestamp': datetime.now(timezone.utc),
