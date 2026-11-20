@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Catálogo de alimentos</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="../css/vendor.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/main-screen.css">
+    <link rel="stylesheet" href="../css/header-kora.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+</head>
+<body >
+    <div id="kora-alerts" aria-live="polite"></div>
+        <header class="kora-header">
+            <div class="kora-header__inner">
+
+                
+                <div class="kora-header__logo">
+                    <a href="#">
+                        <img src="../images/logo.svg" alt="Logo Kora">
+                        
+                    </a>
+                </div>
+
+                
+                <nav class="kora-header__nav kora-header__nav--left">
+                    <a href="main_panel.html">INICIO</a>
+                    <a href="food_catalog.html">CATALOGO</a>
+                    <a href="food_intake.html">CONSUMO</a>
+                </nav>
+
+                
+                <div class="kora-header__brand">
+                    <a href="#">
+                        <span class="kora-header__brand-text">KORA</span>
+                    </a>
+                </div>
+
+                
+                <nav class="kora-header__nav kora-header__nav--right">
+                    <a href="food_intake_history.html">HISTORIAL</a>
+                    <a href="account_settings.html">AJUSTES</a>
+                </nav>
+
+                
+                <div class="kora-header__profile">
+                    <img src="../images/avatars/user-01.jpg" alt="Perfil">
+                    
+                </div>
+
+            </div>
+        </header>
+
+        <article class="s-content s-content--main">
+            <section class="s-alimento">
+                <div class="s-alimento__container">
+                    <h1 class="s-alimento__title">Catálogo de alimentos</h1>
+                    <p class="s-alimento__hint">
+                        Consulta los alimentos y los nutrientes registrados en Kora.
+                    </p>
+
+                    <div class="s-catalog__toolbar">
+                        <div class="s-catalog__search">
+                            <input type="search" id="catalog-search" class="s-alimento__input"
+                                   placeholder="Buscar por nombre…" autocomplete="off">
+                            <button type="button" id="btn-search"
+                                    class="s-alimento__btn s-alimento__btn--primary">Buscar</button>
+                        </div>
+                        <div class="s-catalog__filters">
+                            <select id="catalog-sort" class="s-alimento__input s-alimento__select"
+                                    aria-label="Ordenar alimentos">
+                                <option value="name">Ordenar por nombre</option>
+                                <option value="calories">Ordenar por calorías</option>
+                                <option value="protein">Ordenar por proteína</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="catalog-status" class="s-alimento__hint" role="status" aria-live="polite"></div>
+                    <div id="catalog-grid" class="s-catalog__grid" aria-live="polite"></div>
+
+                    <div id="catalog-empty" class="s-catalog__empty" style="display:none;">
+                        <p id="catalog-empty-message">No hay alimentos para mostrar.</p>
+                    </div>
+
+                    <div id="catalog-loading" class="s-catalog__empty" style="display:none;">
+                        <p>Cargando alimentos…</p>
+                    </div>
+                </div>
+            </section>
+        </article>
+
+        <div id="food-detail-modal" class="kora-modal" aria-hidden="true"
+             role="dialog" aria-modal="true" aria-labelledby="food-detail-title">
+            <div class="kora-modal__backdrop" data-close-modal></div>
+            <div class="kora-modal__panel">
+                <button type="button" class="kora-modal__close" data-close-modal aria-label="Cerrar">×</button>
+                <div class="kora-modal__body">
+                    <div class="kora-modal__image-wrap" id="food-detail-image-wrap" style="display:none;">
+                        <img id="food-detail-image" src="" alt="">
+                    </div>
+
+                    <h2 id="food-detail-title" class="kora-modal__title">—</h2>
+                    <p class="kora-modal__portion" id="food-detail-portion">Porción de referencia: —</p>
+                    <p id="food-detail-description"></p>
+                    <p id="food-detail-category"></p>
+                    <div id="food-detail-nutrients" class="kora-modal__nutrients"></div>
+
+                    <p class="s-alimento__hint">
+                        Se muestran únicamente los nutrientes que devuelve el catálogo.
+                    </p>
+
+                    <div class="kora-modal__actions">
+                        <a id="food-detail-register-btn" href="food_intake.html"
+                           class="s-alimento__btn s-alimento__btn--registrar">Registrar consumo</a>
+                        <button type="button" class="s-alimento__btn s-alimento__btn--secondary"
+                                data-close-modal>Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="s-footer s-footer--main">
+            <div class="row s-footer__bottom">
+                <div class="column xl-4 lg-12">
+                    <p class="ss-copyright"><span>© Copyright KORA 2026</span></p>
+                </div>
+            </div>
+            <div class="kora-ai-button">
+                <button type="button" id="kora-ai-toggle" title="Habla con Kora AI">
+                    <img src="../images/cora.svg" alt="Kora">
+                </button>
+                <span class="kora-ai-label">Habla con Kora AI</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../js/plugins.js"></script>
+    <script src="../js/main.js"></script>
+    <script src="../js/kora-api.js"></script>
+    <script src="../js/kora-config.js"></script>
+    <script src="../js/kora-llm.js"></script>
+    <script src="../js/kora-alerts.js"></script>

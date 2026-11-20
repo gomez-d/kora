@@ -1,0 +1,227 @@
+
+:root {
+    --color-1: #c93f1d;
+    --color-green-dark: #3a4a1c;
+    --color-text: #2a2724;
+    --font-serif: "Cormorant Garamond", serif;
+    --font-sans: "Inter", sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: #f5f5f5;
+}
+
+
+.kora-header {
+    position: relative;
+    width: 100%;
+    background: #ffffff;
+    z-index: 100;
+}
+
+
+.kora-header::before {
+    content: "";
+    display: block;
+    height: 10px;
+    width: 100%;
+    background: linear-gradient(to right, #2f3d18, #3d4f1f, #2f3d18);
+}
+
+
+.kora-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 14px 32px;
+    gap: 20px;
+    position: relative;
+}
+
+
+.kora-header__logo {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+}
+
+.kora-header__logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+
+.kora-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    flex: 1;
+}
+
+.kora-header__nav--left {
+    justify-content: flex-end;
+    padding-right: 20px;
+}
+
+.kora-header__nav--right {
+    justify-content: flex-start;
+    padding-left: 20px;
+}
+
+.kora-header__nav a {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.25s ease;
+    position: relative;
+}
+
+.kora-header__nav a:hover {
+    color: var(--color-1);
+}
+
+.kora-header__nav a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0;
+    height: 1.5px;
+    background: var(--color-1);
+    transition: width 0.25s ease;
+}
+
+.kora-header__nav a:hover::after {
+    width: 100%;
+}
+
+
+.kora-header__brand {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+}
+
+.kora-header__brand a {
+    display: block;
+    text-decoration: none;
+}
+
+.kora-header__brand-text {
+    font-family: var(--font-serif);
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #1a1a1a;
+    line-height: 1;
+    position: relative;
+    padding: 6px 18px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.92) 0%,
+        rgba(255, 248, 240, 0.85) 50%,
+        rgba(255, 255, 255, 0.92) 100%
+    );
+    
+    
+    
+    
+    border-radius: 2px;
+}
+
+
+.kora-header__profile {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #e8e0d9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.kora-header__profile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+.kora-header::after {
+    content: "";
+    display: block;
+    height: 12px;
+    width: 100%;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.06) 0%,
+        rgba(0, 0, 0, 0.02) 40%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+
+
+@media (max-width: 1100px) {
+    .kora-header__nav {
+        gap: 22px;
+    }
+    .kora-header__brand-text {
+        font-size: 34px;
+    }
+}
+
+@media (max-width: 900px) {
+    .kora-header__inner {
+        padding: 12px 20px;
+        gap: 12px;
+    }
+    .kora-header__nav a {
+        font-size: 11px;
+    }
+    .kora-header__nav {
+        gap: 16px;
+    }
+    .kora-header__brand-text {
+        font-size: 28px;
+        letter-spacing: 0.08em;
+    }
+    .kora-header__logo {
+        width: 46px;
+        height: 46px;
+    }
+    .kora-header__profile {
+        width: 42px;
+        height: 42px;
+    }
+}
+
+@media (max-width: 700px) {
+    .kora-header__nav--left a:nth-child(2),
+    .kora-header__nav--left a:nth-child(3),
+    .kora-header__nav--right a:nth-child(2) {
+        display: none; 
+    }
+    .kora-header__brand-text {
+        font-size: 24px;
+    }
+}

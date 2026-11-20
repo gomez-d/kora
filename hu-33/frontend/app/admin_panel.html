@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Administración — Panel principal</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="../css/vendor.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/header-kora.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+</head>
+<body>
+     <header class="kora-header">
+            <div class="kora-header__inner">
+
+                
+                <div class="kora-header__logo">
+                    <a href="#">
+                        <img src="../images/logo.svg" alt="Logo Kora">
+                        
+                    </a>
+                </div>
+
+                
+                <nav class="kora-header__nav kora-header__nav--left">
+                    <a href="admin_panel.html">INICIO</a>
+                    <a href="admin_foods.html">ALIMENTOS</a>
+                </nav>
+
+                
+                <div class="kora-header__brand">
+                    <a href="#">
+                        <span class="kora-header__brand-text">KORA</span>
+                    </a>
+                </div>
+
+                
+                <nav class="kora-header__nav kora-header__nav--right">
+                    <a href="admin_users.html">USUARIOS</a>
+                    <a href="admin_audit.html">AUDITORIA</a>
+                </nav>
+
+                
+                <div class="kora-header__profile">
+                    <img src="../images/avatars/user-02.jpg" alt="Perfil">
+                    
+                </div>
+
+            </div>
+        </header>
+    <div class="admin-shell">
+            <div class="admin-content">
+                <div class="admin-page-header">
+                    <div>
+                        <h1>Indicadores generales</h1>
+                        <p>Resumen del estado de Kora y accesos rápidos a las áreas de gestión.</p>
+                    </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="admin-kpi-grid">
+                    <div class="admin-kpi admin-kpi--accent">
+                        <div class="admin-kpi__label">Alimentos activos</div>
+                        <div class="admin-kpi__value" id="kpi-foods">—</div>
+                        <div class="admin-kpi__hint">En catálogo</div>
+                    </div>
+                    <div class="admin-kpi">
+                        <div class="admin-kpi__label">Usuarios registrados</div>
+                        <div class="admin-kpi__value" id="kpi-users">—</div>
+                        <div class="admin-kpi__hint">Cuentas totales</div>
+                    </div>
+                    <div class="admin-kpi">
+                        <div class="admin-kpi__label">Usuarios activos</div>
+                        <div class="admin-kpi__value" id="kpi-users-active">—</div>
+                        <div class="admin-kpi__hint">Últimos 30 días</div>
+                    </div>
+                    <div class="admin-kpi">
+                        <div class="admin-kpi__label">Eventos de auditoría</div>
+                        <div class="admin-kpi__value" id="kpi-audit">—</div>
+                        <div class="admin-kpi__hint">Últimas 24 h</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <!-- Quick access -->
+                    <div class="admin-card">
+                        <h2 class="admin-card__title">Accesos rápidos</h2>
+                        <div class="admin-quick-grid">
+                            <a href="admin_foods.html" class="admin-quick-link">
+                                <span class="admin-quick-link__icon">＋</span>
+                                <span class="admin-quick-link__label">Registrar alimento</span>
+                            </a>
+                            <a href="admin_foods.html" class="admin-quick-link">
+                                <span class="admin-quick-link__icon">◎</span>
+                                <span class="admin-quick-link__label">Catálogo de alimentos</span>
+                            </a>
+                            <a href="admin_users.html" class="admin-quick-link">
+                                <span class="admin-quick-link__icon">👤</span>
+                                <span class="admin-quick-link__label">Gestionar usuarios</span>
+                            </a>
+                            <a href="admin_audit.html" class="admin-quick-link">
+                                <span class="admin-quick-link__icon">📋</span>
+                                <span class="admin-quick-link__label">Ver auditoría</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Recent activity -->
+                    <div class="admin-card">
+                        <h2 class="admin-card__title">Actividad reciente</h2>
+                        <ul class="admin-activity-list" id="recent-activity">
+                            <li>
+                                <span class="admin-activity-list__time">Hoy, 08:42</span>
+                                <span class="admin-activity-list__text"><strong>Alimento registrado:</strong> Manzana roja</span>
+                            </li>
+                            <li>
+                                <span class="admin-activity-list__time">Hoy, 07:15</span>
+                                <span class="admin-activity-list__text"><strong>Estado de cuenta:</strong> usuario@ejemplo.com → inactivo</span>
+                            </li>
+                            <li>
+                                <span class="admin-activity-list__time">Ayer, 22:03</span>
+                                <span class="admin-activity-list__text"><strong>Error IA:</strong> fallo al analizar imagen</span>
+                            </li>
+                            <li>
+                                <span class="admin-activity-list__time">Ayer, 18:40</span>
+                                <span class="admin-activity-list__text"><strong>Alimento modificado:</strong> Arroz integral</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="admin-note" style="margin-top: 8px;">
+                    Los indicadores y la actividad se cargarán desde el backend cuando esté disponible.
+                    Los datos mostrados son de ejemplo para la interfaz.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var toggle = document.getElementById('admin-menu-toggle');
+            var sidebar = document.getElementById('admin-sidebar');
+            if (toggle && sidebar) {
+                toggle.addEventListener('click', function () {
+                    sidebar.classList.toggle('is-open');
+                });
+            }
+            // Placeholder KPIs (replace with API calls)
+            document.getElementById('kpi-foods').textContent = '128';
+            document.getElementById('kpi-users').textContent = '56';
+            document.getElementById('kpi-users-active').textContent = '41';
+            document.getElementById('kpi-audit').textContent = '12';
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+### List foods
+GET http://localhost:8002/api/foods/
+Accept: application/json
+
+
+### Update a food (PUT)
+PUT http://localhost:8002/api/foods/45560bf9-eafa-457d-89c9-319a272af575/
+Content-Type: application/json
+
+{
+  "category_id": "9a0220cd-a67e-4c0a-b013-9bccd10aa6ca",
+  "name": "MANZANA ACTUALIZADA",
+  "description": "MANZANA FRESCA ACTUALIZADA",
+  "serving_size": "150.00",
+  "serving_unit": "G",
+  "nutrients": [
+    {
+      "nutrient_type": "CALORIES",
+      "amount": "52.00",
+      "unit": "KCAL"
+    }
+  ]
+}
+
+
+### PUT a food with an invalid serving size
+PUT http://localhost:8002/api/foods/45560bf9-eafa-457d-89c9-319a272af575/
+Content-Type: application/json
+
+{
+  "category_id": "9a0220cd-a67e-4c0a-b013-9bccd10aa6ca",
+  "name": "ALIMENTO DE PRUEBA",
+  "description": "DESCRIPCION DE PRUEBA",
+  "serving_size": "0.00",
+  "serving_unit": "G",
+  "nutrients": [
+    {
+      "nutrient_type": "CALORIES",
+      "amount": "52.00",
+      "unit": "KCAL"
+    }
+  ]
+}
+
+
+### Partially update a food (PATCH)
+PATCH http://localhost:8002/api/foods/45560bf9-eafa-457d-89c9-319a272af575/
+Content-Type: application/json
+
+{
+  "name": "MANZANA VERDE"
+}
+
+
+### PATCH a food with an invalid serving size
+PATCH http://localhost:8002/api/foods/45560bf9-eafa-457d-89c9-319a272af575/
+Content-Type: application/json
+
+{
+  "serving_size": "0.00"
+}
+
+
+### PATCH a food with duplicate nutrient types
+PATCH http://localhost:8002/api/foods/45560bf9-eafa-457d-89c9-319a272af575/
+Content-Type: application/json
+
+{
+  "nutrients": [
+    {
+      "nutrient_type": "CALORIES",
+      "amount": "52.00",
+      "unit": "KCAL"
+    },
+    {
+      "nutrient_type": "CALORIES",
+      "amount": "60.00",
+      "unit": "KCAL"
+    }
+  ]
+}
+
+
+### PATCH a food with a duplicate name
+PATCH http://localhost:8002/api/foods/e1bc412f-4ab8-4a89-9e8f-a38789d11848/
+Content-Type: application/json
+
+{
+  "name": "MANZANA VERDE"
+}
+
+
+### PATCH a food using its current name
+PATCH http://localhost:8002/api/foods/e1bc412f-4ab8-4a89-9e8f-a38789d11848/
+Content-Type: application/json
+
+{
+  "name": "PERA"
+}
+
+
+### Update a nonexistent food
+PATCH http://localhost:8002/api/foods/00000000-0000-0000-0000-000000000000/
+Content-Type: application/json
+
+{
+  "name": "ALIMENTO INEXISTENTE"
+}
+
+
+### Delete an existing food
+DELETE http://localhost:8002/api/foods/d1a13a84-3ff4-4fa6-95ad-fbbe2d873b84/
+
+
+### Delete a food referenced by consumption records
+DELETE http://localhost:8002/api/foods/45560bf9-eafa-457d-89c9-319a272af575/
+
+
+### Delete a nonexistent food
+DELETE http://localhost:8002/api/foods/00000000-0000-0000-0000-000000000000/
+
+
+### Get food before testing invalid update
+GET http://localhost:8002/api/foods/e1bc412f-4ab8-4a89-9e8f-a38789d11848/
+
+
+### PATCH food with valid name change and duplicate nutrients
+PATCH http://localhost:8002/api/foods/e1bc412f-4ab8-4a89-9e8f-a38789d11848/
+Content-Type: application/json
+
+{
+  "name": "PERA MODIFICADA",
+  "nutrients": [
+    {
+      "nutrient_type": "CALORIES",
+      "amount": "60.00",
+      "unit": "KCAL"
+    },
+    {
+      "nutrient_type": "CALORIES",
+      "amount": "65.00",
+      "unit": "KCAL"
+    }
+  ]
+}

@@ -17,66 +17,246 @@
   }
 
   function getToken() {
+    return sessionStorage.getItem(
+        cfg().storageKeys.accessToken
+    ) || "";
+}
+
+function getRefreshToken() {
+    return sessionStorage.getItem(
+        cfg().storageKeys.refreshToken
+    ) || "";
+}
+
+function getUser() {
     try {
-      return localStorage.getItem(cfg().storageKeys.token) || "";
-    } catch (e) {
-      return "";
+        var raw = sessionStorage.getItem(
+            cfg().storageKeys.user
+        );
+
+        return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+        return null;
     }
-  }
+}
 
-  function getUser() {
-    try {
-      var raw = localStorage.getItem(cfg().storageKeys.user);
-      return raw ? JSON.parse(raw) : null;
-    } catch (e) {
-      return null;
+function setSession(user, accessToken, refreshToken) {
+    sessionStorage.setItem(
+        cfg().storageKeys.user,
+        JSON.stringify(user)
+    );
+
+    sessionStorage.setItem(
+        cfg().storageKeys.accessToken,
+        accessToken
+    );
+
+    sessionStorage.setItem(
+        cfg().storageKeys.refreshToken,
+        refreshToken
+    );
+}
+
+function clearSession() {
+    sessionStorage.removeItem(cfg().storageKeys.user);
+    sessionStorage.removeItem(cfg().storageKeys.accessToken);
+    sessionStorage.removeItem(cfg().storageKeys.refreshToken);
+}
+
+var refreshPromise = null;
+
+async function refreshSession() {
+
+    if (refreshPromise) {
+        return refreshPromise;
     }
-  }
 
-  function setSession(user, token) {
-    try {
-      if (user) localStorage.setItem(cfg().storageKeys.user, JSON.stringify(user));
-      if (token) localStorage.setItem(cfg().storageKeys.token, token);
-    } catch (e) {}
-  }
+    var refreshToken = getRefreshToken();
 
-  function clearSession() {
+    if (!refreshToken) {
+        clearSession();
+        throw new Error("No existe refresh token.");
+    }
+
+    refreshPromise = (async function () {
+
+        try {
+            var response = await fetch(
+                url(cfg().endpoints.refresh),
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        refresh: refreshToken
+                    })
+                }
+            );
+
+            var data = await response.json();
+
+            if (!response.ok) {
+                throw new Error("No se pudo renovar la sesión.");
+            }
+
+            setSession(
+                getUser(),
+                data.access,
+                data.refresh
+            );
+
+            return data.access;
+
+        } catch (error) {
+            clearSession();
+            throw error;
+
+        } finally {
+            refreshPromise = null;
+        }
+
+    })();
+
+    return refreshPromise;
+}
+function isAccessTokenExpired() {
+    var token = getToken();
+
+    if (!token) {
+        return true;
+    }
+
     try {
-      localStorage.removeItem(cfg().storageKeys.user);
-      localStorage.removeItem(cfg().storageKeys.token);
-    } catch (e) { }
-  }
+        var payload = JSON.parse(
+            atob(token.split(".")[1])
+        );
+
+        return payload.exp * 1000 <= Date.now() + 30000;
+
+    } catch (error) {
+        return true;
+    }
+}
+
+async function ensureAccessToken() {
+    if (!getRefreshToken()) {
+        return false;
+    }
+
+    if (!getToken() || isAccessTokenExpired()) {
+        await refreshSession();
+    }
+
+    return Boolean(getToken());
+}
 
   async function request(path, options) {
+
     options = options || {};
-    var headers = Object.assign({}, options.headers || {});
+
+    var headers = Object.assign(
+        {},
+        options.headers || {}
+    );
+
+    var requestOptions = Object.assign({}, options);
+
+    delete requestOptions.skipRefresh;
+
+    var skipRefresh = options.skipRefresh === true;
+
+    delete requestOptions.json;
+
     var token = getToken();
+
     if (token && !headers.Authorization) {
-      headers.Authorization = "Bearer " + token;
+        headers.Authorization = "Bearer " + token;
     }
+
     if (options.json !== undefined) {
-      headers["Content-Type"] = "application/json";
-      options.body = JSON.stringify(options.json);
-      delete options.json;
+        headers["Content-Type"] = "application/json";
+        requestOptions.body = JSON.stringify(options.json);
     }
-    var res = await fetch(url(path), Object.assign({}, options, { headers: headers }));
+
+    requestOptions.headers = headers;
+
+    var response = await fetch(
+        url(path),
+        requestOptions
+    );
+
+    if (response.status === 401 && !skipRefresh && getRefreshToken()) {
+
+        try {
+            var newToken = await refreshSession();
+
+            headers.Authorization = "Bearer " + newToken;
+
+            requestOptions.headers = headers;
+
+            response = await fetch(
+                url(path),
+                requestOptions
+            );
+
+        } catch (error) {
+            clearSession();
+            throw error;
+        }
+    }
+
+    var text = await response.text();
     var data = null;
-    var text = await res.text();
+
     if (text) {
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        data = { raw: text };
-      }
+        try {
+            data = JSON.parse(text);
+        } catch (error) {
+            data = { raw: text };
+        }
     }
-    if (!res.ok) {
-      var err = new Error((data && (data.message || data.error || data.detail)) || res.statusText || "Error de red");
-      err.status = res.status;
-      err.data = data;
-      throw err;
+
+    if (!response.ok) {
+        var err = new Error(
+            (data && (
+                data.message ||
+                data.error ||
+                data.detail
+            )) || "Error de red"
+        );
+
+        err.status = response.status;
+        err.data = data;
+
+        throw err;
     }
+
     return data;
-  }
+}
+async function logout() {
+
+    var refreshToken = getRefreshToken();
+
+    try {
+
+        if (refreshToken) {
+            await request(
+                cfg().endpoints.logout,
+                {
+                    method: "POST",
+                    json: {
+                        refresh: refreshToken
+                    },
+                    skipRefresh: true
+                }
+            );
+        }
+
+    } finally {
+        clearSession();
+    }
+}
 
   async function registerUser(payload) {
   
@@ -87,7 +267,7 @@
   }
 
   async function loginUser(emailOrUsername, password) {
-    var loginPath = "/api/identity/users/login/";
+    var loginPath = cfg().endpoints.login;
     try {
       return await request(loginPath, {
         method: "POST",
@@ -192,7 +372,11 @@
       listNutritionalProfiles: listNutritionalProfiles,
       createNutritionalProfile: createNutritionalProfile,
       processLlm: processLlm,
-      analyzeVision: analyzeVision
+      analyzeVision: analyzeVision,
+      getRefreshToken: getRefreshToken,
+      refreshSession: refreshSession,
+      ensureAccessToken: ensureAccessToken,
+      logout: logout,
   };
 
 })(window);

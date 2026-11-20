@@ -1,0 +1,52 @@
+### Create food category
+POST http://127.0.0.1:8002/api/food-categories/
+Content-Type: application/json
+
+{
+    "name": "FRUTAS",
+    "description": "CATEGORÍA DE FRUTAS"
+}
+
+
+### Create food
+POST http://127.0.0.1:8002/api/foods/
+Content-Type: application/json
+
+{
+    "category_id": "9a0220cd-a67e-4c0a-b013-9bccd10aa6ca",
+    "name": "MANZANA",
+    "description": "MANZANA FRESCA",
+    "serving_size": 100.00,
+    "serving_unit": "G",
+    "nutrients": [
+        {
+            "nutrient_type": "CALORIES",
+            "amount": 52.00,
+            "unit": "KCAL"
+        }
+    ]
+}
+
+
+### Create consumption record
+POST http://127.0.0.1:8002/api/consumptions/
+Content-Type: application/json
+
+{
+    "user_id": "550e8400-e29b-41d4-a716-446655440000",
+    "consumed_at": "2030-01-01T12:00:00-06:00",
+    "notes": "Consumo de prueba",
+    "consumption_items": [
+        {
+            "food_id": "45560bf9-eafa-457d-89c9-319a272af575",
+            "quantity": 1.00,
+            "calories": 52.00,
+            "protein": 0.26,
+            "carbohydrates": 13.81,
+            "fat": 0.17,
+            "fiber": 2.40,
+            "sugar": 10.39,
+            "sodium": 1.00
+        }
+    ]
+}
