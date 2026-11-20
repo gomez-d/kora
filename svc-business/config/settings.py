@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 import os
 
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
@@ -22,7 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load .env
 load_dotenv(BASE_DIR / '.env')
 
+JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY")
 
+if not JWT_SIGNING_KEY:
+    raise ImproperlyConfigured(
+        "JWT_SIGNING_KEY is not configured."
+    )
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
@@ -196,3 +202,4 @@ REST_FRAMEWORK = {
     ],
     "EXCEPTION_HANDLER": "config.exceptions.kora_exception_handler",
 }
+
