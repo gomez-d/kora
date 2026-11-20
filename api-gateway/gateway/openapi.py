@@ -145,25 +145,52 @@ class KoraSchemaGenerator(SchemaGenerator):
                 },
                 'required': ['success', 'message'],
             },
-            'UserRegistrationRequest': {
-                'type': 'object',
-                'properties': {
-                    'username': {'type': 'string'},
-                    'email': {'type': 'string', 'format': 'email'},
-                    'password': {
-                        'type': 'string',
-                        'format': 'password',
-                        'writeOnly': True,
+            "UserRegistrationRequest": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Valid user email address.",
                     },
-                    'first_name': {'type': 'string'},
-                    'last_name': {'type': 'string'},
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "writeOnly": True,
+                        "description": "User password.",
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": (
+                            "User first name. Whitespace-only values "
+                            "are not accepted."
+                        ),
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": (
+                            "User last name. Whitespace-only values "
+                            "are not accepted."
+                        ),
+                    },
+                    "date_of_birth": {
+                        "type": "string",
+                        "format": "date",
+                        "description": (
+                            "Date of birth in YYYY-MM-DD format. "
+                            "The resulting age must be between 1 and 120 years."
+                        ),
+                    },
                 },
-                'required': [
-                    'username',
-                    'email',
-                    'password',
-                    'first_name',
-                    'last_name',
+                "required": [
+                    "email",
+                    "password",
+                    "first_name",
+                    "last_name",
+                    "date_of_birth",
                 ],
             },
             'UserRegistrationData': {
@@ -236,19 +263,37 @@ class KoraSchemaGenerator(SchemaGenerator):
                     'refresh': {'type': 'string'},
                 },
             },
-            'ValidationErrorResponse': {
-                'type': 'object',
-                'properties': {
-                    'success': {'type': 'boolean', 'example': False},
-                    'message': {
-                        'type': 'string',
-                        'example': 'Validation error.',
+            "ValidationErrorResponse": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": False,
                     },
-                    'errors': {
-                        'type': 'object',
-                        'additionalProperties': True,
+                    "code": {
+                        "type": "string",
+                        "example": "validation_error",
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Invalid request data.",
+                    },
+                    "errors": {
+                        "type": "object",
+                        "additionalProperties": True,
+                        "description": (
+                            "Field-specific validation errors. "
+                            "Unexpected fields are also reported here."
+                        ),
                     },
                 },
+                "required": [
+                    "success",
+                    "code",
+                    "message",
+                    "errors",
+                ],
             },
             'ServiceUnavailableResponse': {
                 'type': 'object',
@@ -258,6 +303,7 @@ class KoraSchemaGenerator(SchemaGenerator):
             },
             'NutritionalProfile': {
                 'type': 'object',
+                "additionalProperties": False,
                 'properties': {
                     'id': {
                         'type': 'string',
@@ -265,18 +311,36 @@ class KoraSchemaGenerator(SchemaGenerator):
                         'readOnly': True,
                     },
                     'user_id': {'type': 'string', 'format': 'uuid'},
-                    'date_of_birth': {'type': 'string', 'format': 'date'},
+                    'date_of_birth': {
+                        'type': 'string',
+                        'format': 'date',
+                        'description': (
+                            'Date of birth in YYYY-MM-DD format. '
+                            'Future dates are not allowed and age must be '
+                            'between 1 and 120 years.'
+                        ),
+                    },
                     'sex': {
                         'type': 'string',
                         'enum': ['MALE', 'FEMALE'],
                     },
-                    'weight': {
-                        'type': 'number',
-                        'exclusiveMinimum': 0,
+                    "weight": {
+                        "type": "number",
+                        "minimum": 1.00,
+                        "maximum": 500.00,
+                        "description": (
+                            "Body weight in kilograms. "
+                            "Allowed range: 1.00 to 500.00 kg."
+                        ),
                     },
-                    'height': {
-                        'type': 'number',
-                        'exclusiveMinimum': 0,
+                    "height": {
+                        "type": "number",
+                        "minimum": 0.30,
+                        "maximum": 2.50,
+                        "description": (
+                            "Body height in meters. "
+                            "Allowed range: 0.30 to 2.50 m."
+                        ),
                     },
                     'activity_level': {
                         'type': 'string',
@@ -318,41 +382,89 @@ class KoraSchemaGenerator(SchemaGenerator):
             },
             'BusinessValidationError': {
                 'type': 'object',
-                'additionalProperties': True,
-            },
-            'FoodNutrient': {
-                'type': 'object',
+                'additionalProperties': False,
                 'properties': {
-                    'id': {
-                        'type': 'string',
-                        'format': 'uuid',
-                        'readOnly': True,
+                    'success': {
+                        'type': 'boolean',
+                        'example': False,
                     },
-                    'nutrient_type': {
+                    'code': {
                         'type': 'string',
-                        'enum': [
-                            'CALORIES',
-                            'PROTEIN',
-                            'CARBOHYDRATES',
-                            'FAT',
-                            'FIBER',
-                            'SUGAR',
-                            'SODIUM',
-                        ],
+                        'example': 'validation_error',
                     },
-                    'amount': {
-                        'type': 'number',
-                        'minimum': 0,
-                    },
-                    'unit': {
+                    'message': {
                         'type': 'string',
-                        'enum': ['G', 'MG', 'KCAL'],
+                        'example': 'Invalid request data.',
+                    },
+                    'errors': {
+                        'type': 'object',
+                        'additionalProperties': True,
                     },
                 },
-                'required': ['nutrient_type', 'amount', 'unit'],
+                'required': [
+                    'success',
+                    'code',
+                    'message',
+                    'errors',
+                ],
+            },
+            "FoodNutrient": {
+                "type": "object",
+                "additionalProperties": False,
+                "description": (
+                    "Nutritional value for a food. Each nutrient type must "
+                    "appear only once in a food payload. Units must match "
+                    "the nutrient type: CALORIES uses KCAL, SODIUM uses MG, "
+                    "and all other supported nutrients use G."
+                ),
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": True,
+                    },
+                    "nutrient_type": {
+                        "type": "string",
+                        "enum": [
+                            "CALORIES",
+                            "PROTEIN",
+                            "CARBOHYDRATES",
+                            "FAT",
+                            "FIBER",
+                            "SUGAR",
+                            "SODIUM",
+                        ],
+                    },
+                    "amount": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": (
+                            "Nutrient amount. Negative values are not allowed."
+                        ),
+                    },
+                    "unit": {
+                        "type": "string",
+                        "enum": [
+                            "G",
+                            "MG",
+                            "KCAL",
+                        ],
+                        "description": (
+                            "Required unit according to nutrient type: "
+                            "CALORIES = KCAL, SODIUM = MG, "
+                            "PROTEIN/CARBOHYDRATES/FAT/FIBER/SUGAR = G."
+                        ),
+                    },
+                },
+                "required": [
+                    "nutrient_type",
+                    "amount",
+                    "unit",
+                ],
             },
             'FoodRequest': {
                 'type': 'object',
+                'additionalProperties': False,
                 'properties': {
                     'category_id': {'type': 'string', 'format': 'uuid'},
                     'name': {'type': 'string'},
@@ -365,10 +477,17 @@ class KoraSchemaGenerator(SchemaGenerator):
                         'type': 'string',
                         'enum': ['G', 'ML', 'UNIT'],
                     },
-                    'nutrients': {
-                        'type': 'array',
-                        'items': {
-                            '$ref': '#/components/schemas/FoodNutrient',
+                    "nutrients": {
+                        "type": "array",
+                        "minItems": 7,
+                        "maxItems": 7,
+                        "description": (
+                            "Exactly seven nutrients are required: CALORIES, PROTEIN, "
+                            "CARBOHYDRATES, FAT, FIBER, SUGAR, and SODIUM. "
+                            "Each nutrient type must appear only once."
+                        ),
+                        "items": {
+                            "$ref": "#/components/schemas/FoodNutrient",
                         },
                     },
                 },
