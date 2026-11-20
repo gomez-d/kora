@@ -38,13 +38,19 @@ endpoints: {
 
     // AI endpoints
     llmProcess: "/ai/process",
-    visionAnalyze: "/vision/analyze"
+    visionAnalyze: "/vision/analyze",
+
+    login: "/api/identity/users/login/",
+    register: "/api/identity/users/register/",
+    refresh: "/api/identity/users/token/refresh/",
+    logout: "/api/identity/users/logout/",
 },
 
 
     storageKeys: {
-      user: "kora_user",
-      token: "kora_token"
+    user: "kora_user",
+    accessToken: "kora_access_token",
+    refreshToken: "kora_refresh_token"
     }
   };
 

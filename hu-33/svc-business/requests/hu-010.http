@@ -1,0 +1,83 @@
+### HU-010 - Retrieve Consumption History
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000
+Accept: application/json
+
+
+### HU-010 - Filter History by Date
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&start_date=2026-10-22&end_date=2026-10-22
+Accept: application/json
+
+
+### HU-010 - Sort History from Oldest to Newest
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&ordering=consumed_at
+Accept: application/json
+
+
+### HU-010 - Sort History from Newest to Oldest
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&ordering=-consumed_at
+Accept: application/json
+
+
+### HU-010 - Test History Pagination
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&page=1&page_size=2
+Accept: application/json
+
+
+### HU-010 - Retrieve the Second Page of History
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&page=2&page_size=2
+Accept: application/json
+
+
+### HU-010 - Validate Required user_id
+GET http://localhost:8002/api/consumptions/
+Accept: application/json
+
+
+### HU-010 - Validate user_id Format
+GET http://localhost:8002/api/consumptions/?user_id=usuario_invalido
+Accept: application/json
+
+
+### HU-010 - Validate Date Format
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&start_date=22-10-2026
+Accept: application/json
+
+
+### HU-010 - Validate Date Range
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&start_date=2026-10-23&end_date=2026-10-22
+Accept: application/json
+
+
+### HU-010 - Retrieve History with No Consumption Records
+GET http://localhost:8002/api/consumptions/?user_id=650e8400-e29b-41d4-a716-446655440000
+Accept: application/json
+
+
+### HU-010 - Verify User Data Isolation
+GET http://localhost:8002/api/consumptions/?user_id=650e8400-e29b-41d4-a716-446655440000
+Accept: application/json
+
+
+### HU-010 - Filter History from a Start Date
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&start_date=2026-10-21
+Accept: application/json
+
+
+### HU-010 - Filter History Until an End Date
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&end_date=2026-10-20
+Accept: application/json
+
+
+### HU-010 - Handle Invalid Ordering
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&ordering=fecha_invalida
+Accept: application/json
+
+
+### HU-010 - Handle Invalid Page Size
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&page_size=abc
+Accept: application/json
+
+
+### HU-010 - Handle Page Size Above the Maximum
+GET http://localhost:8002/api/consumptions/?user_id=550e8400-e29b-41d4-a716-446655440000&page_size=1000
+Accept: application/json

@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Crear cuenta | Kora</title>
+
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+
+    <link rel="stylesheet" href="css/vendor.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/formulario.css">
+
+    <link rel="icon" type="image/svg+xml" href="images/k.svg">
+    <link rel="manifest" href="site.webmanifest">
+</head>
+
+<body id="top">
+
+    <div id="preloader">
+        <div id="loader" class="dots-fade">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
+
+    <div id="page" class="s-pagewrap">
+
+        <article class="s-content">
+
+            <section
+                class="s-pageheader pageheader"
+                style="background-image: url('images/login.jpg');"
+            >
+                <div class="row">
+                    <div class="column xl-12 s-pageheader__content">
+                        <h1 class="page-title">KORA</h1>
+                    </div>
+                </div>
+            </section>
+
+            <section class="row width-narrower row-x-center content-block content-block--grey cta-block">
+
+                <div class="column xl-10 mob-12">
+
+                    <div class="row row-x-center">
+                        <div class="column xl-8 lg-10 md-10 tab-12">
+
+                            <h3>Crear Cuenta</h3>
+
+                            <form
+                                name="registrationForm"
+                                id="registrationForm"
+                                class="formulario-auth"
+                                method="post"
+                                action="initial_setup.html"
+                            >
+
+                                <fieldset>
+
+                                    <div class="campo-formulario">
+                                        <label for="firstNameInput">Nombre</label>
+                                        <input
+                                            name="first_name"
+                                            type="text"
+                                            id="firstNameInput"
+                                            placeholder="Tu nombre"
+                                            autocomplete="given-name"
+                                            required
+                                        >
+                                    </div>
+
+                                    <div class="campo-formulario">
+                                        <label for="lastNameInput">Apellido</label>
+                                        <input
+                                            name="last_name"
+                                            type="text"
+                                            id="lastNameInput"
+                                            placeholder="Tu apellido"
+                                            autocomplete="family-name"
+                                            required
+                                        >
+                                    </div>
+
+                                    <div class="campo-formulario">
+                                        <label for="usernameInput">Nombre de usuario</label>
+                                        <input
+                                            name="username"
+                                            type="text"
+                                            id="usernameInput"
+                                            placeholder="Ej. alondra123"
+                                            autocomplete="username"
+                                            required
+                                        >
+                                    </div>
+
+                                    <div class="campo-formulario">
+                                        <label for="emailInput">Correo electrónico</label>
+                                        <input
+                                            name="email"
+                                            type="email"
+                                            id="emailInput"
+                                            placeholder="tu@correo.com"
+                                            autocomplete="email"
+                                            required
+                                        >
+                                    </div>
+
+                                    <div class="campo-formulario">
+                                        <label for="passwordInput">Contraseña</label>
+                                        <input
+                                            name="password"
+                                            type="password"
+                                            id="passwordInput"
+                                            placeholder="Crea una contraseña"
+                                            autocomplete="new-password"
+                                            minlength="8"
+                                            required
+                                        >
+                                    </div>
+
+                                    <div class="campo-formulario">
+                                        <label for="confirmPasswordInput">
+                                            Confirmar contraseña
+                                        </label>
+                                        <input
+                                            name="confirmPassword"
+                                            type="password"
+                                            id="confirmPasswordInput"
+                                            placeholder="Repite tu contraseña"
+                                            autocomplete="new-password"
+                                            minlength="8"
+                                            required
+                                        >
+                                    </div>
+
+                                    <div class="opcion-formulario">
+                                        <label for="acceptTerms">
+                                            <input
+                                                type="checkbox"
+                                                name="accept_terms"
+                                                id="acceptTerms"
+                                                required
+                                            >
+                                            <span class="label-text">
+                                                Acepto los términos y condiciones
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn--primary btn--large boton-formulario"
+                                        
+                                    >
+                                        Crear cuenta
+                                    </button>
+
+                                </fieldset>
+                            </form>
+
+                            <div class="text-center u-add-top">
+                                <p>
+                                    ¿Ya tienes una cuenta?
+                                    <a href="login.html">Inicia sesión</a>
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </article>
+
+        <footer class="s-footer">
+
+            <div class="row s-footer__bottom">
+
+                <div class="column xl-6 lg-12">
+                    <p class="ss-copyright">
+                        <span>© Copyright KORA 2026</span>
+                    </p>
+                </div>
+
+            </div>
+
+        </footer>
+
+    </div>
+
+    <script src="js/plugins.js"></script>
+    <script src="js/main.js"></script>
+
+
+    <script>
+        const registrationForm = document.getElementById('registrationForm');
+        const passwordInput = document.getElementById('passwordInput');
+        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+
+        function validatePasswords() {
+            confirmPasswordInput.setCustomValidity(
+                confirmPasswordInput.value === passwordInput.value
+                    ? ''
+                    : 'Las contraseñas no coinciden.'
+            );
+        }
+
+        passwordInput.addEventListener('input', validatePasswords);
+        confirmPasswordInput.addEventListener('input', validatePasswords);
+
+        registrationForm.addEventListener('submit', function (event) {
+            validatePasswords();
+
+            if (!this.checkValidity()) {
+                event.preventDefault();
+                this.reportValidity();
+            }
+        });
+    </script>
+
+
+
+    <script src="js/kora-config.js"></script>
+    <script src="js/kora-api.js"></script>
+    <script src="js/kora-auth.js"></script>
+
+</body>
+</html>

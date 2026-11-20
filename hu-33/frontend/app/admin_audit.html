@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kora | Administración — Historial y auditoría</title>
+    <script>
+        document.documentElement.classList.remove('no-js');
+        document.documentElement.classList.add('js');
+    </script>
+    <link rel="stylesheet" href="../css/vendor.css">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/header-kora.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+</head>
+
+<body >
+    <header class="kora-header">
+            <div class="kora-header__inner">
+
+                
+                <div class="kora-header__logo">
+                    <a href="#">
+                        <img src="../images/logo.svg" alt="Logo Kora">
+                        
+                    </a>
+                </div>
+
+                
+                <nav class="kora-header__nav kora-header__nav--left">
+                    <a href="admin_panel.html">INICIO</a>
+                    <a href="admin_foods.html">ALIMENTOS</a>
+                </nav>
+
+                
+                <div class="kora-header__brand">
+                    <a href="#">
+                        <span class="kora-header__brand-text">KORA</span>
+                    </a>
+                </div>
+
+                
+                <nav class="kora-header__nav kora-header__nav--right">
+                    <a href="admin_users.html">USUARIOS</a>
+                    <a href="admin_audit.html">AUDITORIA</a>
+                </nav>
+
+                
+                <div class="kora-header__profile">
+                    <img src="../images/avatars/user-02.jpg" alt="Perfil">
+                    
+                </div>
+
+            </div>
+        </header>
+
+    <div class="admin-shell">
+        
+
+            <div class="admin-content">
+                <div class="admin-page-header">
+                    <div>
+                        <h1>Historial y auditoría</h1>
+                        <p>Registro de acciones administrativas y errores relevantes del sistema.</p>
+                    </div>
+                </div>
+
+                <div class="admin-note">
+                    Los registros permiten rastrear acciones y diagnosticar problemas.
+                    No es necesario exponer el contenido íntegro de conversaciones nutricionales.
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-toolbar">
+                        <div class="admin-toolbar__search">
+                            <input type="search" id="audit-search" placeholder="Buscar por usuario, recurso o ID…" aria-label="Buscar en auditoría">
+                        </div>
+                        <div class="admin-toolbar__filters">
+                            <input type="date" id="audit-date-from" aria-label="Desde" title="Desde">
+                            <input type="date" id="audit-date-to" aria-label="Hasta" title="Hasta">
+                            <select id="audit-filter-type" aria-label="Tipo de acción">
+                                <option value="">Todos los tipos</option>
+                                <option value="alimento">Alimentos</option>
+                                <option value="cuenta">Cuentas</option>
+                                <option value="ia">IA / visión</option>
+                                <option value="sistema">Sistema</option>
+                            </select>
+                            <select id="audit-filter-result" aria-label="Resultado">
+                                <option value="">Todos los resultados</option>
+                                <option value="ok">Éxito</option>
+                                <option value="error">Error</option>
+                                <option value="warn">Advertencia</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="admin-table-wrap">
+                        <table class="admin-table" id="audit-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha y hora</th>
+                                    <th>Usuario / proceso</th>
+                                    <th>Tipo de acción</th>
+                                    <th>Recurso afectado</th>
+                                    <th>Resultado</th>
+                                    <th>ID operación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-tbody">
+                                <tr>
+                                    <td>24 oct 2026, 08:42</td>
+                                    <td>admin@kora.app</td>
+                                    <td>Registro de alimento</td>
+                                    <td>Manzana roja</td>
+                                    <td><span class="admin-badge admin-badge--ok">Éxito</span></td>
+                                    <td><code>op_a8f2c1</code></td>
+                                </tr>
+                                <tr>
+                                    <td>24 oct 2026, 07:15</td>
+                                    <td>admin@kora.app</td>
+                                    <td>Cambio de estado de cuenta</td>
+                                    <td>usuario@ejemplo.com</td>
+                                    <td><span class="admin-badge admin-badge--ok">Éxito</span></td>
+                                    <td><code>op_b3e901</code></td>
+                                </tr>
+                                <tr>
+                                    <td>23 oct 2026, 22:03</td>
+                                    <td>sistema / visión</td>
+                                    <td>Análisis de imagen</td>
+                                    <td>Solicitud de usuario #4821</td>
+                                    <td><span class="admin-badge admin-badge--error">Error</span></td>
+                                    <td><code>op_c7d442</code></td>
+                                </tr>
+                                <tr>
+                                    <td>23 oct 2026, 18:40</td>
+                                    <td>admin@kora.app</td>
+                                    <td>Modificación de alimento</td>
+                                    <td>Arroz integral</td>
+                                    <td><span class="admin-badge admin-badge--ok">Éxito</span></td>
+                                    <td><code>op_d1a556</code></td>
+                                </tr>
+                                <tr>
+                                    <td>23 oct 2026, 14:12</td>
+                                    <td>sistema / LLM</td>
+                                    <td>Solicitud a proveedor de IA</td>
+                                    <td>Recomendación nutricional</td>
+                                    <td><span class="admin-badge admin-badge--error">Error</span></td>
+                                    <td><code>op_e9f023</code></td>
+                                </tr>
+                                <tr>
+                                    <td>22 oct 2026, 11:05</td>
+                                    <td>admin@kora.app</td>
+                                    <td>Cambio de rol</td>
+                                    <td>carlos.m@ejemplo.com</td>
+                                    <td><span class="admin-badge admin-badge--warn">Advertencia</span></td>
+                                    <td><code>op_f4b778</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var toggle = document.getElementById('admin-menu-toggle');
+            var sidebar = document.getElementById('admin-sidebar');
+            if (toggle && sidebar) {
+                toggle.addEventListener('click', function () {
+                    sidebar.classList.toggle('is-open');
+                });
+            }
+
+            function filterTable() {
+                var q = (document.getElementById('audit-search').value || '').toLowerCase();
+                var type = document.getElementById('audit-filter-type').value;
+                var result = document.getElementById('audit-filter-result').value;
+                document.querySelectorAll('#audit-tbody tr').forEach(function (row) {
+                    var text = row.textContent.toLowerCase();
+                    var typeCell = row.cells[2].textContent.toLowerCase();
+                    var resultCell = row.cells[4].textContent.toLowerCase();
+                    var matchQ = !q || text.indexOf(q) !== -1;
+                    var matchT = !type ||
+                        (type === 'alimento' && typeCell.indexOf('alimento') !== -1) ||
+                        (type === 'cuenta' && (typeCell.indexOf('cuenta') !== -1 || typeCell.indexOf('rol') !== -1)) ||
+                        (type === 'ia' && (typeCell.indexOf('ia') !== -1 || typeCell.indexOf('imagen') !== -1 || typeCell.indexOf('llm') !== -1)) ||
+                        (type === 'sistema' && typeCell.indexOf('sistema') !== -1);
+                    var matchR = !result ||
+                        (result === 'ok' && resultCell.indexOf('éxito') !== -1) ||
+                        (result === 'error' && resultCell.indexOf('error') !== -1) ||
+                        (result === 'warn' && resultCell.indexOf('advertencia') !== -1);
+                    row.style.display = matchQ && matchT && matchR ? '' : 'none';
+                });
+            }
+
+            ['audit-search', 'audit-filter-type', 'audit-filter-result', 'audit-date-from', 'audit-date-to'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', filterTable);
+                    el.addEventListener('change', filterTable);
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

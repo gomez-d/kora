@@ -35,11 +35,12 @@
       var first_name = (document.getElementById("firstNameInput") || {}).value || "";
       var last_name = (document.getElementById("lastNameInput") || {}).value || "";
       var username = (document.getElementById("usernameInput") || {}).value || "";
+      var date_of_birth = (document.getElementById("dateOfBirthInput") || {}).value || "";
       var email = (document.getElementById("emailInput") || {}).value || "";
       var password = (document.getElementById("passwordInput") || {}).value || "";
       var confirm = (document.getElementById("confirmPasswordInput") || {}).value || "";
 
-      if (!username || !email || !password || !first_name || !last_name) {
+      if (!username || !email || !password || !first_name || !last_name || !date_of_birth) {
         showMessage(msg, "Completa todos los campos obligatorios.", true);
         return;
       }
@@ -55,10 +56,11 @@
           email: email.trim(),
           password: password,
           first_name: first_name.trim(),
-          last_name: last_name.trim()
+          last_name: last_name.trim(),
+          date_of_birth: date_of_birth
         });
         var userData = (result && result.data) || result;
-        KoraApi.setSession(userData, null);
+        
         showMessage(msg, "Cuenta creada correctamente. Redirigiendo…", false);
         setTimeout(function () {
           window.location.href = "initial_setup.html";
@@ -97,8 +99,15 @@
       showMessage(msg, "Iniciando sesión…", false);
       try {
         var result = await KoraApi.loginUser(email.trim(), password);
-        var userData = (result && result.data) || result;
-        KoraApi.setSession(userData, (result && result.token) || null);
+        var session = result.data;
+
+        KoraApi.setSession(
+            {
+                user_id: session.user_id
+            },
+            session.access,
+            session.refresh
+        );
         showMessage(msg, "Sesión iniciada. Redirigiendo…", false);
         setTimeout(function () {
           window.location.href = "app/main_panel.html";
