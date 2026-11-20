@@ -89,13 +89,14 @@
                                     </div>
 
                                     <div class="campo-formulario">
-                                        <label for="usernameInput">Nombre de usuario</label>
+                                        <label for="dateOfBirthInput">
+                                            Fecha de nacimiento
+                                        </label>
                                         <input
-                                            name="username"
-                                            type="text"
-                                            id="usernameInput"
-                                            placeholder="Ej. alondra123"
-                                            autocomplete="username"
+                                            name="date_of_birth"
+                                            type="date"
+                                            id="dateOfBirthInput"
+                                            autocomplete="bday"
                                             required
                                         >
                                     </div>
@@ -154,12 +155,19 @@
                                         </label>
                                     </div>
 
+                                    <div
+                                        id="registrationMessage"
+                                        class="mensaje-formulario"
+                                        role="alert"
+                                        aria-live="polite"
+                                    ></div>
+
                                     <button
                                         type="submit"
+                                        id="registrationButton"
                                         class="btn btn--primary btn--large boton-formulario"
-                                        
                                     >
-                                        Crear cuenta
+                                        <span class="button-text">Crear cuenta</span>
                                     </button>
 
                                 </fieldset>
