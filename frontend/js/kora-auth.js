@@ -44,7 +44,19 @@
       var password = (document.getElementById("passwordInput") || {}).value || "";
       var confirm = (document.getElementById("confirmPasswordInput") || {}).value || "";
 
-      if (!email || !password || !first_name || !last_name || !date_of_birth) {
+      if (!regForm.checkValidity()) {
+        regForm.reportValidity();
+
+        showMessage(
+          msg,
+          "Completa correctamente todos los campos obligatorios.",
+          "error"
+        );
+
+        return;
+      }
+
+      if (!first_name.trim() || !last_name.trim() || !email.trim() || !date_of_birth || !password) {
         showMessage(
           msg,
           "Completa todos los campos obligatorios.",
@@ -52,6 +64,17 @@
         );
         return;
       }
+
+      if (password.length < 8) {
+        showMessage(
+          msg,
+          "La contraseña debe contener al menos 8 caracteres.",
+          "error"
+        );
+
+        return;
+      }
+
       if (password !== confirm) {
         showMessage(
           msg,
@@ -89,9 +112,21 @@
           window.location.href = "initial_setup.html";
         }, 800);
       } catch (err) {
-        var detail = err.message || "No se pudo registrar.";
+        var detail = err.message || "No se pudo registrar. Inténtalo nuevamente.";
+
         if (err.data && err.data.errors) {
-          detail = JSON.stringify(err.data.errors);
+          var fields = Object.keys(err.data.errors);
+
+          if (fields.length) {
+            var firstField = fields[0];
+            var fieldErrors = err.data.errors[firstField];
+
+            if (Array.isArray(fieldErrors) && fieldErrors.length) {
+              detail = String(fieldErrors[0]);
+            } else if (typeof fieldErrors === "string") {
+              detail = fieldErrors;
+            }
+          }
         }
         showMessage(msg, detail, "error");
 
