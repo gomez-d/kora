@@ -70,7 +70,8 @@
       }
     }
     if (!res.ok) {
-      var err = new Error((data && (data.message || data.error || data.detail)) || res.statusText || "Error de red");
+      var err = new Error(getSafeErrorMessage(res.status, data));
+      
       err.status = res.status;
       err.data = data;
       throw err;
