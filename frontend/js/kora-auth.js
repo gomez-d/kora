@@ -150,6 +150,19 @@
       var button = document.getElementById("loginButton");
       var email = (document.getElementById("emailInput") || {}).value || "";
       var password = (document.getElementById("passwordInput") || {}).value || "";
+
+      if (!loginForm.checkValidity()) {
+        loginForm.reportValidity();
+
+        showMessage(
+          msg,
+          "Completa correctamente tus credenciales.",
+          "error"
+        );
+
+        return;
+      }
+
       if (!email || !password) {
         showMessage(
           msg,
@@ -168,8 +181,8 @@
       );
       try {
         var result = await KoraApi.loginUser(email.trim(), password);
-        var userData = (result && result.data) || result;
-        KoraApi.setSession(userData, (result && result.token) || null);
+        var userData = (result && result.data) || {};
+        KoraApi.setSession(userData, userData.access || null);
         showMessage(
           msg,
           "Sesión iniciada. Redirigiendo...",
