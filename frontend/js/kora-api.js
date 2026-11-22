@@ -24,6 +24,16 @@
     }
   }
 
+  function getRefreshToken() {
+    try {
+      return localStorage.getItem(
+        cfg().storageKeys.refreshToken
+      ) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
   function getUser() {
     try {
       var raw = localStorage.getItem(cfg().storageKeys.user);
@@ -51,33 +61,72 @@
 
   async function request(path, options) {
     options = options || {};
-    var headers = Object.assign({}, options.headers || {});
+    
+    var retryOnUnauthorized = options.retryOnUnauthorized !== false;
+
+    var requestOptions = Object.assign({}, options);
+
+    delete requestOptions.retryOnUnauthorized;
+
+    var headers = Object.assign({}, requestOptions.headers || {});
+
     var token = getToken();
+
     if (token && !headers.Authorization) {
       headers.Authorization = "Bearer " + token;
     }
-    if (options.json !== undefined) {
+
+    if (requestOptions.json !== undefined) {
       headers["Content-Type"] = "application/json";
-      options.body = JSON.stringify(options.json);
-      delete options.json;
+
+      requestOptions.body = JSON.stringify(requestOptions.json);
+
+      delete requestOptions.json;
     }
-    var res = await fetch(url(path), Object.assign({}, options, { headers: headers }));
+
+    var res = await fetch(
+      url(path),
+      Object.assign({}, requestOptions, {
+        headers: headers
+      })
+    );
+
     var data = null;
     var text = await res.text();
+
     if (text) {
       try {
         data = JSON.parse(text);
       } catch (e) {
-        data = { raw: text };
+        data = {
+          raw: text
+        };
       }
     }
+
+    if (res.status === 401 && retryOnUnauthorized && getRefreshToken()) {
+      try {
+        var newAccessToken = await refreshAccessToken();
+        var retryHeaders = Object.assign({}, headers, {Authorization: "Bearer " + newAccessToken});
+
+        return request(path, Object.assign({}, options, {headers: retryHeaders, retryOnUnauthorized: false}));
+      } catch (refreshToken) {
+        clearSession();
+        throw refreshError;
+      }
+    }
+
     if (!res.ok) {
-      var err = new Error(getSafeErrorMessage(res.status, data));
-      
+      var err = new Error(
+        getSafeErrorMessage(res.status, data)
+      );
+
       err.status = res.status;
       err.data = data;
+
       throw err;
     }
+
     return data;
   }
 
@@ -97,6 +146,38 @@
         password: password
       }
     });
+  }
+
+  async function refreshAccessToken() {
+    var refreshToken = getRefreshToken();
+
+    if (!refreshToken) {
+      throw new Error("No refresh token available.");
+    }
+
+    var result = await request(
+      cfg().endpoints.refresh,
+      {
+        method: "POST",
+        json: {
+          refresh: refreshToken
+        },
+        retryOnUnauthorized: false
+      }
+    );
+
+    if (!result || !result.access) {
+      throw new Error("Invalid token refresh response.");
+    }
+
+    try {
+      localStorage.setItem(
+        cfg().storageKeys.token,
+        result.access
+      );
+    } catch (e) {}
+
+    return result.access;
   }
 
   async function listFoods() {
@@ -177,11 +258,13 @@
       url: url,
       request: request,
       getToken: getToken,
+      getRefreshToken: getRefreshToken,
       getUser: getUser,
       setSession: setSession,
       clearSession: clearSession,
       registerUser: registerUser,
       loginUser: loginUser,
+      refreshAccessToken: refreshAccessToken,
 
       listFoods: listFoods,
       createFood: createFood,

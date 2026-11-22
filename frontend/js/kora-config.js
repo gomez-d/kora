@@ -16,6 +16,7 @@ endpoints: {
     identityHealth: "/api/identity/users/health/",
     register: "/api/identity/users/register/",
     login: "/api/identity/users/login/",
+    refresh: "/api/identity/users/token/refresh/",
 
     businessHealth: "/api/business/health/",
     nutritionalProfiles: "/api/business/nutritional-profiles/",
