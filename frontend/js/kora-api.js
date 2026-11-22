@@ -59,6 +59,34 @@
     } catch (e) { }
   }
 
+  function getSafeErrorMessage(status) {
+    if (status === 400) {
+      return "Los datos proporcionados no son válidos.";
+    }
+
+    if (status === 401) {
+      return "Correo o contraseña incorrectos.";
+    }
+
+    if (status === 403) {
+      return "No fue posible completar la operación";
+    }
+
+    if (status === 404) {
+      return "No se pudo completar la solicitud.";
+    }
+
+    if (status === 429) {
+      return "Demasiados intentos. Inténtalo nuevamente más tarde.";
+    }
+
+    if (status >= 500) {
+      return "El servicio no está disponible temporalmente. Inténtalo nuevamente más tarde.";
+    }
+
+    return "Ocurrió un error inesperado. Inténtalo nuevamente.";
+  }
+
   async function request(path, options) {
     options = options || {};
     
@@ -84,12 +112,19 @@
       delete requestOptions.json;
     }
 
-    var res = await fetch(
-      url(path),
-      Object.assign({}, requestOptions, {
-        headers: headers
-      })
-    );
+    var res;
+
+    try {
+      res = await fetch(url(path), Object.assign({}, requestOptions, {headers: headers}));
+    } catch (error) {
+      var connectionError = new Error(
+        "No se pudo conectar con el servicio. Verifica tu conexión e inténtalo nuevamente."
+      );
+
+      connectionError.code = "connection_error";
+
+      throw connectionError;
+    }
 
     var data = null;
     var text = await res.text();
@@ -110,7 +145,7 @@
         var retryHeaders = Object.assign({}, headers, {Authorization: "Bearer " + newAccessToken});
 
         return request(path, Object.assign({}, options, {headers: retryHeaders, retryOnUnauthorized: false}));
-      } catch (refreshToken) {
+      } catch (refreshError) {
         clearSession();
         throw refreshError;
       }

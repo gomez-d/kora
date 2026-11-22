@@ -30,6 +30,58 @@
     }
   }
 
+  function getRegistrationErrorMessage(error) {
+    if (!error) {
+      return "No se pudo completar el registro. Inténtalo nuevamente.";
+    }
+
+    if (error.code === "connection_error") {
+      return error.message;
+    }
+
+    if (error.status === 400) {
+      return "No fue posible registrar la cuenta con los datos proporcionados.";
+    }
+
+    if (error.status === 429) {
+      return "Se realizaron demasiados intentos. Inténtalo nuevamente más tarde.";
+    }
+
+    if (error.status >= 500) {
+      return "El servicio no está disponible temporalmente. Inténtalo nuevamente más tarde.";
+    }
+
+    return "No se pudo completar el registro. Inténtalo nuevamente.";
+  }
+
+  function getLoginErrorMessage(error) {
+    if (!error) {
+      return "No se pudo iniciar sesión. Inténtalo nuevamente.";
+    }
+
+    if (error.code === "connection_error") {
+      return error.message;
+    }
+
+    if (error.status === 400) {
+      return "Los datos de acceso no son válidos.";
+    }
+
+    if (error.status === 401) {
+      return "Correo o contraseña incorrectos.";
+    }
+
+    if (error.status === 429) {
+      return "Se realizaron demasiados intentos. Inténtalo nuevamente más tarde.";
+    }
+
+    if (error.status >= 500) {
+      return "El servicio no está disponible temporalmente. Inténtalo nuevamente más tarde.";
+    }
+
+    return "No se pudo iniciar sesión. Inténtalo nuevamente.";
+  }
+
   // ---- Registro ----
   var regForm = document.getElementById("registrationForm") || document.getElementById("loginForm");
   if (regForm && document.getElementById("firstNameInput")) {
@@ -112,30 +164,9 @@
           window.location.href = "initial_setup.html";
         }, 800);
       } catch (err) {
-        var detail = err.message || "No se pudo registrar. Inténtalo nuevamente.";
+        showMessage(msg, getRegistrationErrorMessage(err), "error");
 
-        if (err.data && err.data.errors) {
-          var fields = Object.keys(err.data.errors);
-
-          if (fields.length) {
-            var firstField = fields[0];
-            var fieldErrors = err.data.errors[firstField];
-
-            if (Array.isArray(fieldErrors) && fieldErrors.length) {
-              detail = String(fieldErrors[0]);
-            } else if (typeof fieldErrors === "string") {
-              detail = fieldErrors;
-            }
-          }
-        }
-        showMessage(msg, detail, "error");
-
-        setLoading(
-          button,
-          false,
-          "Creando cuenta...",
-          "Crear cuenta"
-        );
+        setLoading(button, false, "Creando cuenta...", "Crear cuenta");
       }
     });
   }
@@ -215,17 +246,8 @@
         
       } catch (err) {
         // Si no hay login en backend, permitir acceso demo solo en desarrollo
-        showMessage(
-          msg,
-          err.message || "No se pudo iniciar sesión.",
-          "error"
-        );
-        setLoading(
-          button,
-          false,
-          "Iniciando sesión...",
-          "Entrar a Kora"
-        );
+        showMessage(msg, getLoginErrorMessage(err), "error");
+        setLoading(button, false, "Iniciando sesión...", "Entrar a Kora");
       }
     });
   }
