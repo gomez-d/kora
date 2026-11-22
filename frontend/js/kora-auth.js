@@ -180,17 +180,39 @@
         "Entrar a Kora"
       );
       try {
-        var result = await KoraApi.loginUser(email.trim(), password);
-        var userData = (result && result.data) || {};
-        KoraApi.setSession(userData, userData.access || null);
+        var result = await KoraApi.loginUser(
+          email.trim(), password
+        );
+
+        if (!result || result.success !== true || !result.data || !result.data.access || !result.data.refresh) {
+          throw new Error(
+            "La respuesta de autenticación no es válida."
+          );
+        }
+
+        var accessToken = result.data.access;
+        var refreshToken = result.data.refresh;
+
+        var userData = {
+          user_id: result.data.user_id
+        };
+
+        KoraApi.setSession(
+          userData,
+          accessToken,
+          refreshToken
+        );
+
         showMessage(
           msg,
           "Sesión iniciada. Redirigiendo...",
           "success"
         );
+
         setTimeout(function () {
           window.location.href = "app/main_panel.html";
         }, 600);
+        
       } catch (err) {
         // Si no hay login en backend, permitir acceso demo solo en desarrollo
         showMessage(

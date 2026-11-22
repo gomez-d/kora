@@ -15,6 +15,7 @@
 endpoints: {
     identityHealth: "/api/identity/users/health/",
     register: "/api/identity/users/register/",
+    login: "/api/identity/users/login/",
 
     businessHealth: "/api/business/health/",
     nutritionalProfiles: "/api/business/nutritional-profiles/",
@@ -30,7 +31,8 @@ endpoints: {
 
     storageKeys: {
       user: "kora_user",
-      token: "kora_token"
+      token: "kora_token",
+      refreshToken: "kora_refresh_token",
     }
   };
 

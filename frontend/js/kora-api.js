@@ -33,10 +33,11 @@
     }
   }
 
-  function setSession(user, token) {
+  function setSession(user, accessToken, refreshToken) {
     try {
       if (user) localStorage.setItem(cfg().storageKeys.user, JSON.stringify(user));
-      if (token) localStorage.setItem(cfg().storageKeys.token, token);
+      if (accessToken) localStorage.setItem(cfg().storageKeys.token, accessToken);
+      if (refreshToken) localStorage.setItem(cfg().storageKeys.refreshToken, refreshToken);
     } catch (e) {}
   }
 
@@ -44,6 +45,7 @@
     try {
       localStorage.removeItem(cfg().storageKeys.user);
       localStorage.removeItem(cfg().storageKeys.token);
+      localStorage.removeItem(cfg().storageKeys.refreshToken);
     } catch (e) { }
   }
 
@@ -87,19 +89,14 @@
     });
   }
 
-  async function loginUser(emailOrUsername, password) {
-    var loginPath = "/api/identity/users/login/";
-    try {
-      return await request(loginPath, {
-        method: "POST",
-        json: { username: emailOrUsername, email: emailOrUsername, password: password }
-      });
-    } catch (e) {
-      if (e.status === 404) {
-        e.message = "El inicio de sesión aún no está disponible en el backend (falta endpoint de login). Puedes usar el registro.";
+  async function loginUser(email, password) {
+    return request(cfg().endpoints.login, {
+      method: "POST",
+      json: {
+        email: email,
+        password: password
       }
-      throw e;
-    }
+    });
   }
 
   async function listFoods() {
