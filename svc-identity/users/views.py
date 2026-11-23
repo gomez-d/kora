@@ -20,9 +20,15 @@ from .serializers import (
     UserDetailSerializer,
     UserUpdateSerializer,
     UserTokenRefreshSerializer,
-    PasswordResetConfirmSerializer
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer
 )
-from .models import User
+from users.throttles import (
+    PasswordResetRequestIPThrottle,
+    PasswordResetRequestAccountThrottle,
+    PasswordResetConfirmIPThrottle,
+)
+from .models import User, PasswordResetToken
 from rbac.utils import (
     get_user_role_names,
     get_user_permission_names,
@@ -32,9 +38,6 @@ from rbac.permissions import (
     HasSelfOrKoraPermission
 )
 from clients.unstructured_data_client import send_identity_event
-from users.models import User, PasswordResetToken
-from users.serializers import PasswordResetRequestSerializer
-
 
 class HealthCheckView(APIView):
     """
@@ -403,6 +406,28 @@ class UserTokenRefreshView(TokenRefreshView):
 class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]
 
+    throttle_classes = [
+        PasswordResetRequestIPThrottle,
+        PasswordResetRequestAccountThrottle,
+    ]
+
+    def throttled(self, request, wait):
+        """
+        Audit password recovery requests rejected by throttling.
+        """
+
+        send_identity_event(
+            user_id=None,
+            event="password_reset_rate_limited",
+            level="WARNING",
+            metadata={
+                "source": "password_reset_request",
+                "reason": "rate_limit_exceeded"
+            }
+        )
+
+        return super().throttled(request, wait)
+
     def post(self, request):
         serializer = PasswordResetRequestSerializer(
             data=request.data
@@ -414,6 +439,16 @@ class PasswordResetRequestView(APIView):
         user = User.objects.filter(
             email__iexact=email
         ).first()
+
+        # Audit password recovery requests without exposing account data.
+        send_identity_event(
+            user_id=user.id if user else None,
+            event="password_reset_requested",
+            level="INFO",
+            metadata={
+                "source": "password_reset_request"
+            }
+        )
 
         if user:
             raw_token = PasswordResetToken.create_for_user(user=user)
@@ -452,6 +487,27 @@ class PasswordResetRequestView(APIView):
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
 
+    throttle_classes = [
+        PasswordResetConfirmIPThrottle,
+    ]
+
+    def throttled(self, request, wait):
+        """
+        Audit password reset confirmation attempts rejected by throttling.
+        """
+
+        send_identity_event(
+            user_id=None,
+            event="password_reset_rate_limited",
+            level="WARNING",
+            metadata={
+                "source": "password_reset_confirm",
+                "reason": "rate_limit_exceeded"
+            }
+        )
+
+        return super().throttled(request, wait)
+
     @transaction.atomic
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(
@@ -469,6 +525,16 @@ class PasswordResetConfirmView(APIView):
         )
 
         if reset_token is None:
+            send_identity_event(
+                user_id=None,
+                event="password_reset_invalid_token",
+                level="WARNING",
+                metadata={
+                    "source": "password_reset_confirm",
+                    "reason": "invalid_or_expired"
+                }
+            )
+
             return Response(
                 {
                     "success": False,
@@ -504,6 +570,17 @@ class PasswordResetConfirmView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        transaction.on_commit(
+            lambda user_id=user.id: send_identity_event(
+                user_id=user_id,
+                event="password_reset_completed",
+                level="INFO",
+                metadata={
+                    "source": "password_reset_confirm"
+                }
+            )
+        )
 
         return Response(
             {

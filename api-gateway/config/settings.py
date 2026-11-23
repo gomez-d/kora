@@ -159,7 +159,9 @@ REST_FRAMEWORK = {
         'login': '5/min',
         'registration': '3/hour',
         'refresh': '10/min',
-        'authenticated_user': '60/min'
+        'authenticated_user': '60/min',
+        'password_reset_request': '5/hour',
+        'password_reset_confirm': '10/hour',
     }
 }
 

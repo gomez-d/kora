@@ -1,3 +1,4 @@
+import logging
 import requests
 
 from django.conf import settings
@@ -7,11 +8,25 @@ from requests.exceptions import (
     Timeout
 )
 
+logger = logging.getLogger(__name__)
+
 # Base URL of the unstructured data microservice.
 UNSTRUCTURED_DATA_SERVICE_URL = settings.UNSTRUCTURED_DATA_SERVICE_URL
 
+def log_audit_failure(error, status_code=None):
+    """
+    Log audit delivery failures without exposing sensitive data.
+    """
 
-def send_identity_event(user_id, event, level='INFO', data=None, metadata=None,):
+    logger.warning(
+        "Identity audit event delivery failed. "
+        "Error: %s. HTTP status: %s.",
+        error,
+        status_code,
+    )
+
+
+def send_identity_event(user_id, event, level='INFO', data=None, metadata=None):
     """
     Send an identity event to the unstructured data microservice.
 
@@ -44,6 +59,11 @@ def send_identity_event(user_id, event, level='INFO', data=None, metadata=None,)
 
         # Handle HTTP error responses returned by the remote service.
         if not response.ok:
+            log_audit_failure(
+                error='invalid_response',
+                status_code=response.status_code,
+            )
+
             return {
                 'success': False,
                 'error': 'invalid_response',
@@ -53,6 +73,8 @@ def send_identity_event(user_id, event, level='INFO', data=None, metadata=None,)
         try:
             response_data = response.json()
         except ValueError:
+            log_audit_failure('invalid_json_response')
+
             return {
                 'success': False,
                 'error': 'invalid_json_response',
@@ -65,18 +87,24 @@ def send_identity_event(user_id, event, level='INFO', data=None, metadata=None,)
         }
 
     except Timeout:
+        log_audit_failure('timeout')
+
         return {
             'success': False,
             'error': 'timeout',
         }
 
     except ConnectionError:
+        log_audit_failure('service_unavailable')
+
         return {
             'success': False,
             'error': 'service_unavailable',
         }
 
     except RequestException:
+        log_audit_failure('communication_error')
+
         return {
             'success': False,
             'error': 'communication_error',

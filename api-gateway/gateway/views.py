@@ -13,7 +13,9 @@ from gateway.throttling import (
     LoginRateThrottle,
     RegistrationRateThrottle,
     RefreshRateThrottle,
-    AuthenticatedUserRateThrottle
+    AuthenticatedUserRateThrottle,
+    PasswordResetRequestRateThrottle,
+    PasswordResetConfirmRateThrottle,
 )
 
 
@@ -35,6 +37,12 @@ def build_forward_headers(request):
 
     if content_type:
         headers["Content-Type"] = content_type
+
+    # Forward the client IP obtained from the trusted connection.
+    client_ip = request.META.get("REMOTE_ADDR")
+
+    if client_ip: 
+        headers["X-Forwarded-For"] = client_ip
 
     return headers
 
@@ -120,6 +128,12 @@ class IdentityProxyView(APIView):
 
         elif path == "users/token/refresh":
             throttle_classes = [RefreshRateThrottle]
+
+        elif path == "users/password-reset":
+            throttle_classes = [PasswordResetRequestRateThrottle]
+
+        elif path == "users/password-reset/confirm":
+            throttle_classes = [PasswordResetConfirmRateThrottle]
 
         else:
             throttle_classes = [AuthenticatedUserRateThrottle]
