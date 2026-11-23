@@ -235,7 +235,7 @@ SIMPLE_JWT = {
 
 MAILERS = {
     "default": {
-        "EMAIL_BACKEND": "django.core.mail.backends.console.EmailBackend",
+        "BACKEND": "django.core.mail.backends.console.EmailBackend",
     }
 }
 
