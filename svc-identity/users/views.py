@@ -1,7 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework_simplejwt.exceptions import TokenError
@@ -10,6 +9,9 @@ from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated
 )
+from django.contrib.auth import authenticate
+from django.conf import settings
+from django.core.mail import send_mail
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
@@ -27,6 +29,8 @@ from rbac.permissions import (
     HasSelfOrKoraPermission
 )
 from clients.unstructured_data_client import send_identity_event
+from users.models import User, PasswordResetToken
+from users.serializers import PasswordResetRequestSerializer
 
 
 class HealthCheckView(APIView):
@@ -392,3 +396,52 @@ class UserTokenRefreshView(TokenRefreshView):
     """
 
     serializer_class = UserTokenRefreshSerializer
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"]
+
+        user = User.objects.filter(
+            email__iexact=email
+        ).first()
+
+        if user:
+            raw_token = PasswordResetToken.create_for_user(user=user)
+
+            reset_url = (
+                f"{settings.FRONTEND_PASSWORD_RESET_URL}"
+                f"?token={raw_token}"
+            )
+
+            send_mail(
+                subject="Kora password recovery",
+                message=(
+                    "A password reset was requested for your"
+                    "Kora account.\n\n"
+                    f"Use the following link to reset your password:\n"
+                    f"{reset_url}\n\n"
+                    "If you did not request this change,"
+                    "you can ignore this email."
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False
+            )
+
+        return Response(
+            {
+                "success": True,
+                "message": (
+                    "If the email exists, password recovery "
+                    "instructions will be sent."
+                ),
+            },
+            status=status.HTTP_200_OK,
+        )

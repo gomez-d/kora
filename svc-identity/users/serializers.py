@@ -221,3 +221,6 @@ class UserTokenRefreshSerializer(TokenRefreshSerializer):
         attrs["refresh"] = str(refresh)
 
         return super().validate(attrs)
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
