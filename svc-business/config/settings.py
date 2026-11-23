@@ -98,6 +98,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# Django REST Framework
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "config.exceptions.custom_exception_handler",
+}
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
