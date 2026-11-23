@@ -2,25 +2,11 @@
 (function (global) {
   "use strict";
 
-  var origin = global.location && global.location.origin
-    ? global.location.origin
-    : "";
-
-var isDockerFrontend =
-    global.location &&
-    (global.location.port === "5500" ||
-    global.location.port === "8080" ||
-    global.location.port === "80" ||
-    global.location.port === "");
-
-
   var API_BASE =
-    global.KORA_API_BASE_URL ||
-    (isDockerFrontend ? origin : "http://localhost:8000");
+    global.KORA_API_BASE_URL || "http://localhost:8000";
 
   var AI_BASE =
-      global.KORA_AI_BASE_URL ||
-      (isDockerFrontend ? origin : "http://localhost:8000");
+      global.KORA_AI_BASE_URL || "http://localhost:8000";
 
   global.KoraConfig = {
     API_BASE: API_BASE.replace(/\/$/, ""),
@@ -29,6 +15,8 @@ var isDockerFrontend =
 endpoints: {
     identityHealth: "/api/identity/users/health/",
     register: "/api/identity/users/register/",
+    login: "/api/identity/users/login/",
+    refresh: "/api/identity/users/token/refresh/",
 
     businessHealth: "/api/business/health/",
     nutritionalProfiles: "/api/business/nutritional-profiles/",
@@ -44,7 +32,8 @@ endpoints: {
 
     storageKeys: {
       user: "kora_user",
-      token: "kora_token"
+      token: "kora_token",
+      refreshToken: "kora_refresh_token",
     }
   };
 

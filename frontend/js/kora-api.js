@@ -24,6 +24,16 @@
     }
   }
 
+  function getRefreshToken() {
+    try {
+      return localStorage.getItem(
+        cfg().storageKeys.refreshToken
+      ) || "";
+    } catch (e) {
+      return "";
+    }
+  }
+
   function getUser() {
     try {
       var raw = localStorage.getItem(cfg().storageKeys.user);
@@ -33,10 +43,11 @@
     }
   }
 
-  function setSession(user, token) {
+  function setSession(user, accessToken, refreshToken) {
     try {
       if (user) localStorage.setItem(cfg().storageKeys.user, JSON.stringify(user));
-      if (token) localStorage.setItem(cfg().storageKeys.token, token);
+      if (accessToken) localStorage.setItem(cfg().storageKeys.token, accessToken);
+      if (refreshToken) localStorage.setItem(cfg().storageKeys.refreshToken, refreshToken);
     } catch (e) {}
   }
 
@@ -44,37 +55,113 @@
     try {
       localStorage.removeItem(cfg().storageKeys.user);
       localStorage.removeItem(cfg().storageKeys.token);
+      localStorage.removeItem(cfg().storageKeys.refreshToken);
     } catch (e) { }
+  }
+
+  function getSafeErrorMessage(status) {
+    if (status === 400) {
+      return "Los datos proporcionados no son válidos.";
+    }
+
+    if (status === 401) {
+      return "Correo o contraseña incorrectos.";
+    }
+
+    if (status === 403) {
+      return "No fue posible completar la operación";
+    }
+
+    if (status === 404) {
+      return "No se pudo completar la solicitud.";
+    }
+
+    if (status === 429) {
+      return "Demasiados intentos. Inténtalo nuevamente más tarde.";
+    }
+
+    if (status >= 500) {
+      return "El servicio no está disponible temporalmente. Inténtalo nuevamente más tarde.";
+    }
+
+    return "Ocurrió un error inesperado. Inténtalo nuevamente.";
   }
 
   async function request(path, options) {
     options = options || {};
-    var headers = Object.assign({}, options.headers || {});
+    
+    var retryOnUnauthorized = options.retryOnUnauthorized !== false;
+
+    var requestOptions = Object.assign({}, options);
+
+    delete requestOptions.retryOnUnauthorized;
+
+    var headers = Object.assign({}, requestOptions.headers || {});
+
     var token = getToken();
+
     if (token && !headers.Authorization) {
       headers.Authorization = "Bearer " + token;
     }
-    if (options.json !== undefined) {
+
+    if (requestOptions.json !== undefined) {
       headers["Content-Type"] = "application/json";
-      options.body = JSON.stringify(options.json);
-      delete options.json;
+
+      requestOptions.body = JSON.stringify(requestOptions.json);
+
+      delete requestOptions.json;
     }
-    var res = await fetch(url(path), Object.assign({}, options, { headers: headers }));
+
+    var res;
+
+    try {
+      res = await fetch(url(path), Object.assign({}, requestOptions, {headers: headers}));
+    } catch (error) {
+      var connectionError = new Error(
+        "No se pudo conectar con el servicio. Verifica tu conexión e inténtalo nuevamente."
+      );
+
+      connectionError.code = "connection_error";
+
+      throw connectionError;
+    }
+
     var data = null;
     var text = await res.text();
+
     if (text) {
       try {
         data = JSON.parse(text);
       } catch (e) {
-        data = { raw: text };
+        data = {
+          raw: text
+        };
       }
     }
+
+    if (res.status === 401 && retryOnUnauthorized && getRefreshToken()) {
+      try {
+        var newAccessToken = await refreshAccessToken();
+        var retryHeaders = Object.assign({}, headers, {Authorization: "Bearer " + newAccessToken});
+
+        return request(path, Object.assign({}, options, {headers: retryHeaders, retryOnUnauthorized: false}));
+      } catch (refreshError) {
+        clearSession();
+        throw refreshError;
+      }
+    }
+
     if (!res.ok) {
-      var err = new Error((data && (data.message || data.error || data.detail)) || res.statusText || "Error de red");
+      var err = new Error(
+        getSafeErrorMessage(res.status, data)
+      );
+
       err.status = res.status;
       err.data = data;
+
       throw err;
     }
+
     return data;
   }
 
@@ -86,19 +173,46 @@
     });
   }
 
-  async function loginUser(emailOrUsername, password) {
-    var loginPath = "/api/identity/users/login/";
-    try {
-      return await request(loginPath, {
-        method: "POST",
-        json: { username: emailOrUsername, email: emailOrUsername, password: password }
-      });
-    } catch (e) {
-      if (e.status === 404) {
-        e.message = "El inicio de sesión aún no está disponible en el backend (falta endpoint de login). Puedes usar el registro.";
+  async function loginUser(email, password) {
+    return request(cfg().endpoints.login, {
+      method: "POST",
+      json: {
+        email: email,
+        password: password
       }
-      throw e;
+    });
+  }
+
+  async function refreshAccessToken() {
+    var refreshToken = getRefreshToken();
+
+    if (!refreshToken) {
+      throw new Error("No refresh token available.");
     }
+
+    var result = await request(
+      cfg().endpoints.refresh,
+      {
+        method: "POST",
+        json: {
+          refresh: refreshToken
+        },
+        retryOnUnauthorized: false
+      }
+    );
+
+    if (!result || !result.access) {
+      throw new Error("Invalid token refresh response.");
+    }
+
+    try {
+      localStorage.setItem(
+        cfg().storageKeys.token,
+        result.access
+      );
+    } catch (e) {}
+
+    return result.access;
   }
 
   async function listFoods() {
@@ -179,11 +293,13 @@
       url: url,
       request: request,
       getToken: getToken,
+      getRefreshToken: getRefreshToken,
       getUser: getUser,
       setSession: setSession,
       clearSession: clearSession,
       registerUser: registerUser,
       loginUser: loginUser,
+      refreshAccessToken: refreshAccessToken,
 
       listFoods: listFoods,
       createFood: createFood,
