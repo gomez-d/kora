@@ -12,12 +12,15 @@ from rest_framework.permissions import (
 from django.contrib.auth import authenticate
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db import transaction
+
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
     UserDetailSerializer,
     UserUpdateSerializer,
-    UserTokenRefreshSerializer
+    UserTokenRefreshSerializer,
+    PasswordResetConfirmSerializer
 )
 from .models import User
 from rbac.utils import (
@@ -444,4 +447,68 @@ class PasswordResetRequestView(APIView):
                 ),
             },
             status=status.HTTP_200_OK,
+        )
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    @transaction.atomic
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+
+        raw_token = serializer.validated_data["token"]
+        new_password = serializer.validated_data["new_password"]
+
+        # Validate the recovery token using its stored hash,
+        # expiration time, and single-use status.
+        reset_token = PasswordResetToken.get_valid_token(
+            raw_token
+        )
+
+        if reset_token is None:
+            return Response(
+                {
+                    "success": False,
+                    "message": (
+                        "The password reset token is invalid "
+                        "or has expired."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = reset_token.user
+
+        # Hash the new password using Django´s configured
+        # password hashing mechanism before storing it.
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+
+        # Mark the recovery token as used only after the
+        # password has been successfully updated.
+        consumed = reset_token.consume()
+
+        if not consumed:
+            transaction.set_rollback(True)
+
+            return Response(
+                {
+                    "success": False,
+                    "message": (
+                        "The password reset token is invalid "
+                        "or has expired."
+                    ),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {
+                "success": True,
+                "message": "Password reset successfully.",
+            },
+            status=status.HTTP_200_OK
         )
