@@ -43,12 +43,21 @@ ALLOWED_HOSTS = [
 ]
 
 
+#Internal service URLs
 UNSTRUCTURED_DATA_SERVICE_URL = os.getenv("UNSTRUCTURED_DATA_SERVICE_URL")
 
 if not UNSTRUCTURED_DATA_SERVICE_URL:
     raise ImproperlyConfigured(
         "UNSTRUCTURED_DATA_SERVICE_URL is not configured.")
 
+
+# Internal service authentication
+UNSTRUCTURED_DATA_SERVICE_TOKEN = os.getenv("UNSTRUCTURED_DATA_SERVICE_TOKEN")
+
+if not UNSTRUCTURED_DATA_SERVICE_TOKEN:
+    raise ImproperlyConfigured(
+        "UNSTRUCTURED_DATA_SERVICE_TOKEN is not configured."
+    )
 
 # Application definition
 
@@ -200,8 +209,13 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler',
+    "EXCEPTION_HANDLER": "config.exceptions.kora_exception_handler",
 }
+
+JWT_SIGNING_KEY = os.getenv('JWT_SIGNING_KEY')
+
+if not JWT_SIGNING_KEY:
+    raise ImproperlyConfigured("JWT_SIGNING_KEY is not configured.")
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
@@ -211,5 +225,5 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': os.getenv('JWT_SIGNING_KEY'),
+    'SIGNING_KEY': JWT_SIGNING_KEY,
 }

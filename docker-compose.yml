@@ -1,4 +1,4 @@
-# Kora V2.0.0 — Docker Compose
+﻿# Kora V2.0.0 â€” Docker Compose
 
 services:
   # ---------------------------------------------------------------------------
@@ -52,6 +52,7 @@ services:
     depends_on:
       - svc-identity
       - svc-business
+      - svc-ai
     restart: unless-stopped
 
   svc-identity:
@@ -120,11 +121,11 @@ services:
 # ---------------------------------------------------------------------------
 secrets:
   postgres_password:
-    file: ./docker/postgres/secrets/postgres_password.txt
+    file: C:/kora-secrets/postgres_password.txt
   identity_password:
-    file: ./docker/postgres/secrets/identity_password.txt
+    file: C:/kora-secrets/identity_password.txt
   business_password:
-    file: ./docker/postgres/secrets/business_password.txt
+    file: C:/kora-secrets/business_password.txt
 
 # ---------------------------------------------------------------------------
 # Volumes

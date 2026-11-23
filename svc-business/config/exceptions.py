@@ -1,21 +1,22 @@
+
 from rest_framework.exceptions import (
-    NotAuthenticated,
     ParseError,
-    PermissionDenied,
     ValidationError,
 )
 from rest_framework.views import exception_handler
 
 
-def custom_exception_handler(exc, context):
+def kora_exception_handler(exc, context):
     """
-    Return standardized API error responses without exposing internal details.
+    Standardize validation, authentication, and authorization
+    error responses across the Kora Business service.
     """
 
     response = exception_handler(exc, context)
 
+    # Let DRF handle exceptions without an API response.
     if response is None:
-        return response
+        return None
 
     if isinstance(exc, ValidationError):
         response.data = {
@@ -24,7 +25,6 @@ def custom_exception_handler(exc, context):
             "message": "Invalid request data.",
             "errors": response.data,
         }
-
         return response
 
     if isinstance(exc, ParseError):
@@ -33,29 +33,20 @@ def custom_exception_handler(exc, context):
             "code": "invalid_json",
             "message": "Invalid JSON payload.",
         }
-
         return response
 
-    if isinstance(exc, NotAuthenticated):
+    if response.status_code == 401:
         response.data = {
             "success": False,
             "code": "unauthorized",
-            "message": (
-                "Authentication credentials are missing or invalid."
-            ),
+            "message": "Authentication credentials are missing or invalid.",
         }
 
-        return response
-
-    if isinstance(exc, PermissionDenied):
+    elif response.status_code == 403:
         response.data = {
             "success": False,
             "code": "forbidden",
-            "message": (
-                "You do not have permission to perform this operation."
-            ),
+            "message": "You do not have permission to perform this operation.",
         }
-
-        return response
 
     return response

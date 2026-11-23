@@ -9,7 +9,10 @@ from django.utils import timezone
 from users.models import User
 
 from rbac.models import Role, UserRole
-from rbac.utils import get_user_role_names
+from rbac.utils import (
+    get_user_role_names,
+    get_user_permission_names
+)
 
 class StrictFieldsMixin:
     """
@@ -161,9 +164,7 @@ class UserRegistrationSerializer(StrictFieldsMixin, serializers.ModelSerializer)
         send_identity_event(
             user_id=user.id,
             event='user_registered',
-            data={
-                "email": user.email
-            },
+            level='INFO',
             metadata={
                 "source": "user_registration",
             },
@@ -338,6 +339,9 @@ class UserTokenRefreshSerializer(TokenRefreshSerializer):
 
         # Recalculate the role context using the current database state.
         refresh["roles"] = get_user_role_names(user)
+
+        # Recalculate the current effective permissions.
+        refresh["permissions"] = get_user_permission_names(user)
 
         # Pass the updated signed refresh token to SimpleJWT.
         attrs["refresh"] = str(refresh)

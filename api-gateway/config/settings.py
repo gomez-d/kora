@@ -72,7 +72,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'gateway.middleware.GatewayJWTMiddleware',
-    ]
+]
 
 ROOT_URLCONF = 'config.urls'
 
@@ -160,7 +160,18 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
+    'DEFAULT_THROTTLE_RATES': {
+        'login': '5/min',
+        'registration': '3/hour',
+        'refresh': '10/min',
+        'authenticated_user': '60/min'
+    }
 }
+
+JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY")
+
+if not JWT_SIGNING_KEY:
+    raise ImproperlyConfigured("JWT_SIGNING_KEY is not configured.")
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
@@ -168,7 +179,7 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': os.getenv('JWT_SIGNING_KEY'),
+    'SIGNING_KEY': JWT_SIGNING_KEY,
 }
 
 # CORS

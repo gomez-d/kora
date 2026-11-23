@@ -169,7 +169,10 @@ class IdentityEventSerializer(serializers.Serializer):
     the identity microservice.
     """
 
-    user_id = serializers.UUIDField()
+    user_id = serializers.UUIDField(
+        required=False,
+        allow_null=True
+    )
     event = serializers.CharField()
     level = serializers.CharField()
     data = serializers.DictField(required=False)
@@ -183,3 +186,24 @@ class IdentityEventSerializer(serializers.Serializer):
         attrs.setdefault('metadata', {})
 
         return attrs
+
+    def validate_data(self, value):
+        sensitive_fields = {
+            'password',
+            'token',
+            'access_token',
+            'refresh_token',
+            'authorization',
+            'secret'
+        }
+
+        for key in value:
+            if key.lower() in sensitive_fields:
+                raise serializers.ValidationError(
+                    "Sensitive information cannot be logged."
+                )
+
+        return value
+
+    def validate_metadata(self, value):
+        return self.validate_data(value)

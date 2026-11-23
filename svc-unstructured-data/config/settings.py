@@ -38,8 +38,19 @@ DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes", "on")
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-    if host.strip
+    if host.strip()
 ]
+
+
+#Internal service authentication
+UNSTRUCTURED_DATA_SERVICE_TOKEN = os.getenv(
+    "UNSTRUCTURED_DATA_SERVICE_TOKEN"
+)
+
+if not UNSTRUCTURED_DATA_SERVICE_TOKEN:
+    raise ImproperlyConfigured(
+        "UNSTRUCTURED_DATA_SERVICE_TOKEN is not configured."
+    )
 
 
 # Application definition

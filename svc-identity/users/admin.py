@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import User, RefreshToken
+from .models import User
 
 
 @admin.register(User)
@@ -47,30 +47,4 @@ class CustomUserAdmin(UserAdmin):
                 "is_superuser"
             )
         }),
-    )
-
-
-@admin.register(RefreshToken)
-class RefreshTokenAdmin(admin.ModelAdmin):
-    list_display = (
-        "user",
-        "token_jti",
-        "expires_at",
-        "revoked_at",
-        "created_at",
-        "id"
-    )
-    search_fields = (
-        "user__email",
-        "token_jti"
-    )
-    list_filter = (
-        "expires_at",
-        "revoked_at",
-        "created_at"
-    )
-    ordering = ("-created_at",)
-    readonly_fields = (
-        "id",
-        "created_at"
     )
