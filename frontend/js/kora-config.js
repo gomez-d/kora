@@ -3,7 +3,7 @@
   "use strict";
 
   var API_BASE =
-    global.KORA_API_BASE_URL || "http://localhost:8000";
+    global.KORA_API_BASE_URL || "http://localhost:8080";
 
   var AI_BASE =
     global.KORA_AI_BASE_URL || "http://localhost:8000";
@@ -18,6 +18,9 @@
       login: "/api/identity/users/login/",
       refresh: "/api/identity/users/token/refresh/",
       logout: "/api/identity/users/logout/",
+
+      passwordResetRequest: "/api/identity/users/password-reset/",
+      passwordResetConfirm: "/api/identity/users/password-reset/confirm/",
 
       businessHealth: "/api/business/health/",
       nutritionalProfiles: "/api/business/nutritional-profiles/",
