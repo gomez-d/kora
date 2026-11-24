@@ -85,6 +85,8 @@ The following table identifies the main configuration variables used by each com
 | `DB_PASSWORD` | Database password for local development. |
 | `DB_PASSWORD_FILE` | Optional path to an externally supplied database password file. |
 | `UNSTRUCTURED_DATA_SERVICE_URL` | Internal URL of the Unstructured Data service. |
+| `UNSTRUCTURED_DATA_SERVICE_TOKEN` | Authentication token for internal security audit requests. |
+| `FRONTEND_PASSWORD_RESET_URL` | Frontend URL used to generate password recovery links. |
 
 ### 3.3 Business Service
 
@@ -156,6 +158,60 @@ The root `.env` file defines shared configuration variables used by Docker Compo
 Database passwords are provided through Docker Secrets rather than root environment variables.
 
 These variables configure host-to-container port mappings and shared infrastructure settings. They do not automatically become environment variables inside every container.
+
+
+### 3.8 Password Recovery Configuration (HU-070)
+
+The password recovery workflow requires additional configuration in the Identity Service and API Gateway.
+
+#### Identity Service
+
+| Configuration | Purpose |
+|---|---|
+| `FRONTEND_PASSWORD_RESET_URL` | Defines the frontend password reset URL included in recovery instructions. |
+| `UNSTRUCTURED_DATA_SERVICE_URL` | Defines the internal destination for security audit events. |
+| `UNSTRUCTURED_DATA_SERVICE_TOKEN` | Authenticates communication with the audit service. |
+| `MAILERS` | Configures Django's email delivery backend. |
+| `REST_FRAMEWORK.DEFAULT_THROTTLE_RATES` | Configures password recovery request limits. |
+| `CACHES` | Configures storage for rate-limiting counters. |
+
+In the tested local development environment, the Identity Service uses Django's console email backend:
+
+```python
+MAILERS = {
+    "default": {
+        "BACKEND": "django.core.mail.backends.console.EmailBackend",
+    }
+}
+```
+
+This backend displays recovery instructions in the Identity Service console instead of sending messages through an external email provider.
+
+The local configuration uses a PostgreSQL-backed Django database cache for Identity Service throttling.
+
+#### API Gateway
+
+The API Gateway defines the following password recovery throttling scopes:
+
+| Scope | Rate |
+|---|---|
+| `password_reset_request` | `5/hour` per client IP |
+| `password_reset_confirm` | `10/hour` per client IP |
+
+The Gateway identifies clients using `REMOTE_ADDR` and applies these limits before forwarding requests to the Identity Service.
+
+The Identity Service enforces its own additional request limits independently of the Gateway.
+
+#### Security Considerations
+
+- Recovery tokens and passwords must not be stored in environment files or application logs.
+- Internal audit authentication tokens must remain outside version control.
+- Production email delivery requires an appropriately configured email provider.
+- The configured frontend recovery URL must match the deployed frontend address.
+- Trusted proxy configuration must be reviewed before production deployment.
+- Rate-limiting caches should use shared storage when multiple application instances are deployed.
+
+For implementation details and test results, see [HU-070 — Password Recovery](../user-stories/HU-070.md).
 
 ## 4. Local Development Configuration
 
