@@ -14,8 +14,25 @@ from .models import (
     ConsumptionItem
 )
 
+class StrictFieldsMixin:
+    """
+    Reject input fields that are not part of the serializer contract.
+    """
 
-class NutritionalProfileSerializer(serializers.ModelSerializer):
+    def to_internal_value(self, data):
+        if hasattr(data, "keys"):
+            unexpected_fields = set(data.keys()) - set(self.fields.keys())
+
+            if unexpected_fields:
+                raise serializers.ValidationError({
+                    "unexpected_fields": (
+                        "Unexpected field(s): "
+                        f"{', '.join(sorted(unexpected_fields))}."
+                    )
+                })
+        return super().to_internal_value(data)
+
+class NutritionalProfileSerializer(StrictFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = NutritionalProfile
         fields = [
@@ -55,22 +72,29 @@ class NutritionalProfileSerializer(serializers.ModelSerializer):
         return value
 
     def validate_weight(self, value):
-        if value <= 0:
+        """
+        Validate weight within the accepted range.
+        """
+
+        if value < Decimal("1.00") or value > Decimal("500"):
             raise serializers.ValidationError(
-                "Weight must be greater than 0."
+                "Weight must be between 1 and 500 kg."
             )
         return value
 
     def validate_height(self, value):
-        if value <= 0:
-            raise serializers.ValidationError(
-                "Height must be greater than 0."
-            )
+        """
+        Validate height within the accepted range.
+        """
 
+        if value < Decimal("0.30") or value > Decimal("2.50"):
+            raise serializers.ValidationError(
+                "Height must be between 0.30 and 2.50 meters."
+            )
         return value
 
 
-class FoodCategorySerializer(serializers.ModelSerializer):
+class FoodCategorySerializer(StrictFieldsMixin, serializers.ModelSerializer):
     name = serializers.CharField(
         allow_blank=True,
         validators=[
@@ -114,7 +138,7 @@ class FoodCategorySerializer(serializers.ModelSerializer):
         return value.strip().upper()
 
 
-class FoodNutrientSerializer(serializers.ModelSerializer):
+class FoodNutrientSerializer(StrictFieldsMixin, serializers.ModelSerializer):
     class Meta:
         model = FoodNutrient
         fields = [
@@ -127,6 +151,36 @@ class FoodNutrientSerializer(serializers.ModelSerializer):
             "id"
         ]
 
+    def validate(self, attrs):
+        """
+        Validate that each nutrient uses the expected unit.
+        """
+
+        expected_units = {
+            "CALORIES": "KCAL",
+            "PROTEIN": "G",
+            "CARBOHYDRATES": "G",
+            "FAT": "G",
+            "FIBER": "G",
+            "SUGAR": "G",
+            "SODIUM": "MG",
+        }
+
+        nutrient_type = attrs.get("nutrient_type")
+        unit = attrs.get("unit")
+
+        expected_unit = expected_units.get(nutrient_type)
+
+        if expected_unit and unit != expected_unit:
+            raise serializers.ValidationError({
+                "unit": (
+                    f"Invalid unit for {nutrient_type}. "
+                    f"Expected {expected_unit}."
+                )
+            })
+
+        return attrs
+
     def validate_amount(self, value):
         if value < 0:
             raise serializers.ValidationError(
@@ -136,7 +190,7 @@ class FoodNutrientSerializer(serializers.ModelSerializer):
         return value
 
 
-class FoodSerializer(serializers.ModelSerializer):
+class FoodSerializer(StrictFieldsMixin, serializers.ModelSerializer):
     # Expose the foreign key as category_id in the API
     category_id = serializers.PrimaryKeyRelatedField(
         source="category",
@@ -183,6 +237,20 @@ class FoodSerializer(serializers.ModelSerializer):
         ]
 
     def validate_nutrients(self, value):
+        """
+        Validate uniqueness and completeness of the nutrient set.
+        """
+
+        required_nutrients = {
+            "CALORIES",
+            "PROTEIN",
+            "CARBOHYDRATES",
+            "FAT",
+            "FIBER",
+            "SUGAR",
+            "SODIUM",
+        }
+
         nutrient_types = [
             nutrient["nutrient_type"]
             for nutrient in value
@@ -191,6 +259,16 @@ class FoodSerializer(serializers.ModelSerializer):
         if len(nutrient_types) != len(set(nutrient_types)):
             raise serializers.ValidationError(
                 "Repeating the type of nutrient in a food item is not permitted."
+            )
+
+        provided_nutrients = set(nutrient_types)
+
+        missing_nutrients = required_nutrients - provided_nutrients
+
+        if missing_nutrients:
+            raise serializers.ValidationError(
+                "Missing required nutrient(s): "
+                f"{', '.join(sorted(missing_nutrients))}."
             )
 
         return value
@@ -279,7 +357,7 @@ class FoodReadSerializer(serializers.ModelSerializer):
         ]
 
 
-class ConsumptionItemSerializer(serializers.ModelSerializer):
+class ConsumptionItemSerializer(StrictFieldsMixin, serializers.ModelSerializer):
     food_id = serializers.PrimaryKeyRelatedField(
         source="food",
         queryset=Food.objects.all()
@@ -336,7 +414,7 @@ class ConsumptionItemSerializer(serializers.ModelSerializer):
         return value
 
 
-class ConsumptionRecordSerializer(serializers.ModelSerializer):
+class ConsumptionRecordSerializer(StrictFieldsMixin, serializers.ModelSerializer):
     consumption_items = ConsumptionItemSerializer(
         many=True,
         allow_empty=False
