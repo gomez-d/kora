@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="../css/main-screen.css">
     <link rel="stylesheet" href="../css/header-kora.css">
     <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+<style>
+    html {
+        visibility: hidden;
+    }
+</style>
 </head>
 <body >
         <header class="kora-header">
@@ -72,10 +77,11 @@
                         <p>Para modificar edad, sexo, peso, altura, actividad y objetivo, ve a <a href="nutritional_profile.html">Mi perfil nutricional</a>.</p>
                     </div>
 
-                    <div class="s-alimento__footer-actions">
-                        <a href="../login.html" class="s-alimento__btn s-alimento__btn--registrar">Cerrar sesión</a>
-                        <a href="main_panel.html" class="s-alimento__btn s-alimento__btn--secondary">Volver al panel</a>
-                    </div>
+                    <a href="#"
+                    id="kora-logout"
+                    class="s-alimento__btn s-alimento__btn--registrar">
+                        Cerrar sesión
+                    </a>
                 </div>
             </section>
         </article>
@@ -94,9 +100,16 @@
             </div>
         </footer>
     </div>
+    <script src="../js/kora-config.js"></script>
+<script src="../js/kora-api.js"></script>
+<script src="../js/kora-session.js"></script>
 
     <script src="../js/plugins.js"></script>
     <script src="../js/main.js"></script>
     <script src="../js/kora-llm.js"></script>
+
+<script>
+    KoraSession.requireAuth();
+</script>
 </body>
 </html>

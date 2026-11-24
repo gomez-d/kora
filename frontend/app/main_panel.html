@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="../css/main-screen.css">
     <link rel="stylesheet" href="../css/header-kora.css">
     <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+<style>
+    html {
+        visibility: hidden;
+    }
+</style> 
 </head>
 <body>
     <div id="kora-alerts" aria-live="polite"></div>
@@ -138,6 +143,9 @@
             </div>
         </footer>
     </div>
+    <script src="../js/kora-config.js"></script>
+<script src="../js/kora-api.js"></script>
+<script src="../js/kora-session.js"></script>
 
     <script src="../js/plugins.js"></script>
     <script src="../js/main.js"></script>
@@ -146,5 +154,8 @@
     <script>
 
     </script>
+<script>
+    KoraSession.requireAuth();
+</script>
 </body>
 </html>
