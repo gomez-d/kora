@@ -121,11 +121,11 @@ services:
 # ---------------------------------------------------------------------------
 secrets:
   postgres_password:
-    file: C:/kora-secrets/postgres_password.txt
+    file: ./docker/postgres/secrets/postgres_password
   identity_password:
-    file: C:/kora-secrets/identity_password.txt
+    file: ./docker/postgres/secrets/identity_password
   business_password:
-    file: C:/kora-secrets/business_password.txt
+    file: ./docker/postgres/secrets/business_password
 
 # ---------------------------------------------------------------------------
 # Volumes
