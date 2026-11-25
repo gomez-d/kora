@@ -1,7 +1,12 @@
 import uuid
+import hashlib
+import secrets
+from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
 
 
 class UserManager(BaseUserManager):
@@ -64,3 +69,77 @@ class User(AbstractUser):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="password_reset_tokens",
+    )
+    token_hash = models.CharField(
+        max_length=64,
+        unique=True,
+        db_index=True,
+    )
+    expires_at = models.DateTimeField()
+    used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    @staticmethod
+    def hash_token(token):
+        return hashlib.sha256(
+            token.encode("utf-8")
+        ).hexdigest()
+
+    @classmethod
+    def create_for_user(cls, user, expiration_minutes=30):
+        cls.objects.filter(
+            user=user,
+            used=False,
+        ).update(used=True)
+
+        raw_token = secrets.token_urlsafe(32)
+
+        cls.objects.create(
+            user=user,
+            token_hash=cls.hash_token(raw_token),
+            expires_at=(
+                timezone.now() + timedelta(minutes=expiration_minutes)
+            ),
+        )
+
+        return raw_token
+
+    def is_valid(self):
+        return (
+            not self.used
+            and self.expires_at > timezone.now()
+        )
+
+    def consume(self):
+        if not self.is_valid():
+            return False
+
+        self.used = True
+        self.save(update_fields=["used"])
+
+        return True
+
+    @classmethod
+    def get_valid_token(cls, raw_token):
+        token_hash = cls.hash_token(raw_token)
+
+        try:
+            token = cls.objects.get(
+                token_hash=token_hash,
+            )
+        except cls.DoesNotExist:
+            return None
+
+        if not token.is_valid():
+            return None
+
+        return token

@@ -3,18 +3,23 @@ import requests
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.exceptions import APIException
+
 from django.http import HttpResponse
 from django.conf import settings
+
 from gateway.clients.base import forward_request
-from rest_framework import status
 from gateway.permissions import IsAuthenticatedOrPublicRoute
-from rest_framework.exceptions import APIException
 from gateway.throttling import (
     LoginRateThrottle,
     RegistrationRateThrottle,
     RefreshRateThrottle,
-    AuthenticatedUserRateThrottle
+    AuthenticatedUserRateThrottle,
+    PasswordResetRequestRateThrottle,
+    PasswordResetConfirmRateThrottle,
 )
+from gateway.clients.unstructured_data_client import send_gateway_event
 
 
 def build_forward_headers(request):
@@ -35,6 +40,12 @@ def build_forward_headers(request):
 
     if content_type:
         headers["Content-Type"] = content_type
+
+    # Forward the client IP obtained from the trusted connection.
+    client_ip = request.META.get("REMOTE_ADDR")
+
+    if client_ip: 
+        headers["X-Forwarded-For"] = client_ip
 
     return headers
 
@@ -109,6 +120,32 @@ class BusinessProxyView(APIView):
 class IdentityProxyView(APIView):
     permission_classes = [IsAuthenticatedOrPublicRoute]
 
+    def throttled(self, request, wait):
+        """
+        Audit password recovery requests rejected by the Gateway.
+        """
+        path = self.kwargs.get("path", "").strip("/")
+
+        recovery_sources = {
+            "users/password-reset": "password_reset_request",
+            "users/password-reset/confirm": "password_reset_confirm",
+        }
+
+        source = recovery_sources.get(path)
+
+        if source:
+            send_gateway_event(
+                event="password_reset_rate_limited",
+                level="WARNING",
+                metadata={
+                    "source": source,
+                    "service": "api-gateway",
+                    "reason": "rate_limit_exceeded",
+                },
+            )
+
+        return super().throttled(request, wait)
+
     def get_throttles(self):
         path = self.kwargs.get("path", "").strip("/")
 
@@ -120,6 +157,12 @@ class IdentityProxyView(APIView):
 
         elif path == "users/token/refresh":
             throttle_classes = [RefreshRateThrottle]
+
+        elif path == "users/password-reset":
+            throttle_classes = [PasswordResetRequestRateThrottle]
+
+        elif path == "users/password-reset/confirm":
+            throttle_classes = [PasswordResetConfirmRateThrottle]
 
         else:
             throttle_classes = [AuthenticatedUserRateThrottle]
