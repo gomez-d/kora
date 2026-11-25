@@ -27,7 +27,7 @@ The implementation applies at the API Gateway level. Frontend requests are subje
 
 ## 3. Rate Limiting Policies
 
-The API Gateway defines dedicated rate limiting policies for authentication, password recovery, and authenticated requests.
+The API Gateway defines four rate limiting policies.
 
 | Operation | Request Limit | Identification Method |
 |---|---|---|
@@ -35,8 +35,6 @@ The API Gateway defines dedicated rate limiting policies for authentication, pas
 | User Registration | 3 requests per hour | Client IP address |
 | Token Refresh | 10 requests per minute | Client IP address |
 | Authenticated Endpoints | 60 requests per minute | Authenticated User ID |
-| Password Recovery Request | 5 requests per hour | Client IP address |
-| Password Recovery Confirmation | 10 requests per hour | Client IP address |
 
 Each policy has an independent throttling scope.
 
@@ -82,43 +80,6 @@ Requests are identified using the authenticated user's `user_id` obtained from t
 
 The same throttling scope is used across the Business and AI proxies. Therefore, requests to both services share the same authenticated-user limit.
 
-
-### 3.5 Password Recovery
-
-Password recovery endpoints are publicly accessible through the API Gateway and do not require JWT authentication.
-
-**Endpoints:**
-
-- `POST /api/identity/users/password-reset/`
-- `POST /api/identity/users/password-reset/confirm/`
-
-The API Gateway applies dedicated throttling policies to both password recovery endpoints.
-
-| Operation | Gateway Throttle Scope | Configured Rate |
-|---|---|---|
-| Password recovery request | `password_reset_request` | `5/hour` |
-| Password recovery confirmation | `password_reset_confirm` | `10/hour` |
-
-These policies are selected by `IdentityProxyView.get_throttles()` before the request is forwarded to the Identity Service.
-
-The Identity Service independently enforces additional IP-based and email-based rate limits.
-
-The API Gateway forwards these requests to the Identity Service.
-
-The Identity Service applies additional abuse prevention controls:
-
-| Operation | Scope | Rate Limit |
-|---|---|---|
-| Password recovery request | Client IP | 5/hour |
-| Password recovery request | Normalized email address | 3/hour |
-| Password recovery confirmation | Client IP | 10/hour |
-
-These limits belong to the Identity Service and must not be confused with Gateway-level throttling policies.
-
-Both endpoints use the existing security auditing mechanism to record relevant recovery events.
-
-For endpoint details and functional test results, see [HU-070 — Password Recovery](../user-stories/HU-070.md).
-
 ## 4. Protected Endpoints
 
 The following table summarizes the endpoints and proxy components covered by the implemented policies.
@@ -131,10 +92,6 @@ The following table summarizes the endpoints and proxy components covered by the
 | Identity Proxy | Other authenticated Identity endpoints | 60/minute per user |
 | Business Proxy | `/api/business/{path}/` | 60/minute per user |
 | AI Proxy | `/api/ai/{path}/` | 60/minute per user |
-| Identity Proxy | `/api/identity/users/password-reset/` | Public endpoint; additional limits enforced by Identity Service |
-| Identity Proxy | `/api/identity/users/password-reset/confirm/` | Public endpoint; additional limits enforced by Identity Service |
-| Identity Proxy | `/api/identity/users/password-reset/` | 5/hour per IP |
-| Identity Proxy | `/api/identity/users/password-reset/confirm/` | 10/hour per IP |
 
 The limits are enforced by the API Gateway before forwarding requests to the corresponding microservices.
 
@@ -205,8 +162,6 @@ The following custom throttling classes are implemented:
 | `RegistrationRateThrottle` | Applies the registration request limit |
 | `RefreshRateThrottle` | Applies the token refresh request limit |
 | `AuthenticatedUserRateThrottle` | Applies the authenticated-user request limit |
-| `PasswordResetRequestRateThrottle` | Limits password recovery requests by client IP |
-| `PasswordResetConfirmRateThrottle` | Limits password recovery confirmations by client IP |
 
 The custom classes extend Django REST Framework's `SimpleRateThrottle`.
 
@@ -220,8 +175,6 @@ The request rates are defined in the API Gateway's `REST_FRAMEWORK` configuratio
 | `registration` | `3/hour` |
 | `refresh` | `10/min` |
 | `authenticated_user` | `60/min` |
-| `password_reset_request` | `5/hour` |
-| `password_reset_confirm` | `10/hour` |
 
 ### 7.3 View Integration
 
@@ -287,22 +240,6 @@ The following considerations apply to the current implementation:
 - Requests exceeding configured limits are rejected before reaching the target microservices.
 - The implementation does not trust client-supplied `X-Forwarded-For` values for IP identification.
 - Rate limiting is an application-level abuse protection mechanism and does not replace network-level DDoS protection.
-
-### Password Recovery Security
-
-Password recovery endpoints do not require JWT authentication because they must remain accessible to users who cannot authenticate.
-
-The Identity Service provides additional protections through:
-
-- IP-based throttling for recovery requests and confirmations.
-- Email-based throttling for recovery requests.
-- Generic recovery responses to reduce account enumeration.
-- Expiring and single-use recovery tokens.
-- Security event auditing.
-
-The Gateway and Identity Service may enforce independent request limits. A request rejected by the Gateway does not reach the Identity Service.
-
-Gateway-level rate limits and proxy identification behavior must be verified against the deployed configuration before production release.
 
 ### 9.1 Cache Considerations
 

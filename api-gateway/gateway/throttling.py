@@ -25,17 +25,6 @@ class RegistrationRateThrottle(IPRateThrottle):
 class RefreshRateThrottle(IPRateThrottle):
     scope = "refresh"
 
-class PasswordResetRequestRateThrottle(IPRateThrottle):
-    """
-    Limit password recovery requests by client IP.
-    """
-    scope = "password_reset_request"
-
-class PasswordResetConfirmRateThrottle(IPRateThrottle):
-    """
-    Limit password reset confirmation requests by client IP.
-    """
-    scope = "password_reset_confirm"
 
 class AuthenticatedUserRateThrottle(SimpleRateThrottle):
     scope = "authenticated_user"

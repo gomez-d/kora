@@ -203,18 +203,13 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
-
+import os
+from datetime import timedelta
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     "EXCEPTION_HANDLER": "config.exceptions.kora_exception_handler",
-    'NUM_PROXIES': 1,
-    'DEFAULT_THROTTLE_RATES': {
-        'password_reset_request_ip': '5/hour',
-        'password_reset_request_account': '3/hour',
-        'password_reset_confirm_ip': '10/hour',
-    },
 }
 
 JWT_SIGNING_KEY = os.getenv('JWT_SIGNING_KEY')
@@ -231,32 +226,4 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': JWT_SIGNING_KEY,
-}
-
-MAILERS = {
-    "default": {
-        "BACKEND": "django.core.mail.backends.console.EmailBackend",
-    }
-}
-
-DEFAULT_FROM_EMAIL = os.getenv(
-    "DEFAULT_FROM_EMAIL",
-    "no-reply@kora.local",
-)
-
-FRONTEND_PASSWORD_RESET_URL = os.getenv(
-    "FRONTEND_PASSWORD_RESET_URL",
-    "http://localhost:5500/reset-password.html",
-)
-
-# Shared cache for password recovery rate limiting.
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "identity_cache",
-        "TIMEOUT": 3600,
-        "OPTIONS": {
-            "MAX_ENTRIES": 10000,
-        },
-    }
 }

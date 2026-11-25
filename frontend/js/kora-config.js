@@ -6,7 +6,7 @@
     global.KORA_API_BASE_URL || "http://localhost:8000";
 
   var AI_BASE =
-    global.KORA_AI_BASE_URL || "http://localhost:8004";
+    global.KORA_AI_BASE_URL || "http://localhost:8000";
 
   global.KoraConfig = {
     API_BASE: API_BASE.replace(/\/$/, ""),
@@ -18,9 +18,6 @@
       login: "/api/identity/users/login/",
       refresh: "/api/identity/users/token/refresh/",
       logout: "/api/identity/users/logout/",
-
-      passwordResetRequest: "/api/identity/users/password-reset/",
-      passwordResetConfirm: "/api/identity/users/password-reset/confirm/",
 
       businessHealth: "/api/business/health/",
       nutritionalProfiles: "/api/business/nutritional-profiles/",

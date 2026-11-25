@@ -5,9 +5,6 @@ PUBLIC_PATHS = {
     "/api/identity/users/register/",
     "/api/identity/users/login/",
     "/api/identity/users/token/refresh/",
-    "/api/identity/users/password-reset/",
-    "/api/identity/users/password-reset/confirm/",
-    "/api/identity/users/health/",
 }
 
 PUBLIC_PATH_PREFIXES = (

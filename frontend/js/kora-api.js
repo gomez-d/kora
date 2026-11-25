@@ -172,10 +172,8 @@
     var requestOptions = Object.assign({}, options);
 
     var skipRefresh = options.skipRefresh === true;
-    var skipAuth = options.skipAuth === true;
 
     delete requestOptions.skipRefresh;
-    delete requestOptions.skipAuth;
 
     if (options.json !== undefined) {
       headers["Content-Type"] = "application/json";
@@ -185,9 +183,7 @@
 
     var token = getToken();
 
-    if (skipAuth) {
-      delete headers.Authorization;
-    } else if (token  &&  !headers.Authorization) {
+    if (token && !headers.Authorization) {
       headers.Authorization = "Bearer " + token;
     }
 
@@ -206,7 +202,7 @@
       throw connectionError;
     }
 
-    if (response.status === 401 && !skipAuth && !skipRefresh && getRefreshToken()) {
+    if (response.status === 401 && !skipRefresh && getRefreshToken()) {
       try {
         var newToken = await refreshSession();
 
@@ -258,37 +254,6 @@
     } finally {
       clearSession();
     }
-  }
-
-  /**
-   *  Request password recovery instructions.
-   */
-
-  async function requestPasswordReset(email) {
-    return request(cfg().endpoints.passwordResetRequest, {
-      method: "POST",
-      skipAuth: true,
-      skipRefresh: true,
-      json: {
-        email: email
-      }
-    });
-  }
-
-  /**
-   *  Confirm password recovery using a valid token.
-   */
-
-  async function confirmPasswordReset(token, newPassword) {
-    return request(cfg().endpoints.passwordResetConfirm, {
-      method: "POST",
-      skipAuth: true,
-      skipRefresh: true,
-      json: {
-        token: token,
-        new_password: newPassword
-      }
-    });
   }
 
   async function registerUser(payload) {
@@ -411,8 +376,6 @@
     clearSession: clearSession,
     registerUser: registerUser,
     loginUser: loginUser,
-    requestPasswordReset: requestPasswordReset,
-    confirmPasswordReset: confirmPasswordReset,
     refreshAccessToken: refreshAccessToken,
     refreshSession: refreshSession,
     ensureAccessToken: ensureAccessToken,

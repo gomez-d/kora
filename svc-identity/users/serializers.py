@@ -2,12 +2,9 @@ from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.settings import api_settings
-
 from clients.unstructured_data_client import send_identity_event
-
 from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
-from django.core.exceptions import ValidationError as DjangoValidationError
 
 from users.models import User
 
@@ -350,26 +347,3 @@ class UserTokenRefreshSerializer(TokenRefreshSerializer):
         attrs["refresh"] = str(refresh)
 
         return super().validate(attrs)
-
-class PasswordResetRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-
-class PasswordResetConfirmSerializer(serializers.Serializer):
-    token = serializers.CharField(
-        write_only=True
-    )
-    new_password = serializers.CharField(
-        write_only=True
-    )
-
-    def validate_new_password(self, value):
-        # Reuse Django's configured password validators to enforce
-        # the same security policy used throughout the Identity service.
-        try:
-            validate_password(value)
-        except DjangoValidationError as error:
-            raise serializers.ValidationError(
-                list(error.messages)
-            )
-
-        return value

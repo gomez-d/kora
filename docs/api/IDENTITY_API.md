@@ -72,8 +72,6 @@ The Users application manages user accounts and authentication.
 | POST | `/api/users/login/` | Authenticate a user |
 | POST | `/api/users/logout/` | Revoke a refresh token and log out the authenticated user |
 | POST | `/api/users/token/refresh/` | Refresh an access token |
-| POST | `/api/users/password-reset/` | Request password recovery instructions |
-| POST | `/api/users/password-reset/confirm/` | Confirm password recovery and set a new password |
 
 `{user_id}` is a UUID identifying the user.
 
@@ -452,143 +450,6 @@ The relevant Simple JWT settings are:
 | ACCESS_TOKEN_LIFETIME | 15 minutes | Defines the access token lifetime |
 | REFRESH_TOKEN_LIFETIME | 1 day | Defines the refresh token lifetime |
 
-
-## 2.12 Request Password Recovery
-
-### POST `/api/users/password-reset/`
-
-Requests password recovery instructions for a user account.
-
-**Gateway endpoint:**
-
-`POST /api/identity/users/password-reset/`
-
-The frontend must access this endpoint through the API Gateway.
-
-**Authentication:** Not required.
-
-**Request body:**
-
-```json
-{
-  "email": "user@example.com"
-}
-```
-
-**Fields:**
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| email | string | Yes | Email address associated with the account |
-
-**Successful response:**
-
-HTTP `200 OK`
-
-```json
-{
-  "success": true,
-  "message": "If the email exists, password recovery instructions will be sent."
-}
-```
-
-**Expected behavior:**
-
-- Validates the submitted email address.
-- Returns a generic response to reduce account enumeration risks.
-- Generates a password recovery token for an eligible account.
-- Sends recovery instructions using the configured email backend.
-- Applies request throttling by client IP and email address.
-- Records relevant security audit events.
-
-**Error responses:**
-
-| Status Code | Condition |
-|---|---|
-| 400 Bad Request | Invalid or missing email |
-| 429 Too Many Requests | Recovery request rate limit exceeded |
-| 500 Internal Server Error | Unexpected server error |
-
-**Rate limits:**
-
-| Scope | Limit |
-|---|---|
-| Client IP | 5 requests/hour |
-| Email address | 3 requests/hour |
-
-## 2.13 Confirm Password Recovery
-
-### POST `/api/users/password-reset/confirm/`
-
-Validates a recovery token and updates the associated user's password.
-
-**Gateway endpoint:**
-
-`POST /api/identity/users/password-reset/confirm/`
-
-**Authentication:** Not required.
-
-**Request body:**
-
-```json
-{
-  "token": "RECOVERY_TOKEN",
-  "new_password": "NewStrongPassword123!"
-}
-```
-
-**Fields:**
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| token | string | Yes | Password recovery token |
-| new_password | string | Yes | New password that must satisfy the configured validators |
-
-**Successful response:**
-
-HTTP `200 OK`
-
-```json
-{
-  "success": true,
-  "message": "Password reset successfully."
-}
-```
-
-**Expected behavior:**
-
-- Validates the recovery token.
-- Rejects invalid, expired, or previously consumed tokens.
-- Validates the new password.
-- Updates the password using Django's password hashing mechanism.
-- Marks the recovery token as used after a successful reset.
-- Records the successful password recovery audit event.
-
-**Error responses:**
-
-| Status Code | Condition |
-|---|---|
-| 400 Bad Request | Invalid, expired, or previously used token |
-| 400 Bad Request | Missing or invalid password |
-| 429 Too Many Requests | Confirmation rate limit exceeded |
-| 500 Internal Server Error | Unexpected server error |
-
-**Rate limits:**
-
-| Scope     | Limit            |
-|-----------|------------------|
-| Client IP | 10 requests/hour |
-
-**Security considerations:**
-
-- Recovery tokens are single-use.
-- Recovery tokens have an expiration time.
-- Passwords and raw recovery tokens must not be included in audit logs.
-- Recovery confirmation does not require an authenticated session.
-
-For implementation details, configuration requirements, and test results, see [HU-070 — Password Recovery](../user-stories/HU-070.md).
-
-
 ---
 
 # 3. RBAC API
@@ -823,8 +684,6 @@ The API uses standard HTTP status codes to communicate operation results.
 | 400 Bad Request | Invalid request data or validation error |
 | 401 Unauthorized | Authentication failed or credentials are invalid |
 | 404 Not Found | Requested resource does not exist or is unavailable |
-| 429 Too Many Requests | Request rejected due to rate limiting |
-| 500 Internal Server Error | Unexpected server error |
 
 The exact response status depends on the endpoint and operation.
 
@@ -900,8 +759,5 @@ The Identity Service currently provides:
 - User-role assignments.
 - Role-permission assignments.
 - Unified OpenAPI documentation.
-- Password recovery requests and confirmation.
-- Single-use password recovery token validation.
-- Password recovery rate limiting and security auditing.
 
 The API contract described here reflects the implemented Users and RBAC endpoints.
