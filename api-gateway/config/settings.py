@@ -153,6 +153,15 @@ MAILERS = {
 DATA_UPLOAD_MAX_MEMORY_SIZE = 25 * 1024 * 1024  # 25 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 
+# Unstructured Data service configuration
+UNSTRUCTURED_DATA_SERVICE_URL = os.getenv(
+    "UNSTRUCTURED_DATA_SERVICE_URL", ""
+)
+
+UNSTRUCTURED_DATA_SERVICE_TOKEN = os.getenv(
+    "UNSTRUCTURED_DATA_SERVICE_TOKEN", ""
+)
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'gateway.authentication.GatewayJWTAuthentication',
