@@ -3,10 +3,10 @@
   "use strict";
 
   var API_BASE =
-    global.KORA_API_BASE_URL || "http://localhost:8080";
+    global.KORA_API_BASE_URL || "http://localhost:8000";
 
   var AI_BASE =
-    global.KORA_AI_BASE_URL || "http://localhost:8000";
+    global.KORA_AI_BASE_URL || "http://localhost:8004";
 
   global.KoraConfig = {
     API_BASE: API_BASE.replace(/\/$/, ""),
