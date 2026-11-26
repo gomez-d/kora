@@ -1,8 +1,15 @@
 from django.urls import path
 from users.views import (
     HealthCheckView,
+    UserView,
     UserRegistrationView,
-    UserDetailView
+    UserDetailView,
+    UserUpdateView,
+    UserLoginView,
+    UserLogoutView,
+    UserTokenRefreshView,
+    PasswordResetRequestView,
+    PasswordResetConfirmView,
 )
 
 urlpatterns = [
@@ -10,6 +17,11 @@ urlpatterns = [
         'health/',
         HealthCheckView.as_view(),
         name='health-check'
+    ),
+    path(
+        'users/',
+        UserView.as_view(),
+        name='users'
     ),
     path(
         'register/',
@@ -20,5 +32,35 @@ urlpatterns = [
         'users/<uuid:user_id>/',
         UserDetailView.as_view(),
         name="user-detail"
-    )
+    ),
+    path(
+        'users/<uuid:user_id>/update/',
+        UserUpdateView.as_view(),
+        name='user-update'
+    ),
+    path(
+        'login/',
+        UserLoginView.as_view(),
+        name="user-login"
+    ),
+    path(
+        'logout/',
+        UserLogoutView.as_view(),
+        name="user-logout"
+    ),
+    path(
+        'token/refresh/',
+        UserTokenRefreshView.as_view(),
+        name='token-refresh'
+    ),
+    path(
+        "password-reset/",
+        PasswordResetRequestView.as_view(),
+        name="password-reset-request",
+    ),
+    path(
+        "password-reset/confirm/",
+        PasswordResetConfirmView.as_view(),
+        name="password-reset-confirm",
+    ),
 ]

@@ -12,9 +12,10 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 import os
 
+from datetime import timedelta
 from pathlib import Path
-from urllib.parse import urlparse
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,21 +23,36 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load .env
 load_dotenv(BASE_DIR / '.env')
 
-IDENTITY_SERVICE_URL = os.getenv(
-    "IDENTITY_SERVICE_URL",
-    "http://localhost:8001"
-)
+JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY")
 
+if not JWT_SIGNING_KEY:
+    raise ImproperlyConfigured(
+        "JWT_SIGNING_KEY is not configured."
+    )
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-hqab6mf34an#4*-gd&zor9rf*_$udb$5=t%#o2vx00i0$!dx)8'
+# Security settings
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise ImproperlyConfigured("SECRET_KEY is not configured")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes", "on")
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if host.strip()
+]
+
+IDENTITY_SERVICE_URL = os.getenv("IDENTITY_SERVICE_URL")
+if not IDENTITY_SERVICE_URL:
+    raise ImproperlyConfigured("IDENTITY_SERVICE_URL is not configured.")
+
+UNSTRUCTURED_DATA_SERVICE_URL = os.getenv("UNSTRUCTURED_DATA_SERVICE_URL")
+if not UNSTRUCTURED_DATA_SERVICE_URL:
+    raise ImproperlyConfigured(
+        "UNSTRUCTURED_DATA_SERVICE_URL is not configured.")
 
 
 # Application definition
@@ -82,37 +98,59 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# Django REST Framework
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "config.exceptions.custom_exception_handler",
+}
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-database_url = os.getenv('DATABASE_URL')
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5432")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
 
-if database_url:
-    parse_database_url = urlparse(database_url)
+# Read database password form Docker Secret or Local environment
+DB_PASSWORD_FILE = os.getenv(
+    "DB_PASSWORD_FILE",
+    "/run/secrets/business_password"
+)
 
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': parse_database_url.path.lstrip("/"),
-            'USER': parse_database_url.username,
-            'PASSWORD': parse_database_url.password,
-            'HOST': parse_database_url.hostname,
-            'PORT': parse_database_url.port or 5432,
-        }
-    }
+if os.path.isfile(DB_PASSWORD_FILE):
+    with open(DB_PASSWORD_FILE, encoding="utf-8") as secret_file:
+        DB_PASSWORD = secret_file.read().strip()
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': '',
-            'USER': '',
-            'PASSWORD': '',
-            'HOST': '',
-            'PORT': '5432',
-        }
-    }
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
 
+# Validate required database configuration
+required_db_vars = {
+    "DB_NAME": DB_NAME,
+    "DB_USER": DB_USER,
+    "DB_PASSWORD": DB_PASSWORD
+}
+
+missing_db_vars = [
+    name
+    for name,value in required_db_vars.items()
+    if not value
+]
+
+if missing_db_vars:
+    raise ImproperlyConfigured(
+        f"Missing database configuration: {', '.join(missing_db_vars)}"
+    )
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": DB_NAME,
+        "USER": DB_USER,
+        "PASSWORD": DB_PASSWORD,
+        "HOST": DB_HOST,
+        "PORT": DB_PORT
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
@@ -159,3 +197,13 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY")
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "nutrition.authentication.KoraJWTAuthentication",
+    ],
+    "EXCEPTION_HANDLER": "config.exceptions.kora_exception_handler",
+}
+

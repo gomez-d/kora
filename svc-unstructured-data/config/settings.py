@@ -16,6 +16,7 @@ import os
 
 from pathlib import Path
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,13 +27,30 @@ load_dotenv(BASE_DIR / '.env')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_w(^qe&ztbl&(x0ahq$-#(tn7@w%v+&^$d(h1e4$(^ad2hp%%+'
+# Security settings
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if not SECRET_KEY:
+    raise ImproperlyConfigured("SECRET_KEY is not configured.")
 
-ALLOWED_HOSTS = []
+DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes", "on")
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if host.strip()
+]
+
+
+#Internal service authentication
+UNSTRUCTURED_DATA_SERVICE_TOKEN = os.getenv(
+    "UNSTRUCTURED_DATA_SERVICE_TOKEN"
+)
+
+if not UNSTRUCTURED_DATA_SERVICE_TOKEN:
+    raise ImproperlyConfigured(
+        "UNSTRUCTURED_DATA_SERVICE_TOKEN is not configured."
+    )
 
 
 # Application definition
@@ -134,4 +152,3 @@ REST_FRAMEWORK = {
     'UNAUTHENTICATED_USER': None,
     'UNAUTHENTICATED_TOKEN': None,
 }
-

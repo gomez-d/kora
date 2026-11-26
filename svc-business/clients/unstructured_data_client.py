@@ -1,5 +1,6 @@
-import os
 import requests
+
+from django.conf import settings
 from requests.exceptions import (
     ConnectionError,
     RequestException,
@@ -7,9 +8,8 @@ from requests.exceptions import (
 )
 
 # Base URL of the unstructured data microservice.
-UNSTRUCTURED_DATA_SERVICE_URL = os.getenv(
-    'UNSTRUCTURED_DATA_SERVICE_URL'
-)
+UNSTRUCTURED_DATA_SERVICE_URL = settings.UNSTRUCTURED_DATA_SERVICE_URL
+
 
 def _handle_response(response):
     """
@@ -36,6 +36,7 @@ def _handle_response(response):
         'status_code': response.status_code,
         'data': response_data
     }
+
 
 def create_document(document_type, document):
     """
@@ -65,7 +66,7 @@ def create_document(document_type, document):
             'success': False,
             'error': 'timeout'
         }
-    
+
     except ConnectionError:
         return {
             'success': False,
@@ -78,6 +79,7 @@ def create_document(document_type, document):
             'error': 'communication_error',
         }
 
+
 def get_documents(document_type):
     """
     Retrieve all documents from a supported MongoDB collection.
@@ -88,7 +90,7 @@ def get_documents(document_type):
         f'/api/documents/{document_type}'
     )
 
-    try: 
+    try:
         response = requests.get(
             url,
             timeout=5,
@@ -113,6 +115,7 @@ def get_documents(document_type):
             'success': False,
             'error': 'communication_error',
         }
+
 
 def get_document(document_type, document_id):
     """
@@ -141,7 +144,7 @@ def get_document(document_type, document_id):
     except ConnectionError:
         return {
             'success': False,
-            'error':'service_unavailable',
+            'error': 'service_unavailable',
         }
 
     except RequestException:

@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="css/formulario.css">
 
     <link rel="icon" type="image/svg+xml" href="images/k.svg">
-    <link rel="manifest" href="site.webmanifest">
 </head>
 
 <body id="top">
@@ -121,11 +120,19 @@
                                         </label>
                                     </div>
 
+                                    <div
+                                        id="loginMessage"
+                                        class="mensaje-formulario"
+                                        role="alert"
+                                        aria-live="polite"
+                                    ></div>
+
                                     <button
                                         type="submit"
+                                        id="loginButton"
                                         class="btn btn--primary btn--large boton-formulario"
                                     >
-                                        Entrar a Kora
+                                        <span class="button-text">Entrar a Kora</span>
                                     </button>
 
                                 </fieldset>

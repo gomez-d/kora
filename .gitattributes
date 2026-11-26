@@ -1,0 +1,5 @@
+# Preserve Unix line endings for shell scripts.
+*.sh text eol=lf
+
+# Preserve consistent line endings for Python dependencies.
+**/requirements.txt text eol=lf

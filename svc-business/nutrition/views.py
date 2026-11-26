@@ -1,15 +1,20 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+)
 
 from django.db import IntegrityError
 
-from .models import (
+from nutrition.models import (
     NutritionalProfile,
     Food,
     FoodCategory,
     ConsumptionRecord
 )
-from .serializers import (
+from nutrition.serializers import (
     NutritionalProfileSerializer,
     FoodCategorySerializer,
     FoodSerializer,
@@ -17,14 +22,29 @@ from .serializers import (
     ConsumptionRecordSerializer,
     ConsumptionHistorySerializer
 )
-from .pagination import ConsumptionPagination
-from .clients.identity import user_exists
+from nutrition.pagination import ConsumptionPagination
+from clients.identity_client import user_exists
+
+from .permissions import (
+    HasBusinessPermission,
+    HasSelfBusinessPermission,
+    HasOwnedBusinessPermission
+)
 
 from datetime import date
 from uuid import UUID
 
 
 class HealthCheckView(APIView):
+    """
+    Expose the Business service health status without requiring
+    authentication.
+    """
+
+    # Health checks must remain publicly accessible so infrastructure
+    # components can verify service availability without a user session.
+    permission_classes = [AllowAny]
+
     def get(self, request):
         return Response({
             "status": "ok",
@@ -33,22 +53,30 @@ class HealthCheckView(APIView):
 
 
 class NutritionalProfileView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+        HasSelfBusinessPermission
+    ]
+
+    required_permissions = {
+        "GET": "nutritional_profiles.read_self",
+        "POST": "nutritional_profiles.create_self",
+    }
+
     def get(self, request):
         user_id = request.query_params.get("user_id")
 
         if not user_id:
-            return Response(
-                {"detail": "The user_id query parameter is required."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id query parameter is required."
+            })
 
         try:
             user_uuid = UUID(user_id)
         except (ValueError, TypeError):
-            return Response(
-                {"detail": "The user_id must be a valid UUID."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id must be a valid UUID.",
+            })
 
         profiles = NutritionalProfile.objects.filter(user_id=user_uuid)
         serializer = NutritionalProfileSerializer(profiles, many=True)
@@ -62,26 +90,23 @@ class NutritionalProfileView(APIView):
         user_id = request.data.get("user_id")
 
         if not user_id:
-            return Response(
-                {"detail": "The user_id field is required."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id field is required.",
+            })
 
         try:
             user_uuid = UUID(str(user_id))
         except (ValueError, TypeError, AttributeError):
-            return Response(
-                {"detail": "The user_id field must be a valid UUID."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id field must be a valid UUID.",
+            })
 
         exists = user_exists(user_uuid)
 
         if exists is False:
-            return Response(
-                {"detail": "The specified user does not exist."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The specified user does not exist.",
+            })
 
         if exists is None:
             return Response(
@@ -91,11 +116,84 @@ class NutritionalProfileView(APIView):
 
         serializer = NutritionalProfileSerializer(data=request.data)
 
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user_id=user_uuid)
+
+        return Response(
+            serializer.data,
+            status=201
+        )
+
+class NutritionalProfileDetailView(APIView):
+    """
+    Manage an existing nutritional profile while enforcing
+    permission and resource ownership rules.
+    """
+
+    # Require authentication and validate the permission associated
+    # with the requested operation.
+    permission_classes = [
+        IsAuthenticated,
+        HasOwnedBusinessPermission
+    ]
+
+    # Updating a nutritional profile is allowed only through the
+    # self-scoped update permission.
+    required_permissions = {
+        "PATCH": "nutritional_profiles.update_self",
+    }
+
+    def patch(self, request, profile_id):
+        """
+        Partially update an existing nutritional profile only when
+        the authenticated identity owns the stored resource.
+        """
+
+        # Retrieve the profile using its own resource identifier.
+        # Ownership is not determined from data supplied by the client.
+        try:
+            profile = NutritionalProfile.objects.get(id=profile_id)
+        except NutritionalProfile.DoesNotExist:
+            return Response(
+                {"detail": "Nutritional profile not found."},
+                status=404
+            )
+
+        # Execute the object-level permission check.
+        # HasOwnedBusinessPermission compares profile.user_id stored
+        # in PostgreSQL against the trusted user_id from the JWT.
+        self.check_object_permissions(
+            request,
+            profile
+        )
+
+        # The owner of the resource must remain immutable.
+        # A client must not be able to transfer a nutritional profile
+        # to another user by changing user_id through PATCH.
+        if "user_id" in request.data:
+            return Response(
+                {
+                    "detail": (
+                        "The user_id field cannot be modified."
+                    )
+                },
+                status=400
+            )
+
+        # Perform a partial update after authentication,
+        # permission validation and ownership validation succeed.
+        serializer = NutritionalProfileSerializer(
+            profile,
+            data=request.data,
+            partial=True
+        )
+
         if serializer.is_valid():
-            serializer.save(user_id=user_uuid)
+            serializer.save()
+
             return Response(
                 serializer.data,
-                status=201
+                status=200
             )
 
         return Response(
@@ -103,8 +201,17 @@ class NutritionalProfileView(APIView):
             status=400
         )
 
-
 class FoodCategoryView(APIView):
+    permission_classes = [
+        IsAuthenticated, 
+        HasBusinessPermission
+    ]
+
+    required_permissions = {
+        "GET": "food_categories.read",
+        "POST": "food_categories.create",
+    }
+
     def get(self, request):
         categories = FoodCategory.objects.all().order_by("name")
         serializer = FoodCategorySerializer(categories, many=True)
@@ -121,13 +228,23 @@ class FoodCategoryView(APIView):
                 status=201
             )
 
-        return Response(
-            serializer.errors,
-            status=400
-        )
-
-
 class FoodView(APIView):
+
+    # Require a valid authenticated identity before checking
+    # the permissions associated with food catalog operations.
+    permission_classes = [
+        IsAuthenticated,
+        HasBusinessPermission
+    ]
+
+    # Define the permission required for each supported HTTP method.
+    # Reading the catalog is available to authorized users,
+    # while creating foods is restricted to administrative permissions.
+    required_permissions = {
+        "GET": "foods.read",
+        "POST": "foods.create",
+    }
+
     def get(self, request):
         foods = Food.objects.select_related(
             "category"
@@ -169,21 +286,33 @@ class FoodView(APIView):
             data=request.data
         )
 
-        if serializer.is_valid():
-            serializer.save()
-
-            return Response(
-                serializer.data,
-                status=201
-            )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
         return Response(
-            serializer.errors,
-            status=400
+            serializer.data,
+            status=201
         )
 
 
 class FoodDetailView(APIView):
+
+    # Require an authenticated identity before evaluating
+    # permissions for individual food resources.
+    permission_classes = [
+        IsAuthenticated,
+        HasBusinessPermission
+    ]
+
+    # Associate each HTTP operation with its corresponding
+    # RBAC permission.
+    required_permissions = {
+        "GET": "foods.read",
+        "PUT": "foods.update",
+        "PATCH": "foods.update",
+        "DELETE": "foods.delete",
+    }
+
     def get(self, request, food_id):
         try:
             food = Food.objects.select_related(
@@ -211,25 +340,20 @@ class FoodDetailView(APIView):
             data=request.data
         )
 
-        if serializer.is_valid():
-            serializer.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-            updated_food = Food.objects.select_related(
-                "category"
-            ).prefetch_related(
-                "nutrients"
-            ).get(id=food_id)
+        updated_food = Food.objects.select_related(
+            "category"
+        ).prefetch_related(
+            "nutrients"
+        ).get(id=food_id)
 
-            response_serializer = FoodReadSerializer(updated_food)
-
-            return Response(
-                response_serializer.data,
-                status=200
-            )
+        response_serializer = FoodReadSerializer(updated_food)
 
         return Response(
-            serializer.errors,
-            status=400
+            response_serializer.data,
+            status=200
         )
 
     def patch(self, request, food_id):
@@ -247,25 +371,20 @@ class FoodDetailView(APIView):
             partial=True
         )
 
-        if serializer.is_valid():
-            serializer.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-            updated_food = Food.objects.select_related(
-                "category"
-            ).prefetch_related(
-                "nutrients"
-            ).get(id=food_id)
+        updated_food = Food.objects.select_related(
+            "category"
+        ).prefetch_related(
+            "nutrients"
+        ).get(id=food_id)
 
-            response_serializer = FoodReadSerializer(updated_food)
-
-            return Response(
-                response_serializer.data,
-                status=200
-            )
+        response_serializer = FoodReadSerializer(updated_food)
 
         return Response(
-            serializer.errors,
-            status=400
+            response_serializer.data,
+            status=200
         )
 
     def delete(self, request, food_id):
@@ -294,6 +413,27 @@ class FoodDetailView(APIView):
 
 
 class ConsumptionRecordView(APIView):
+
+    # Require a valid authenticated identity before evaluating
+    # any business authorization rule.
+    permission_classes = [
+        IsAuthenticated,
+        HasSelfBusinessPermission
+    ]
+
+    # Define the specific permission required for each HTTP method.
+    #
+    # GET:
+    # The authenticated user may only read their own consumption history.
+    #
+    # POST:
+    # The authenticated user may only create consumption records
+    # associated with their own identity.
+    required_permissions = {
+        "GET": "consumptions.read_self",
+        "POST": "consumptions.create_self",
+    }
+
     def get(self, request):
         consumptions = ConsumptionRecord.objects.prefetch_related(
             "consumption_items__food"
@@ -302,18 +442,16 @@ class ConsumptionRecordView(APIView):
         user_id = request.query_params.get("user_id")
 
         if not user_id:
-            return Response(
-                {"detail": "The user_id parameter is required."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id parameter is required.",
+            })
 
         try:
             user_id = UUID(user_id)
         except ValueError:
-            return Response(
-                {"detail": "Invalid user_id format."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "Invalid user_id format.",
+            })
 
         consumptions = consumptions.filter(user_id=user_id)
 
@@ -333,16 +471,14 @@ class ConsumptionRecordView(APIView):
                     consumed_at__date__lte=end_date
                 )
         except ValueError:
-            return Response(
-                {"detail": "Dates must use YYYY-MM-DD format."},
-                status=400
-            )
+            raise ValidationError({
+                "date": "Dates must use YYYY-MM-DD format.",
+            })
 
         if start_date and end_date and start_date > end_date:
-            return Response(
-                {"detail": "start_date cannot be after end_date."},
-                status=400
-            )
+            raise ValidationError({
+                "date_range": "start_date cannot be after end_date.",
+            })
 
         ordering = request.query_params.get(
             "ordering",
@@ -374,26 +510,23 @@ class ConsumptionRecordView(APIView):
         user_id = request.data.get("user_id")
 
         if not user_id:
-            return Response(
-                {"detail": "The user_id field is required."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id field is required.",
+            })
 
         try:
             user_uuid = UUID(str(user_id))
         except (ValueError, TypeError, AttributeError):
-            return Response(
-                {"detail": "The user_id field must be a valid UUID."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The user_id field must be a valid UUID.",
+            })
 
         exists = user_exists(user_uuid)
 
         if exists is False:
-            return Response(
-                {"detail": "The specified user does not exist."},
-                status=400
-            )
+            raise ValidationError({
+                "user_id": "The specified user does not exist.",
+            })
 
         if exists is None:
             return Response(
@@ -403,12 +536,86 @@ class ConsumptionRecordView(APIView):
 
         serializer = ConsumptionRecordSerializer(data=request.data)
 
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user_id=user_uuid)
+
+        return Response(
+            serializer.data,
+            status=201
+        )
+
+class ConsumptionRecordDetailView(APIView):
+    """
+    Manage an existing consumption record while enforcing
+    permission and resource ownership rules.
+    """
+
+    # Require authentication and verify the permission associated
+    # with the requested operation.
+    permission_classes = [
+        IsAuthenticated,
+        HasOwnedBusinessPermission
+    ]
+
+    # A user may update only consumption records that belong
+    # to their own authenticated identity.
+    required_permissions = {
+        "PATCH": "consumptions.update_self",
+    }
+
+    def patch(self, request, consumption_id):
+        """
+        Partially update an existing consumption record only when
+        the authenticated identity owns the stored resource.
+        """
+
+        # Retrieve the consumption record using its resource identifier.
+        # Ownership is determined from the persisted resource and not
+        # from a user_id supplied by the client.
+        try:
+            consumption = ConsumptionRecord.objects.get(
+                id=consumption_id
+            )
+        except ConsumptionRecord.DoesNotExist:
+            return Response(
+                {"detail": "Consumption record not found."},
+                status=404
+            )
+
+        # Execute the object-level permission check.
+        # HasOwnedBusinessPermission compares consumption.user_id
+        # stored in PostgreSQL with the trusted user_id from the JWT.
+        self.check_object_permissions(
+            request,
+            consumption
+        )
+
+        # Resource ownership must remain immutable.
+        # A client cannot transfer a consumption record to another user.
+        if "user_id" in request.data:
+            return Response(
+                {
+                    "detail": (
+                        "The user_id field cannot be modified."
+                    )
+                },
+                status=400
+            )
+
+        # Perform a partial update only after authentication,
+        # permission validation and ownership validation succeed.
+        serializer = ConsumptionRecordSerializer(
+            consumption,
+            data=request.data,
+            partial=True
+        )
+
         if serializer.is_valid():
-            serializer.save(user_id=user_uuid)
+            serializer.save()
 
             return Response(
                 serializer.data,
-                status=201
+                status=200
             )
 
         return Response(

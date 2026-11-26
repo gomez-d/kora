@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.schemas import get_schema_view
 
-from users.openapi import IdentitySchemaGenerator
+from api_docs.openapi import IdentitySchemaGenerator
 
 schema_view = get_schema_view(
     title='Kora Identity API',
@@ -30,5 +30,6 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include('users.urls')),
+    path('api/rbac/', include('rbac.urls')),
     path('api/schema/', schema_view, name='openapi-schema'),
 ]

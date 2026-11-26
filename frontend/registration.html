@@ -17,7 +17,6 @@
     <link rel="stylesheet" href="css/formulario.css">
 
     <link rel="icon" type="image/svg+xml" href="images/k.svg">
-    <link rel="manifest" href="site.webmanifest">
 </head>
 
 <body id="top">
@@ -89,16 +88,29 @@
                                     </div>
 
                                     <div class="campo-formulario">
-                                        <label for="usernameInput">Nombre de usuario</label>
+                                        <label for="dateOfBirthInput">
+                                            Fecha de nacimiento
+                                        </label>
                                         <input
-                                            name="username"
-                                            type="text"
-                                            id="usernameInput"
-                                            placeholder="Ej. alondra123"
-                                            autocomplete="username"
+                                            name="date_of_birth"
+                                            type="date"
+                                            id="dateOfBirthInput"
+                                            autocomplete="bday"
                                             required
                                         >
                                     </div>
+
+<div class="campo-formulario">
+    <label for="dateOfBirthInput">Fecha de nacimiento</label>
+    <input
+        name="date_of_birth"
+        type="date"
+        id="dateOfBirthInput"
+        autocomplete="bday"
+        required
+    >
+</div>
+
 
                                     <div class="campo-formulario">
                                         <label for="emailInput">Correo electrónico</label>
@@ -154,12 +166,19 @@
                                         </label>
                                     </div>
 
+                                    <div
+                                        id="registrationMessage"
+                                        class="mensaje-formulario"
+                                        role="alert"
+                                        aria-live="polite"
+                                    ></div>
+
                                     <button
                                         type="submit"
+                                        id="registrationButton"
                                         class="btn btn--primary btn--large boton-formulario"
-                                        
                                     >
-                                        Crear cuenta
+                                        <span class="button-text">Crear cuenta</span>
                                     </button>
 
                                 </fieldset>

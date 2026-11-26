@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="../css/header-kora.css">
     <link rel="stylesheet" href="../css/admin.css">
     <link rel="icon" type="image/png" sizes="32x32" href="../images/k.svg">
+<style>
+    html {
+        visibility: hidden;
+    }
+</style> 
 </head>
 <body>
      <header class="kora-header">
@@ -158,5 +163,11 @@
             document.getElementById('kpi-audit').textContent = '12';
         })();
     </script>
+<script src="../js/kora-config.js"></script>
+<script src="../js/kora-api.js"></script>
+<script src="../js/kora-session.js"></script>
+<script>
+    KoraSession.requireAuth();
+</script>
 </body>
 </html>

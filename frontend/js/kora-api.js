@@ -6,99 +6,312 @@
     return global.KoraConfig || {
       API_BASE: "http://localhost:8000",
       endpoints: {},
-      storageKeys: { user: "kora_user", token: "kora_token" }
+      storageKeys: {
+        user: "kora_user",
+        accessToken: "kora_access_token",
+        refreshToken: "kora_refresh_token"
+      }
     };
   }
 
   function url(path) {
     if (!path) return cfg().API_BASE;
     if (/^https?:\/\//i.test(path)) return path;
-    return cfg().API_BASE + (path.charAt(0) === "/" ? path : "/" + path);
+
+    return cfg().API_BASE +
+      (path.charAt(0) === "/" ? path : "/" + path);
   }
 
   function getToken() {
-    try {
-      return localStorage.getItem(cfg().storageKeys.token) || "";
-    } catch (e) {
-      return "";
-    }
+    return sessionStorage.getItem(cfg().storageKeys.accessToken) || "";
+  }
+
+  function getRefreshToken() {
+    return sessionStorage.getItem(cfg().storageKeys.refreshToken) || "";
   }
 
   function getUser() {
     try {
-      var raw = localStorage.getItem(cfg().storageKeys.user);
+      var raw = sessionStorage.getItem(cfg().storageKeys.user);
       return raw ? JSON.parse(raw) : null;
-    } catch (e) {
+    } catch (error) {
       return null;
     }
   }
 
-  function setSession(user, token) {
-    try {
-      if (user) localStorage.setItem(cfg().storageKeys.user, JSON.stringify(user));
-      if (token) localStorage.setItem(cfg().storageKeys.token, token);
-    } catch (e) {}
+  function setSession(user, accessToken, refreshToken) {
+    if (user) {
+      sessionStorage.setItem(
+        cfg().storageKeys.user,
+        JSON.stringify(user)
+      );
+    }
+
+    if (accessToken) {
+      sessionStorage.setItem(
+        cfg().storageKeys.accessToken,
+        accessToken
+      );
+    }
+
+    if (refreshToken) {
+      sessionStorage.setItem(
+        cfg().storageKeys.refreshToken,
+        refreshToken
+      );
+    }
   }
 
   function clearSession() {
+    sessionStorage.removeItem(cfg().storageKeys.user);
+    sessionStorage.removeItem(cfg().storageKeys.accessToken);
+    sessionStorage.removeItem(cfg().storageKeys.refreshToken);
+  }
+
+  var refreshPromise = null;
+
+  async function refreshSession() {
+    if (refreshPromise) {
+      return refreshPromise;
+    }
+
+    var refreshToken = getRefreshToken();
+
+    if (!refreshToken) {
+      clearSession();
+      throw new Error("No existe refresh token.");
+    }
+
+    refreshPromise = (async function () {
+      try {
+        var response = await fetch(url(cfg().endpoints.refresh), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            refresh: refreshToken
+          })
+        });
+
+        var data = await response.json().catch(function () {
+          return {};
+        });
+
+        if (!response.ok || !data.access) {
+          throw new Error("No se pudo renovar la sesión.");
+        }
+
+        setSession(
+          getUser(),
+          data.access,
+          data.refresh || refreshToken
+        );
+
+        return data.access;
+
+      } catch (error) {
+        clearSession();
+        throw error;
+
+      } finally {
+        refreshPromise = null;
+      }
+    })();
+
+    return refreshPromise;
+  }
+
+  function isAccessTokenExpired() {
+    var token = getToken();
+
+    if (!token) return true;
+
     try {
-      localStorage.removeItem(cfg().storageKeys.user);
-      localStorage.removeItem(cfg().storageKeys.token);
-    } catch (e) { }
+      var payload = JSON.parse(
+        atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+      );
+
+      return payload.exp * 1000 <= Date.now() + 30000;
+    } catch (error) {
+      return true;
+    }
+  }
+
+  async function ensureAccessToken() {
+    if (!getRefreshToken()) {
+      return false;
+    }
+
+    if (!getToken() || isAccessTokenExpired()) {
+      await refreshSession();
+    }
+
+    return Boolean(getToken());
+  }
+
+  function getSafeErrorMessage(status, data) {
+    if (data && (data.message || data.error || data.detail)) {
+      return data.message || data.error || data.detail;
+    }
+
+    if (status === 400) return "Los datos proporcionados no son válidos.";
+    if (status === 401) return "Correo o contraseña incorrectos.";
+    if (status === 403) return "No fue posible completar la operación.";
+    if (status === 404) return "No se pudo completar la solicitud.";
+    if (status === 429) return "Demasiados intentos. Inténtalo nuevamente más tarde.";
+    if (status >= 500) return "El servicio no está disponible temporalmente. Inténtalo nuevamente más tarde.";
+
+    return "Ocurrió un error inesperado. Inténtalo nuevamente.";
   }
 
   async function request(path, options) {
     options = options || {};
+
     var headers = Object.assign({}, options.headers || {});
-    var token = getToken();
-    if (token && !headers.Authorization) {
-      headers.Authorization = "Bearer " + token;
-    }
+    var requestOptions = Object.assign({}, options);
+
+    var skipRefresh = options.skipRefresh === true;
+    var skipAuth = options.skipAuth === true;
+
+    delete requestOptions.skipRefresh;
+    delete requestOptions.skipAuth;
+
     if (options.json !== undefined) {
       headers["Content-Type"] = "application/json";
-      options.body = JSON.stringify(options.json);
-      delete options.json;
+      requestOptions.body = JSON.stringify(options.json);
+      delete requestOptions.json;
     }
-    var res = await fetch(url(path), Object.assign({}, options, { headers: headers }));
+
+    var token = getToken();
+
+    if (skipAuth) {
+      delete headers.Authorization;
+    } else if (token  &&  !headers.Authorization) {
+      headers.Authorization = "Bearer " + token;
+    }
+
+    requestOptions.headers = headers;
+
+    var response;
+
+    try {
+      response = await fetch(url(path), requestOptions);
+    } catch (error) {
+      var connectionError = new Error(
+        "No se pudo conectar con el servicio. Verifica tu conexión e inténtalo nuevamente."
+      );
+
+      connectionError.code = "connection_error";
+      throw connectionError;
+    }
+
+    if (response.status === 401 && !skipAuth && !skipRefresh && getRefreshToken()) {
+      try {
+        var newToken = await refreshSession();
+
+        headers.Authorization = "Bearer " + newToken;
+        requestOptions.headers = headers;
+
+        response = await fetch(url(path), requestOptions);
+
+      } catch (error) {
+        clearSession();
+        throw error;
+      }
+    }
+
+    var text = await response.text();
     var data = null;
-    var text = await res.text();
+
     if (text) {
       try {
         data = JSON.parse(text);
-      } catch (e) {
+      } catch (error) {
         data = { raw: text };
       }
     }
-    if (!res.ok) {
-      var err = new Error((data && (data.message || data.error || data.detail)) || res.statusText || "Error de red");
-      err.status = res.status;
+
+    if (!response.ok) {
+      var err = new Error(getSafeErrorMessage(response.status, data));
+      err.status = response.status;
       err.data = data;
       throw err;
     }
+
     return data;
   }
 
-  async function registerUser(payload) {
-  
-    return request(cfg().endpoints.register, {
+  async function logout() {
+    var refreshToken = getRefreshToken();
+
+    try {
+      if (refreshToken) {
+        await request(cfg().endpoints.logout, {
+          method: "POST",
+          json: {
+            refresh: refreshToken
+          },
+          skipRefresh: true
+        });
+      }
+    } finally {
+      clearSession();
+    }
+  }
+
+  /**
+   *  Request password recovery instructions.
+   */
+
+  async function requestPasswordReset(email) {
+    return request(cfg().endpoints.passwordResetRequest, {
       method: "POST",
-      json: payload
+      skipAuth: true,
+      skipRefresh: true,
+      json: {
+        email: email
+      }
     });
   }
 
-  async function loginUser(emailOrUsername, password) {
-    var loginPath = "/api/identity/users/login/";
-    try {
-      return await request(loginPath, {
-        method: "POST",
-        json: { username: emailOrUsername, email: emailOrUsername, password: password }
-      });
-    } catch (e) {
-      if (e.status === 404) {
-        e.message = "El inicio de sesión aún no está disponible en el backend (falta endpoint de login). Puedes usar el registro.";
+  /**
+   *  Confirm password recovery using a valid token.
+   */
+
+  async function confirmPasswordReset(token, newPassword) {
+    return request(cfg().endpoints.passwordResetConfirm, {
+      method: "POST",
+      skipAuth: true,
+      skipRefresh: true,
+      json: {
+        token: token,
+        new_password: newPassword
       }
-      throw e;
-    }
+    });
+  }
+
+  async function registerUser(payload) {
+    return request(cfg().endpoints.register, {
+      method: "POST",
+      json: payload,
+      skipRefresh: true
+    });
+  }
+
+  async function loginUser(email, password) {
+    return request(cfg().endpoints.login, {
+      method: "POST",
+      json: {
+        email: email,
+        password: password
+      },
+      skipRefresh: true
+    });
+  }
+
+  async function refreshAccessToken() {
+    return refreshSession();
   }
 
   async function listFoods() {
@@ -106,11 +319,16 @@
   }
 
   async function createFood(payload) {
-    return request(cfg().endpoints.foods, { method: "POST", json: payload });
+    return request(cfg().endpoints.foods, {
+      method: "POST",
+      json: payload
+    });
   }
 
   async function listNutritionalProfiles() {
-    return request(cfg().endpoints.nutritionalProfiles, { method: "GET" });
+    return request(cfg().endpoints.nutritionalProfiles, {
+      method: "GET"
+    });
   }
 
   async function createNutritionalProfile(payload) {
@@ -121,80 +339,92 @@
   }
 
   async function processLlm(prompt) {
-    var base = cfg().AI_BASE;
-    var res = await fetch(base + cfg().endpoints.llmProcess, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "llm", prompt: prompt })
+    var res = await fetch(
+      cfg().AI_BASE + cfg().endpoints.llmProcess,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "llm", prompt: prompt })
+      }
+    );
+
+    var data = await res.json().catch(function () {
+      return {};
     });
-    var data = await res.json().catch(function () { return {}; });
+
     if (!res.ok) {
       var err = new Error(data.error || data.detail || "Error LLM");
       err.status = res.status;
       err.data = data;
       throw err;
     }
+
     return data;
   }
 
   async function analyzeVision(file) {
-    var base = cfg().AI_BASE;
     var form = new FormData();
     form.append("image", file);
-    var res = await fetch(base + cfg().endpoints.visionAnalyze, {
-      method: "POST",
-      body: form
+
+    var res = await fetch(
+      cfg().AI_BASE + cfg().endpoints.visionAnalyze,
+      {
+        method: "POST",
+        body: form
+      }
+    );
+
+    var data = await res.json().catch(function () {
+      return {};
     });
-    var data = await res.json().catch(function () { return {}; });
+
     if (!res.ok) {
       var err = new Error(data.error || data.detail || "Error visión");
       err.status = res.status;
       err.data = data;
       throw err;
     }
+
     return data;
   }
-  
+
   async function listFoodCategories() {
-      return request(cfg().endpoints.foodCategories, {
-          method: "GET"
-      });
+    return request(cfg().endpoints.foodCategories, {
+      method: "GET"
+    });
   }
 
   async function createFoodCategory(payload) {
-      return request(cfg().endpoints.foodCategories, {
-          method: "POST",
-          json: payload
-      });
-  }
-  async function createFood(payload) {
-      return request(cfg().endpoints.foods, {
-          method: "POST",
-          json: payload
-      });
+    return request(cfg().endpoints.foodCategories, {
+      method: "POST",
+      json: payload
+    });
   }
 
-  
   global.KoraApi = {
-      url: url,
-      request: request,
-      getToken: getToken,
-      getUser: getUser,
-      setSession: setSession,
-      clearSession: clearSession,
-      registerUser: registerUser,
-      loginUser: loginUser,
-
-      listFoods: listFoods,
-      createFood: createFood,
-      createFoodCategory: createFoodCategory,
-        listFoodCategories,
-      listNutritionalProfiles: listNutritionalProfiles,
-      createNutritionalProfile: createNutritionalProfile,
-      processLlm: processLlm,
-      analyzeVision: analyzeVision
+    url: url,
+    request: request,
+    getToken: getToken,
+    getRefreshToken: getRefreshToken,
+    getUser: getUser,
+    setSession: setSession,
+    clearSession: clearSession,
+    registerUser: registerUser,
+    loginUser: loginUser,
+    requestPasswordReset: requestPasswordReset,
+    confirmPasswordReset: confirmPasswordReset,
+    refreshAccessToken: refreshAccessToken,
+    refreshSession: refreshSession,
+    ensureAccessToken: ensureAccessToken,
+    logout: logout,
+    listFoods: listFoods,
+    createFood: createFood,
+    listFoodCategories: listFoodCategories,
+    createFoodCategory: createFoodCategory,
+    listNutritionalProfiles: listNutritionalProfiles,
+    createNutritionalProfile: createNutritionalProfile,
+    processLlm: processLlm,
+    analyzeVision: analyzeVision
   };
 
 })(window);
-
-
