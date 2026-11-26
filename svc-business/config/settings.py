@@ -23,16 +23,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Load .env
 load_dotenv(BASE_DIR / '.env')
 
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
+
+# Security settings
 JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY")
 
 if not JWT_SIGNING_KEY:
     raise ImproperlyConfigured(
         "JWT_SIGNING_KEY is not configured."
     )
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# Security settings
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     raise ImproperlyConfigured("SECRET_KEY is not configured")
@@ -53,6 +55,10 @@ UNSTRUCTURED_DATA_SERVICE_URL = os.getenv("UNSTRUCTURED_DATA_SERVICE_URL")
 if not UNSTRUCTURED_DATA_SERVICE_URL:
     raise ImproperlyConfigured(
         "UNSTRUCTURED_DATA_SERVICE_URL is not configured.")
+
+REDIS_URL = os.getenv("REDIS_URL")
+if not REDIS_URL:
+    raise ImproperlyConfigured("REDIS_URL is not configured.")
 
 
 # Application definition
@@ -132,7 +138,7 @@ required_db_vars = {
 
 missing_db_vars = [
     name
-    for name,value in required_db_vars.items()
+    for name, value in required_db_vars.items()
     if not value
 ]
 
@@ -198,12 +204,9 @@ MAILERS = {
     },
 }
 
-JWT_SIGNING_KEY = os.getenv("JWT_SIGNING_KEY")
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "nutrition.authentication.KoraJWTAuthentication",
     ],
     "EXCEPTION_HANDLER": "config.exceptions.kora_exception_handler",
 }
-
