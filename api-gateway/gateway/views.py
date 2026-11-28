@@ -44,7 +44,7 @@ def build_forward_headers(request):
     # Forward the client IP obtained from the trusted connection.
     client_ip = request.META.get("REMOTE_ADDR")
 
-    if client_ip: 
+    if client_ip:
         headers["X-Forwarded-For"] = client_ip
 
     return headers
@@ -69,7 +69,67 @@ class BusinessProxyView(APIView):
         self.args = args
         self.kwargs = kwargs
 
-        # Convert Django's request into a DRF Request.
+        content_type = request.headers.get("Content-Type", "")
+
+        # Handle multipart uploads without parsing or modifying
+        # the original request body.
+        if (
+            request.method == "POST"
+            and content_type.startswith("multipart/form-data")
+        ):
+            drf_request = self.initialize_request(
+                request, *args, **kwargs
+            )
+
+            self.request = drf_request
+            self.headers = self.default_response_headers
+
+            try:
+                self.initial(drf_request, *args, **kwargs)
+
+            except APIException as exc:
+                response = self.handle_exception(exc)
+
+                return self.finalize_response(
+                    drf_request,
+                    response,
+                    *args,
+                    **kwargs
+                )
+
+            path = kwargs["path"]
+
+            url = f"{settings.BUSINESS_SERVICE_URL}/api/{path}/"
+
+            try:
+                response = forward_request(
+                    method="POST",
+                    url=url,
+                    headers=build_forward_headers(drf_request),
+                    params=request.GET,
+                    data=request.body,
+                )
+
+            except requests.RequestException:
+                response = Response(
+                    {"error": "Business service is unavailable"},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+
+                return self.finalize_response(
+                    drf_request,
+                    response,
+                    *args,
+                    **kwargs
+                )
+
+            return HttpResponse(
+                response.content,
+                status=response.status_code,
+                content_type=response.headers.get("Content-Type")
+            )
+
+        # Preserve the existing behavior for JSON and other requests.
         request = self.initialize_request(request, *args, **kwargs)
         self.request = request
         self.headers = self.default_response_headers
@@ -90,7 +150,6 @@ class BusinessProxyView(APIView):
         params = request.query_params
         json = request.data
 
-        # Forward the incoming request to Business.
         try:
             response = forward_request(
                 method=method,

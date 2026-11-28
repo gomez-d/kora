@@ -60,6 +60,16 @@ REDIS_URL = os.getenv("REDIS_URL")
 if not REDIS_URL:
     raise ImproperlyConfigured("REDIS_URL is not configured.")
 
+# Temporary image
+AI_IMAGES_DIR = Path(
+    os.getenv("AI_IMAGES_DIR", "../tmp/kora-images")
+)
+
+if not AI_IMAGES_DIR.is_absolute():
+    AI_IMAGES_DIR = (BASE_DIR / AI_IMAGES_DIR).resolve()
+
+AI_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+
 
 # Application definition
 

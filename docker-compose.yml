@@ -97,6 +97,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    volumes:
+      - ai_images:/tmp/kora-images
     restart: unless-stopped
 
   svc-unstructured-data:
@@ -121,6 +123,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    volumes:
+      - ai_images:/tmp/kora-images
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
@@ -152,3 +156,4 @@ volumes:
   postgres_data:
   mongo_data:
   redis_data:
+  ai_images:

@@ -11,6 +11,16 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
+# Temporary image storage
+AI_IMAGES_DIR = Path(
+    os.getenv("AI_IMAGES_DIR", "../tmp/kora-images")
+)
+
+if not AI_IMAGES_DIR.is_absolute():
+    AI_IMAGES_DIR = (BASE_DIR / AI_IMAGES_DIR).resolve()
+
+AI_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+
 
 # Import routers after loading environment variables
 def load_routers():
