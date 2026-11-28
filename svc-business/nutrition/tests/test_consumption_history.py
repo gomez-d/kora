@@ -12,6 +12,7 @@ from nutrition.models import (
     Food,
     FoodCategory,
 )
+from nutrition.tests.utils import authenticate_test_client
 
 
 class ConsumptionHistoryTests(APITestCase):
@@ -56,6 +57,14 @@ class ConsumptionHistoryTests(APITestCase):
             now - timedelta(days=1),
             "Consumo de otro usuario",
             with_item=False,
+        )
+
+        authenticate_test_client(
+            self.client,
+            user_id=self.user_id,
+            permissions=[
+                "consumptions.read_self",
+            ],
         )
 
     def create_consumption(
@@ -119,7 +128,7 @@ class ConsumptionHistoryTests(APITestCase):
             status.HTTP_400_BAD_REQUEST,
         )
         self.assertEqual(
-            response.data["detail"],
+            str(response.data["errors"]["user_id"]),
             "The user_id parameter is required.",
         )
 
@@ -132,17 +141,23 @@ class ConsumptionHistoryTests(APITestCase):
 
         self.assertEqual(
             response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertEqual(
-            response.data["detail"],
-            "Invalid user_id format.",
+            status.HTTP_403_FORBIDDEN,
         )
 
     def test_history_returns_empty_results_for_user_without_records(self):
+        empty_user_id = uuid.uuid4()
+
+        authenticate_test_client(
+            self.client,
+            user_id=empty_user_id,
+            permissions=[
+                "consumptions.read_self",
+            ],
+        )
+
         response = self.client.get(
             self.url,
-            {"user_id": str(uuid.uuid4())},
+            {"user_id": str(empty_user_id)},
             format="json",
         )
 
@@ -199,7 +214,7 @@ class ConsumptionHistoryTests(APITestCase):
             status.HTTP_400_BAD_REQUEST,
         )
         self.assertEqual(
-            response.data["detail"],
+            str(response.data["errors"]["date"]),
             "Dates must use YYYY-MM-DD format.",
         )
 
@@ -214,7 +229,7 @@ class ConsumptionHistoryTests(APITestCase):
             status.HTTP_400_BAD_REQUEST,
         )
         self.assertEqual(
-            response.data["detail"],
+            str(response.data["errors"]["date_range"]),
             "start_date cannot be after end_date.",
         )
 

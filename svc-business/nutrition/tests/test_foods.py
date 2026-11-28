@@ -1,7 +1,6 @@
 
 import uuid
 
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -10,6 +9,7 @@ from nutrition.models import (
     FoodCategory,
     FoodNutrient,
 )
+from nutrition.tests.utils import authenticate_test_client
 
 
 class FoodTests(APITestCase):
@@ -23,6 +23,56 @@ class FoodTests(APITestCase):
             name="Manzana",
             description="Manzana fresca",
         )
+
+        authenticate_test_client(
+            self.client,
+            user_id=uuid.uuid4(),
+            permissions=[
+                "foods.read",
+                "foods.create",
+                "foods.update",
+                "foods.delete",
+            ],
+        )
+
+    def complete_nutrients(self):
+        return [
+            {
+                "nutrient_type": "CALORIES",
+                "amount": 52,
+                "unit": "KCAL",
+            },
+            {
+                "nutrient_type": "PROTEIN",
+                "amount": 0.4,
+                "unit": "G",
+            },
+            {
+                "nutrient_type": "CARBOHYDRATES",
+                "amount": 15,
+                "unit": "G",
+            },
+            {
+                "nutrient_type": "FAT",
+                "amount": 0.1,
+                "unit": "G",
+            },
+            {
+                "nutrient_type": "FIBER",
+                "amount": 2.4,
+                "unit": "G",
+            },
+            {
+                "nutrient_type": "SUGAR",
+                "amount": 10,
+                "unit": "G",
+            },
+            {
+                "nutrient_type": "SODIUM",
+                "amount": 1,
+                "unit": "MG",
+            },
+        ]
 
     def create_food(
         self,
@@ -40,18 +90,7 @@ class FoodTests(APITestCase):
         )
 
         if nutrients is None:
-            nutrients = [
-                {
-                    "nutrient_type": "CALORIES",
-                    "amount": 52,
-                    "unit": "KCAL",
-                },
-                {
-                    "nutrient_type": "FIBER",
-                    "amount": 2.4,
-                    "unit": "G",
-                },
-            ]
+            nutrients = self.complete_nutrients()
 
         for nutrient in nutrients:
             FoodNutrient.objects.create(
@@ -68,42 +107,23 @@ class FoodTests(APITestCase):
             "description": "Manzana fresca actualizada",
             "serving_size": 100,
             "serving_unit": "G",
-            "nutrients": [
-                {
-                    "nutrient_type": "CALORIES",
-                    "amount": 60,
-                    "unit": "KCAL",
-                },
-                {
-                    "nutrient_type": "FIBER",
-                    "amount": 3,
-                    "unit": "G",
-                },
-            ],
+            "nutrients": self.complete_nutrients(),
         }
         payload.update(overrides)
         return payload
 
+    def assert_validation_error(self, response, field):
+        self.assertIn("errors", response.data)
+        self.assertIn(field, response.data["errors"])
+
     def test_create_food_with_nutrients(self):
-        """A valid food and its nutrients should be created successfully."""
         payload = {
             "category_id": str(self.category.id),
             "name": "Pera",
             "description": "Pera fresca",
             "serving_size": 100,
             "serving_unit": "G",
-            "nutrients": [
-                {
-                    "nutrient_type": "CALORIES",
-                    "amount": 52,
-                    "unit": "KCAL",
-                },
-                {
-                    "nutrient_type": "FIBER",
-                    "amount": 2.4,
-                    "unit": "G",
-                },
-            ],
+            "nutrients": self.complete_nutrients(),
         }
 
         response = self.client.post(
@@ -112,17 +132,13 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_201_CREATED,
-        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Food.objects.count(), 2)
-        self.assertEqual(FoodNutrient.objects.count(), 4)
+        self.assertEqual(FoodNutrient.objects.count(), 14)
         self.assertEqual(response.data["name"], "PERA")
-        self.assertEqual(len(response.data["nutrients"]), 2)
+        self.assertEqual(len(response.data["nutrients"]), 7)
 
     def test_create_food_without_nutrients(self):
-        """A food without nutrients should be rejected."""
         payload = {
             "category_id": str(self.category.id),
             "name": "Pera",
@@ -138,16 +154,12 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("nutrients", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "nutrients")
         self.assertEqual(Food.objects.count(), 1)
-        self.assertEqual(FoodNutrient.objects.count(), 2)
+        self.assertEqual(FoodNutrient.objects.count(), 7)
 
     def test_create_food_with_empty_name(self):
-        """A food with an empty name should be rejected."""
         payload = {
             "category_id": str(self.category.id),
             "name": "",
@@ -169,16 +181,12 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("name", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "name")
         self.assertEqual(Food.objects.count(), 1)
-        self.assertEqual(FoodNutrient.objects.count(), 2)
+        self.assertEqual(FoodNutrient.objects.count(), 7)
 
     def test_create_food_with_zero_serving_size(self):
-        """A food with a zero serving size should be rejected."""
         payload = {
             "category_id": str(self.category.id),
             "name": "Pera",
@@ -200,16 +208,12 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("serving_size", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "serving_size")
         self.assertEqual(Food.objects.count(), 1)
-        self.assertEqual(FoodNutrient.objects.count(), 2)
+        self.assertEqual(FoodNutrient.objects.count(), 7)
 
     def test_create_food_with_negative_nutrient_amount(self):
-        """A food with a negative nutrient amount should be rejected."""
         payload = {
             "category_id": str(self.category.id),
             "name": "Pera",
@@ -231,16 +235,12 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("nutrients", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "nutrients")
         self.assertEqual(Food.objects.count(), 1)
-        self.assertEqual(FoodNutrient.objects.count(), 2)
+        self.assertEqual(FoodNutrient.objects.count(), 7)
 
     def test_create_food_with_invalid_nutrient_type(self):
-        """A food with an invalid nutrient type should be rejected."""
         payload = {
             "category_id": str(self.category.id),
             "name": "Pera",
@@ -262,16 +262,12 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("nutrients", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "nutrients")
         self.assertEqual(Food.objects.count(), 1)
-        self.assertEqual(FoodNutrient.objects.count(), 2)
+        self.assertEqual(FoodNutrient.objects.count(), 7)
 
     def test_create_food_with_invalid_serving_unit(self):
-        """A food with an invalid serving unit should be rejected."""
         payload = {
             "category_id": str(self.category.id),
             "name": "Pera",
@@ -293,16 +289,12 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("serving_unit", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "serving_unit")
         self.assertEqual(Food.objects.count(), 1)
-        self.assertEqual(FoodNutrient.objects.count(), 2)
+        self.assertEqual(FoodNutrient.objects.count(), 7)
 
     def test_create_food_with_invalid_nutrient_unit(self):
-        """A food with an invalid nutrient unit should be rejected."""
         payload = {
             "category_id": str(self.category.id),
             "name": "Pera",
@@ -324,16 +316,12 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("nutrients", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "nutrients")
         self.assertEqual(Food.objects.count(), 1)
-        self.assertEqual(FoodNutrient.objects.count(), 2)
+        self.assertEqual(FoodNutrient.objects.count(), 7)
 
     def test_create_food_with_nonexistent_category(self):
-        """A food with a nonexistent category should be rejected."""
         payload = {
             "category_id": str(uuid.uuid4()),
             "name": "Pera",
@@ -355,16 +343,12 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("category_id", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "category_id")
         self.assertEqual(Food.objects.count(), 1)
-        self.assertEqual(FoodNutrient.objects.count(), 2)
+        self.assertEqual(FoodNutrient.objects.count(), 7)
 
     def test_create_food_with_duplicate_name(self):
-        """A food with an existing name should be rejected."""
         payload = {
             "category_id": str(self.category.id),
             "name": "Manzana",
@@ -386,15 +370,11 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("name", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "name")
         self.assertEqual(Food.objects.count(), 1)
 
     def test_create_food_with_duplicate_nutrient_type(self):
-        """A food with duplicate nutrient types should be rejected."""
         payload = {
             "category_id": str(self.category.id),
             "name": "Pera",
@@ -421,15 +401,11 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("nutrients", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "nutrients")
         self.assertEqual(Food.objects.count(), 1)
 
     def test_create_food_with_different_case_name(self):
-        """Food names should be unique regardless of letter case."""
         payload = {
             "category_id": str(self.category.id),
             "name": "manzana",
@@ -451,15 +427,11 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("name", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "name")
         self.assertEqual(Food.objects.count(), 1)
 
     def test_update_food_with_put(self):
-        """PUT should update all food fields and replace its nutrients."""
         payload = self.food_payload()
 
         response = self.client.put(
@@ -468,12 +440,7 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        print(response.data)
-
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK,
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.food.refresh_from_db()
         self.assertEqual(self.food.name, "MANZANA ACTUALIZADA")
@@ -484,14 +451,21 @@ class FoodTests(APITestCase):
         self.assertEqual(str(self.food.serving_size), "100.00")
 
         nutrients = list(self.food.nutrients.order_by("nutrient_type"))
-        self.assertEqual(len(nutrients), 2)
+        self.assertEqual(len(nutrients), 7)
         self.assertEqual(
             {nutrient.nutrient_type for nutrient in nutrients},
-            {"CALORIES", "FIBER"},
+            {
+                "CALORIES",
+                "PROTEIN",
+                "CARBOHYDRATES",
+                "FAT",
+                "FIBER",
+                "SUGAR",
+                "SODIUM",
+            },
         )
 
     def test_update_food_with_patch(self):
-        """PATCH should update only the fields supplied."""
         original_description = self.food.description
         original_serving_size = self.food.serving_size
         original_nutrients = list(
@@ -508,10 +482,7 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK,
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.food.refresh_from_db()
         self.assertEqual(self.food.name, "MANZANA VERDE")
@@ -529,23 +500,18 @@ class FoodTests(APITestCase):
         )
 
     def test_update_food_with_zero_serving_size(self):
-        """An update with a zero serving size should be rejected."""
         response = self.client.patch(
             f"/api/foods/{self.food.id}/",
             {"serving_size": 0},
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         self.food.refresh_from_db()
         self.assertEqual(str(self.food.serving_size), "100.00")
 
     def test_update_food_with_duplicate_nutrient_types(self):
-        """Duplicate nutrient types should be rejected without partial updates."""
         original_name = self.food.name
         original_nutrients = list(
             self.food.nutrients.values_list(
@@ -577,10 +543,7 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
         self.food.refresh_from_db()
         self.assertEqual(self.food.name, original_name)
@@ -596,7 +559,6 @@ class FoodTests(APITestCase):
         )
 
     def test_update_food_with_duplicate_name(self):
-        """An update should reject a name used by another food."""
         other_food = self.create_food(
             name="Pera",
             description="Pera fresca",
@@ -608,51 +570,36 @@ class FoodTests(APITestCase):
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertIn("name", response.data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assert_validation_error(response, "name")
 
         self.food.refresh_from_db()
         self.assertEqual(self.food.name, "Manzana")
 
     def test_update_food_with_its_current_name(self):
-        """An update should allow a food to retain its current name."""
         response = self.client.patch(
             f"/api/foods/{self.food.id}/",
             {"name": self.food.name},
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK,
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_nonexistent_food(self):
-        """Updating a nonexistent food should return 404."""
         response = self.client.patch(
             f"/api/foods/{uuid.uuid4()}/",
             {"name": "Pera"},
             format="json",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_404_NOT_FOUND,
-        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_food_without_consumption_records(self):
-        """A food without consumption records should be deleted."""
         response = self.client.delete(
             f"/api/foods/{self.food.id}/",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_204_NO_CONTENT,
-        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(
             Food.objects.filter(id=self.food.id).exists()
         )
@@ -661,18 +608,13 @@ class FoodTests(APITestCase):
         )
 
     def test_delete_nonexistent_food(self):
-        """Deleting a nonexistent food should return 404."""
         response = self.client.delete(
             f"/api/foods/{uuid.uuid4()}/",
         )
 
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_404_NOT_FOUND,
-        )
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_deleted_food_returns_not_found(self):
-        """A deleted food should no longer be retrievable."""
         food_id = self.food.id
 
         delete_response = self.client.delete(

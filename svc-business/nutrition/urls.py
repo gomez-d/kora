@@ -9,6 +9,7 @@ from .views import (
     NutritionalProfileDetailView,
     ConsumptionRecordDetailView,
 )
+from .recognition import FoodRecognitionView
 
 urlpatterns = [
     path(
@@ -51,4 +52,9 @@ urlpatterns = [
         ConsumptionRecordDetailView.as_view(),
         name="consumption-detail"
     ),
+    path(
+        "food-recognition/",
+        FoodRecognitionView.as_view(),
+        name="food-recognition"
+    )
 ]

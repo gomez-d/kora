@@ -15,6 +15,7 @@ from nutrition.models import (
     FoodCategory,
     FoodNutrient,
 )
+from nutrition.tests.utils import authenticate_test_client
 
 
 class ConsumptionRecordTests(APITestCase):
@@ -96,6 +97,16 @@ class ConsumptionRecordTests(APITestCase):
                 }
             ],
         }
+
+        authenticate_test_client(
+            self.client,
+            user_id=self.payload["user_id"],
+            permissions=[
+                "consumptions.read_self",
+                "consumptions.create_self",
+                "consumptions.update_self",
+            ],
+        )
 
     def test_create_consumption_with_one_food(self):
         """A valid consumption with one food should be created."""
@@ -239,7 +250,7 @@ class ConsumptionRecordTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST,
         )
-        self.assertIn("consumption_items", response.data)
+        self.assertIn("consumption_items", response.data["errors"])
         self.assertEqual(ConsumptionRecord.objects.count(), 0)
 
     def test_create_consumption_with_negative_quantity(self):
@@ -254,7 +265,7 @@ class ConsumptionRecordTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST,
         )
-        self.assertIn("consumption_items", response.data)
+        self.assertIn("consumption_items", response.data["errors"])
         self.assertEqual(ConsumptionRecord.objects.count(), 0)
 
     def test_create_consumption_with_future_date(self):
@@ -271,7 +282,7 @@ class ConsumptionRecordTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST,
         )
-        self.assertIn("consumed_at", response.data)
+        self.assertIn("consumed_at", response.data["errors"])
         self.assertEqual(ConsumptionRecord.objects.count(), 0)
 
     def test_create_consumption_with_nonexistent_food(self):
@@ -288,7 +299,7 @@ class ConsumptionRecordTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST,
         )
-        self.assertIn("consumption_items", response.data)
+        self.assertIn("consumption_items", response.data["errors"])
         self.assertEqual(ConsumptionRecord.objects.count(), 0)
 
     def test_create_consumption_without_items(self):
@@ -357,7 +368,7 @@ class ConsumptionRecordTests(APITestCase):
 
         self.assertEqual(
             response.status_code,
-            status.HTTP_400_BAD_REQUEST,
+            status.HTTP_403_FORBIDDEN,
         )
         self.assertEqual(ConsumptionRecord.objects.count(), 0)
         self.mock_user_exists.assert_not_called()

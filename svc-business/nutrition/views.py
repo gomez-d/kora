@@ -124,6 +124,7 @@ class NutritionalProfileView(APIView):
             status=201
         )
 
+
 class NutritionalProfileDetailView(APIView):
     """
     Manage an existing nutritional profile while enforcing
@@ -201,9 +202,10 @@ class NutritionalProfileDetailView(APIView):
             status=400
         )
 
+
 class FoodCategoryView(APIView):
     permission_classes = [
-        IsAuthenticated, 
+        IsAuthenticated,
         HasBusinessPermission
     ]
 
@@ -227,6 +229,12 @@ class FoodCategoryView(APIView):
                 serializer.data,
                 status=201
             )
+
+        return Response(
+            serializer.errors,
+            status=400
+        )
+
 
 class FoodView(APIView):
 
@@ -543,6 +551,7 @@ class ConsumptionRecordView(APIView):
             serializer.data,
             status=201
         )
+
 
 class ConsumptionRecordDetailView(APIView):
     """
