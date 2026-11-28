@@ -87,6 +87,7 @@ class BusinessRbacAuthorizationTests(APITestCase):
 
         payload = {
             "user_id": str(user_id),
+            "token_type": "access",
             "roles": roles,
             "permissions": permissions,
         }

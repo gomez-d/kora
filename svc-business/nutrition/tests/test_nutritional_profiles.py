@@ -1,11 +1,12 @@
 from datetime import date, timedelta
-from uuid import uuid4
 from unittest.mock import patch
+from uuid import uuid4
 
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from nutrition.models import NutritionalProfile
+from nutrition.tests.utils import authenticate_test_client
 
 
 class NutritionalProfileTests(APITestCase):
@@ -14,12 +15,21 @@ class NutritionalProfileTests(APITestCase):
         self.user_id = uuid4()
         self.other_user_id = uuid4()
 
+        authenticate_test_client(
+            self.client,
+            user_id=self.user_id,
+            permissions=[
+                "nutritional_profiles.create_self",
+                "nutritional_profiles.read_self",
+            ],
+        )
+
         self.payload = {
             "user_id": str(self.user_id),
             "date_of_birth": "1995-05-15",
             "sex": "MALE",
             "weight": "75.50",
-            "height": "175.00",
+            "height": "1.75",
             "activity_level": "MODERATE",
         }
 
@@ -86,10 +96,7 @@ class NutritionalProfileTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST,
         )
-        self.assertEqual(
-            response.data["detail"],
-            "The user_id query parameter is required.",
-        )
+        self.assertIn("user_id", response.data["errors"])
 
     def test_list_profiles_rejects_invalid_user_id(self):
         response = self.client.get(
@@ -99,11 +106,7 @@ class NutritionalProfileTests(APITestCase):
 
         self.assertEqual(
             response.status_code,
-            status.HTTP_400_BAD_REQUEST,
-        )
-        self.assertEqual(
-            response.data["detail"],
-            "The user_id must be a valid UUID.",
+            status.HTTP_403_FORBIDDEN,
         )
 
     @patch("nutrition.views.user_exists", return_value=True)
@@ -127,7 +130,7 @@ class NutritionalProfileTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST,
         )
-        self.assertIn("date_of_birth", response.data)
+        self.assertIn("date_of_birth", response.data["errors"])
         mock_user_exists.assert_called_once_with(self.user_id)
 
     @patch("nutrition.views.user_exists", return_value=True)
@@ -150,7 +153,7 @@ class NutritionalProfileTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST,
         )
-        self.assertIn("date_of_birth", response.data)
+        self.assertIn("date_of_birth", response.data["errors"])
         mock_user_exists.assert_called_once_with(self.user_id)
 
     @patch("nutrition.views.user_exists", return_value=True)
@@ -173,7 +176,7 @@ class NutritionalProfileTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST,
         )
-        self.assertIn("weight", response.data)
+        self.assertIn("weight", response.data["errors"])
         mock_user_exists.assert_called_once_with(self.user_id)
 
     @patch("nutrition.views.user_exists", return_value=True)
@@ -196,7 +199,7 @@ class NutritionalProfileTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST,
         )
-        self.assertIn("height", response.data)
+        self.assertIn("height", response.data["errors"])
         mock_user_exists.assert_called_once_with(self.user_id)
 
     @patch("nutrition.views.user_exists", return_value=True)
@@ -231,10 +234,7 @@ class NutritionalProfileTests(APITestCase):
             response.status_code,
             status.HTTP_400_BAD_REQUEST,
         )
-        self.assertEqual(
-            response.data["detail"],
-            "The specified user does not exist.",
-        )
+        self.assertIn("user_id", response.data["errors"])
         self.assertFalse(
             NutritionalProfile.objects.filter(
                 user_id=self.user_id
@@ -282,6 +282,6 @@ class NutritionalProfileTests(APITestCase):
 
         self.assertEqual(
             response.status_code,
-            status.HTTP_400_BAD_REQUEST,
+            status.HTTP_403_FORBIDDEN,
         )
         mock_user_exists.assert_not_called()
