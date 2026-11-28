@@ -247,24 +247,40 @@ These tests confirm that both microservices can detect Redis unavailability and 
 
 They do not verify automatic reconnection during active message processing, message delivery guarantees, or consumer recovery. Those behaviors will be implemented and tested in subsequent user stories.
 
-## 9. Messaging Architecture and Future Implementation
+## 9. Messaging Architecture and Implementation Status
 
-Redis Streams is the selected messaging mechanism for asynchronous communication.
+Redis Streams is the asynchronous communication mechanism between Business and AI.
 
-The following streams are defined as the planned communication channels:
+The following streams are defined:
 
 | Stream | Producer | Consumer |
 |---|---|---|
 | `ai:requests` | Business | AI |
 | `ai:results` | AI | Business |
 
-The implementation of publishing, consuming, acknowledgment, retry handling, and message recovery is covered by subsequent user stories:
+### 9.1. Implementation Status
 
-- **HU-039:** Business Event Publishing.
-- **HU-040:** Event Consumer Implementation.
-- **HU-041:** AI Asynchronous Processing.
+The messaging implementation is divided into multiple user stories:
 
-These functionalities are not part of the current HU-038 implementation.
+| User Story | Description | Status |
+|---|---|---|
+| HU-038 | Redis infrastructure and connectivity integration. | Completed |
+| HU-039 | Business event contract, publishing mechanism, and food recognition request integration. | Implemented |
+| HU-040 | Event consumer implementation and message handling. | Pending |
+| HU-041 | AI asynchronous processing and result communication. | Pending |
+
+HU-039 introduces a reusable event publisher in Business, allowing business operations to publish validated events to Redis Streams.
+
+The first integrated operation is food recognition through image uploads.
+
+Business stores uploaded images in shared temporary storage and publishes image references through `ai:requests`.
+
+For additional details, see:
+
+- `docs/user-stories/HU-039.md`
+- `docs/architecture/IMAGE_STORAGE.md`
+
+AI event consumption, result publication, and Business result consumption remain part of subsequent implementation stages.
 
 ## 10. Scope of HU-038
 
@@ -280,7 +296,9 @@ The completed scope includes:
 - Local and Docker connection verification.
 - Redis availability and recovery testing.
 
-Message publishing and consumption are intentionally excluded from this user story and will be implemented in the corresponding subsequent user stories.
+Event publishing was subsequently implemented in HU-039.
+
+Event consumption, acknowledgment, retry handling, and message recovery remain outside the scope of HU-038 and are addressed by subsequent user stories.
 
 ## 10. Message Structure and JSON Contracts
 
@@ -439,17 +457,19 @@ Error messages must not expose credentials, secrets, internal stack traces, or o
 | `ai.processing.completed` | AI | `ai:results` | Reports successful processing. |
 | `ai.processing.failed` | AI | `ai:results` | Reports processing failure. |
 
-### 10.6 Message Processing Considerations
+### 10.6. Message Processing Considerations
 
-The following rules guide the future implementation of Redis Streams consumers and producers:
+The following rules guide the implementation of Redis Streams producers and consumers:
 
 - Each event must have a unique `event_id`.
 - Each AI request must have a unique `request_id`.
 - The `request_id` must be preserved in the corresponding result to correlate requests and responses.
 - Consumers must support idempotent processing to prevent duplicate execution when messages are delivered more than once.
-- Messages must be acknowledged only after successful processing and, for AI failures, after the failure result has been successfully published.
-- Consumer Groups will be used to coordinate message processing.
+- Messages must be acknowledged only after the corresponding processing operation and required result publication have completed successfully.
+- Consumer Groups must be used to coordinate message processing.
 - Pending messages must be recoverable if a consumer becomes unavailable.
 - Infrastructure errors and functional processing errors must be handled separately.
 
-The implementation of these mechanisms belongs to HU-039, HU-040, and HU-041.
+The generic event contract and Business publishing mechanism were implemented in HU-039.
+
+Consumer Groups, message acknowledgment, pending message recovery, and AI processing are responsibilities of subsequent user stories.
